@@ -446,7 +446,11 @@ namespace PKHeX.Core.AutoMod
             var language = regen.Extra.Language;
             var pidiv = MethodFinder.Analyze(pk);
             var abilitypref = GetAbilityPreference(pk, enc);
-
+            if (pk is PK8 k)
+            {
+                k.DynamaxLevel = set.DynamaxLevel;
+                pk = k;
+            }
             pk.SetSpeciesLevel(set, Form, enc, language);
             pk.SetDateLocks(enc);
             pk.SetHeldItem(set);
