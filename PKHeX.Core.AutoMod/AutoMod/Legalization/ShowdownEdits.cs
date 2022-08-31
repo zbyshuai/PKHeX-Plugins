@@ -280,7 +280,7 @@ namespace PKHeX.Core.AutoMod
                 pk.SetRelearnMoves(moves);
             }
 
-            if (pk is IAwakened)
+            if (pk is PB7)
             {
                 pk.SetAwakenedValues(set);
                 return;
