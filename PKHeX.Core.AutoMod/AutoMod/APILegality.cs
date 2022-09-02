@@ -699,7 +699,7 @@ namespace PKHeX.Core.AutoMod
             else if (enc.Generation is not (3 or 4))
             {
                 pk.IVs = set.IVs;
-                if (pk is IAwakened)
+                if (pk is PB7)
                 {
                     pk.SetAwakenedValues(set);
                     return;
