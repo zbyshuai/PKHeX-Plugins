@@ -13,11 +13,16 @@ namespace PKHeX.Core.AutoMod
         private static readonly string TrainerPath = Path.Combine(Path.GetDirectoryName(Environment.ProcessPath)!, "trainers");
         private static readonly SimpleTrainerInfo DefaultFallback8 = new(GameVersion.SW);
         private static readonly SimpleTrainerInfo DefaultFallback7 = new(GameVersion.UM);
-        private static readonly GameVersion[] FringeVersions = { GameVersion.GG, GameVersion.BDSP, GameVersion.PLA };
+        private static readonly GameVersion[] FringeVersions = { GameVersion.GG, GameVersion.BDSP, GameVersion.PLA, GameVersion.SV };
 
         public static ITrainerInfo DefaultFallback(int gen = 8, LanguageID? lang = null)
         {
-            var fallback = gen > 7 ? DefaultFallback8 : DefaultFallback7;
+            var fallback = gen switch
+            {
+                7 => DefaultFallback7,
+                8 => DefaultFallback8,
+                9 => DefaultFallback9,
+            };
             if (lang == null)
                 return fallback;
             return new SimpleTrainerInfo((GameVersion)fallback.Game) { Language = (int)lang };
