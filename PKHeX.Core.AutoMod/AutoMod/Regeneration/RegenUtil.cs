@@ -88,8 +88,8 @@ namespace PKHeX.Core.AutoMod
             {
                 const int mil = 1_000_000;
                 uint repack = ((uint)sid << 16) + (uint)tid;
-                tid = (int)(repack % mil);
-                sid = (int)(repack / mil);
+                tid = (ushort)(repack % mil);
+                sid = (ushort)(repack / mil);
             }
 
             var result = new[]
