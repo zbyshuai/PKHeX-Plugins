@@ -22,6 +22,7 @@ namespace PKHeX.Core.AutoMod
                 7 => DefaultFallback7,
                 8 => DefaultFallback8,
                 9 => DefaultFallback9,
+                _ => DefaultFallback7,
             };
             if (lang == null)
                 return fallback;
