@@ -27,6 +27,7 @@ namespace PKHeX.Core.Injection
                 return;
 
             ReadBox(box);
+
         }
 
         public void ReadBox(int box)
