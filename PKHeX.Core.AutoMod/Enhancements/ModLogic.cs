@@ -161,7 +161,7 @@ namespace PKHeX.Core.AutoMod
             if (blank.GetIsFormInvalid(tr, blank.Form))
                 return null;
 
-            var setText = new ShowdownSet(blank).Text.Split('\r')[0];
+            var setText = new ShowdownSet(blank).Text.Split(Environment.NewLine)[0];
             if (shiny && !SimpleEdits.IsShinyLockedSpeciesForm(blank.Species, blank.Form))
                 setText += Environment.NewLine + "Shiny: Yes";
 
@@ -180,7 +180,7 @@ namespace PKHeX.Core.AutoMod
             if (success == LegalizationResult.Regenerated)
                 return pk;
 
-            sset = new ShowdownSet(setText.Split('\r')[0]);
+            sset = new ShowdownSet(setText.Split(Environment.NewLine)[0]);
             set = new RegenTemplate(sset) { Nickname = string.Empty };
             template.ApplySetDetails(set);
 
