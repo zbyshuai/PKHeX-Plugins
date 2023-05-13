@@ -668,6 +668,7 @@
         private System.Windows.Forms.NumericUpDown NUD_Slot;
         private System.Windows.Forms.Label L_Box;
         private System.Windows.Forms.NumericUpDown NUD_Box;
+        private System.Windows.Forms.CheckBox checkBox1;
         private System.Windows.Forms.CheckBox checkBox2;
         private System.Windows.Forms.Label L_ReadOffset;
         private System.Windows.Forms.Button B_ReadOffset;
