@@ -194,12 +194,15 @@ namespace AutoModPlugins
         public static void SetAPILegalitySettings(PluginSettings settings)
         {
             APILegality.UseTrainerData = settings.UseTrainerData;
+            TrainerSettings.DefaultOT = settings.DefaultOT;
+            TrainerSettings.DefaultTID16 = settings.DefaultTID16;
+            TrainerSettings.DefaultSID16 = settings.DefaultSID16;
             APILegality.SetAllLegalRibbons = settings.SetAllLegalRibbons;
             APILegality.SetMatchingBalls = settings.SetMatchingBalls;
             APILegality.ForceSpecifiedBall = settings.ForceSpecifiedBall;
             APILegality.UseCompetitiveMarkings = settings.UseCompetitiveMarkings;
             APILegality.UseMarkings = settings.UseMarkings;
-            APILegality.AllowMismatch = settings.AllowMismatch;
+            APILegality.EnableDevMode = settings.EnableDevMode;
             APILegality.UseXOROSHIRO = settings.UseXOROSHIRO;
             APILegality.PrioritizeGame = settings.PrioritizeGame;
             APILegality.PrioritizeGameVersion = settings.PriorityGameVersion;
@@ -216,7 +219,7 @@ namespace AutoModPlugins
             if (APILegality.UseCompetitiveMarkings)
                 MarkingApplicator.MarkingMethod = APILegality.CompetitiveMarking;
 
-            if (APILegality.AllowMismatch && settings.LatestAllowedVersion == "0.0.0.0")
+            if (APILegality.EnableDevMode && settings.LatestAllowedVersion == "0.0.0.0")
             {
                 settings.LatestAllowedVersion = ALMVersion.Versions.CoreVersionLatest?.ToString() ?? "0.0.0.0";
                 APILegality.LatestAllowedVersion = settings.LatestAllowedVersion;

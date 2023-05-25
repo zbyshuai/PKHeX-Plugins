@@ -21,7 +21,7 @@ namespace PKHeX.Core.AutoMod
         public static bool SetAllLegalRibbons { get; set; } = true;
         public static bool UseCompetitiveMarkings { get; set; }
         public static bool UseMarkings { get; set; } = true;
-        public static bool AllowMismatch { get; set; } = false;
+        public static bool EnableDevMode { get; set; } = false;
         public static string LatestAllowedVersion { get; set; } = "0.0.0.0";
         public static bool UseXOROSHIRO { get; set; } = true;
         public static bool PrioritizeGame { get; set; } = true;
@@ -480,7 +480,7 @@ namespace PKHeX.Core.AutoMod
             // Aesthetics
             pk.ApplyHeightWeight(enc);
             pk.SetSuggestedBall(SetMatchingBalls, ForceSpecifiedBall, regen.Extra.Ball, enc);
-            pk.ApplyMarkings(UseMarkings, UseCompetitiveMarkings);
+            pk.ApplyMarkings(UseMarkings);
             pk.ApplyBattleVersion(handler);
         }
 
@@ -534,7 +534,7 @@ namespace PKHeX.Core.AutoMod
         /// <param name="pk"></param>
         /// <param name="apply">boolean to apply or not to apply markings</param>
         /// <param name="competitive">boolean to apply competitive IVs instead of the default behaviour</param>
-        private static void ApplyMarkings(this PKM pk, bool apply = true, bool competitive = false)
+        private static void ApplyMarkings(this PKM pk, bool apply = true)
         {
             if (!apply || pk.Format <= 3) // No markings if pk.Format is less than or equal to 3
                 return;
@@ -1433,7 +1433,7 @@ namespace PKHeX.Core.AutoMod
             {
                 try
                 {
-                    if (!AllowMismatch && ALMVersion.GetIsMismatch())
+                    if (!EnableDevMode && ALMVersion.GetIsMismatch())
                         return new(template, LegalizationResult.VersionMismatch);
 
                     var res = dest.GetLegalFromTemplate(template, set, out var s, nativeOnly);

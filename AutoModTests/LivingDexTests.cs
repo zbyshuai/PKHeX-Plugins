@@ -15,16 +15,15 @@ namespace AutoModTests
         static LivingDexTests() => TestUtil.InitializePKHeXEnvironment();
         private static readonly GameVersion[] GetGameVersionsToTest = { SL, BD, PLA, SW, US, SN, OR, X, B2, B, Pt, E, C, RD };
 
-        private static Dictionary<GameVersion, GenerateResult> TestLivingDex(bool includeforms, bool shiny, bool alpha, bool native, out bool passed)
+        private static Dictionary<GameVersion, GenerateResult> TestLivingDex(bool includeforms, bool shiny, bool alpha, bool native)
         {
-            passed = true;
             var results = new Dictionary<GameVersion, GenerateResult>();
             foreach (var s in GetGameVersionsToTest)
-                results[s] = SingleSaveTest(s, includeforms, shiny, alpha, native, ref passed);
+                results[s] = SingleSaveTest(s, includeforms, shiny, alpha, native);
             return results;
         }
 
-        private static GenerateResult SingleSaveTest(this GameVersion s, bool includeforms, bool shiny, bool alpha, bool native, ref bool passed)
+        private static GenerateResult SingleSaveTest(this GameVersion s, bool includeforms, bool shiny, bool alpha, bool native)
         {
             ModLogic.IncludeForms = includeforms;
             ModLogic.SetShiny = shiny;
@@ -34,13 +33,12 @@ namespace AutoModTests
             var sav = SaveUtil.GetBlankSAV(s, "ALMUT");
             RecentTrainerCache.SetRecentTrainer(sav);
 
-            var expected = sav.GetExpectedDexCount(includeforms, native);
+            var expected = sav.GetExpectedDexCount(includeforms, shiny, alpha, native);
             expected.Should().NotBe(0);
 
             var pkms = sav.GenerateLivingDex().ToArray();
             var genned = pkms.Length;
             var val = new GenerateResult(genned == expected, expected, genned);
-            passed = genned == expected;
             return val;
         }
 
@@ -53,9 +51,8 @@ namespace AutoModTests
 #pragma warning restore xUnit1013 // Only for internal debugging
         {
             APILegality.Timeout = 99999;
-            var passed = true;
-            _ = s.SingleSaveTest(includeforms, shiny, alpha, native, ref passed);
-            passed.Should().BeTrue();
+            var res = s.SingleSaveTest(includeforms, shiny, alpha, native);
+            res.Success.Should().BeTrue();
         }
 
         [Fact]
@@ -65,7 +62,7 @@ namespace AutoModTests
             bool legalizer_settings = Legalizer.EnableEasterEggs;
             bool ribbon_settings = APILegality.SetAllLegalRibbons;
             int set_timeout = APILegality.Timeout;
-            bool mismatch = APILegality.AllowMismatch;
+            bool dev = APILegality.EnableDevMode;
             bool inc_forms = ModLogic.IncludeForms;
             bool set_shiny = ModLogic.SetShiny;
             bool set_alpha = ModLogic.SetAlpha;
@@ -74,7 +71,7 @@ namespace AutoModTests
             Legalizer.EnableEasterEggs = false;
             APILegality.SetAllLegalRibbons = false;
             APILegality.Timeout = 99999;
-            APILegality.AllowMismatch = true;
+            APILegality.EnableDevMode = true;
 
             // SetShiny and SetAlpha should not exclude entries from the living dex.
             // new[] { includeForms, shiny, alpha, nativeOnly }
@@ -102,18 +99,18 @@ namespace AutoModTests
             };
 
             string status = string.Empty;
-            var res = new List<(Dictionary<GameVersion, GenerateResult>, bool)>();
+            var res = new List<Dictionary<GameVersion, GenerateResult>>();
             for (int row = 0; row < matrix.Length; row++)
             {
-                var result = TestLivingDex(matrix[row][0], matrix[row][1], matrix[row][2], matrix[row][3], out bool success);
+                var result = TestLivingDex(matrix[row][0], matrix[row][1], matrix[row][2], matrix[row][3]);
                 status += Status(result, matrix[row][0], matrix[row][1], matrix[row][2], matrix[row][3]) + Environment.NewLine;
-                res.Add((result, success));
+                res.Add(result);
             }
 
             Legalizer.EnableEasterEggs = legalizer_settings;
             APILegality.SetAllLegalRibbons = ribbon_settings;
             APILegality.Timeout = set_timeout;
-            APILegality.AllowMismatch = mismatch;
+            APILegality.EnableDevMode = dev;
             ModLogic.IncludeForms = inc_forms;
             ModLogic.SetShiny = set_shiny;
             ModLogic.SetAlpha = set_alpha;
@@ -122,8 +119,8 @@ namespace AutoModTests
             Directory.CreateDirectory(Path.Combine(dir, "logs"));
             File.WriteAllText(Path.Combine(dir, "logs", "output_livingdex.txt"), status);
 
-            var passed = res.All(x => x.Item2);
-            passed.Should().BeTrue($"Living Dex Successfully Genned (Output: \n\n{status}\n\n)");
+            var succeeded = res.All(x => x.Values.All(z => z.Success));
+            succeeded.Should().BeTrue($"Living Dex Successfully Genned (Output: \n\n{status}\n\n)");
         }
 
         /// <summary>
@@ -143,7 +140,7 @@ namespace AutoModTests
         private readonly record struct GenerateResult(bool Success, int Expected, int Generated);
 
         // Ideally should use purely PKHeX's methods or known total counts so that we're not verifying against ourselves.
-        private static int GetExpectedDexCount(this SaveFile sav, bool includeForms, bool native)
+        private static int GetExpectedDexCount(this SaveFile sav, bool includeForms, bool shiny, bool alpha, bool native)
         {
             Dictionary<ushort, List<byte>> speciesDict = new();
             var personal = sav.Personal;
@@ -161,7 +158,7 @@ namespace AutoModTests
                         || (FormInfo.IsTotemForm(s, f) && sav.Context is not EntityContext.Gen7) || FormInfo.IsLordForm(s, f, sav.Context))
                         continue;
 
-                    var valid = sav.GetRandomEncounter(s, f, false, false, native, out PKM? pk);
+                    var valid = sav.GetRandomEncounter(s, f, shiny, alpha, native, out PKM? pk);
                     if (pk is not null && valid && pk.Form == f && !forms.Contains(f))
                     {
                         forms.Add(f);

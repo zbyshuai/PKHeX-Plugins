@@ -159,33 +159,21 @@ namespace AutoModPlugins
                 communicator.Port = int.Parse(TB_Port.Text);
                 communicator.Connect();
 
-                var (msg, lv) = ("", LiveHeXVersion.Unknown);
-                string sbbVer = string.Empty, botbaseUrl = string.Empty;
+                var (validation, msg, lv) = (LiveHeXValidation.None, "", LiveHeXVersion.Unknown);
                 string gameVer = "0";
 
                 var versions = RamOffsets.GetValidVersions(SAV.SAV).Reverse().ToArray();
                 if (communicator is not ICommunicatorNX nx)
-                    (msg, lv) = Connect_NTR(communicator, versions);
+                    (validation, msg, lv) = Connect_NTR(communicator, versions);
                 else
-                    (msg, lv) = Connect_Switch(nx, versions, ref sbbVer, ref gameVer, out botbaseUrl);
+                    (validation, msg, lv) = Connect_Switch(nx, versions, ref gameVer);
 
                 var currVer = lv is LiveHeXVersion.Unknown ? RamOffsets.GetValidVersions(SAV.SAV).Reverse().ToArray()[0] : lv;
-                if (lv is LiveHeXVersion.Unknown)
-                {
-                    Remote.Bot = new PokeSysBotMini(currVer, communicator, _settings.UseCachedPointers);
-                    Text += $" Unknown Version (Forced: {currVer} | Detected: {gameVer})";
+                bool validated = ConnectionValidated(Remote.Bot, gameVer, currVer, validation, msg);
+                if (!validated && !_settings.EnableDevMode)
+                    return;
 
-                    var error = WinFormsUtil.ALMErrorBasic(msg, botbaseUrl != string.Empty);
-                    error.ShowDialog();
-
-                    var res = error.DialogResult;
-                    var url = botbaseUrl != string.Empty ? botbaseUrl
-                                                         : "https://github.com/architdate/PKHeX-Plugins/wiki/FAQ-and-Troubleshooting#troubleshooting";
-                    if (res == DialogResult.Retry)
-                        Process.Start(new ProcessStartInfo { FileName = url, UseShellExecute = true });
-                }
-                else Text += $" Detected Version: {currVer}";
-
+                Text += $" Detected: {currVer}";
                 if (Remote.Bot.com is IPokeBlocks)
                 {
                     var cblist = GetSortedBlockList(currVer).ToArray();
@@ -225,39 +213,35 @@ namespace AutoModPlugins
             B_Disconnect.Enabled = B_Disconnect.Visible = groupBox1.Enabled = groupBox2.Enabled = groupBox3.Enabled = true;
         }
 
-        private (string, LiveHeXVersion) Connect_NTR(ICommunicator com, LiveHeXVersion[] versions)
+        private (LiveHeXValidation, string, LiveHeXVersion) Connect_NTR(ICommunicator com, LiveHeXVersion[] versions)
         {
             foreach (var version in versions)
             {
                 Remote.Bot = new PokeSysBotMini(version, com, _settings.UseCachedPointers);
                 var data = Remote.Bot.ReadSlot(1, 1);
                 var pkm = SAV.SAV.GetDecryptedPKM(data);
-                if (pkm.ChecksumValid)
-                    return ("", version);
+                bool valid = pkm.Species <= pkm.MaxSpeciesID && pkm.Species > 0 && pkm.Language != (int)LanguageID.Hacked && pkm.Language != (int)LanguageID.UNUSED_6;
+                if (valid)
+                    return (LiveHeXValidation.None, "", version);
             }
 
             var saveName = GameInfo.GetVersionName((GameVersion)SAV.SAV.Game);
             var msg = $"Could not find a compatible game version while establishing an NTR connection.\n" +
                       $"Save file loaded: Pokémon {saveName}";
-            return (msg, LiveHeXVersion.Unknown);
+            return (LiveHeXValidation.GameVersion, msg, LiveHeXVersion.Unknown);
         }
 
-        private (string, LiveHeXVersion) Connect_Switch(ICommunicatorNX nx, LiveHeXVersion[] versions, ref string botbaseVer, ref string gameVer, out string botbaseUrl)
+        private (LiveHeXValidation, string, LiveHeXVersion) Connect_Switch(ICommunicatorNX nx, LiveHeXVersion[] versions, ref string gameVer)
         {
-            botbaseUrl = string.Empty;
-            botbaseVer = nx.GetBotbaseVersion();
+            var botbaseVer = nx.GetBotbaseVersion();
             var version = decimal.TryParse(botbaseVer, CultureInfo.InvariantCulture, out var v) ? v : 0;
-            if (version < InjectionBase.BotbaseVersion)
+            if (version < InjectionBase.BotbaseVersion && !_settings.EnableDevMode)
             {
-                bool wifi = nx.Protocol is InjectorCommunicationType.SocketNetwork;
-                var msg = $"Incompatible {(wifi ? "sys-botbase" : "usb-botbase")} version.\n" +
+                var msg = $"Incompatible {(nx.Protocol is InjectorCommunicationType.SocketNetwork ? "sys-botbase" : "usb-botbase")} version.\n" +
                           $"Expected version {InjectionBase.BotbaseVersion} or greater, and current version is {version}.\n\n" +
                           $"Please download and install the latest version by clicking the \"Update\" button.";
-                
-                if (wifi)
-                    botbaseUrl = "https://github.com/olliz0r/sys-botbase/releases/latest";
-                else botbaseUrl = "https://github.com/Koi-3088/usb-botbase/releases/latest";
-                return (msg, LiveHeXVersion.Unknown);
+
+                return (LiveHeXValidation.Botbase, msg, LiveHeXVersion.Unknown);
             }
 
             var titleID = nx.GetTitleID();
@@ -266,26 +250,34 @@ namespace AutoModPlugins
 
             var saveName = GameInfo.GetVersionName((GameVersion)SAV.SAV.Game);
             var compatible = InjectionBase.SaveCompatibleWithTitle(SAV.SAV, titleID);
-            if (!compatible)
+            var lv = InjectionBase.GetVersionFromTitle(titleID, gameVer);
+            if (!compatible && !_settings.EnableDevMode)
             {
-                var msg = $"Detected game: {gameName}\n" +
+                var msg = $"Detected game: {gameName} ({gameVer})\n" +
                           $"Save file loaded: Pokémon {saveName}\n\n" +
                           $"Have you selected the correct blank save in PKHeX?";
-                return (msg, LiveHeXVersion.Unknown);
+
+                if (lv is not LiveHeXVersion.Unknown)
+                    gameVer = lv.ToString();
+                return (LiveHeXValidation.BlankSAV, msg, LiveHeXVersion.Unknown);
             }
 
-            var lv = InjectionBase.GetVersionFromTitle(titleID, gameVer);
-            if (lv is LiveHeXVersion.Unknown)
+            if (lv is LiveHeXVersion.Unknown && !_settings.EnableDevMode)
             {
                 var msg = $"Unsupported version for {gameName}\n\n" +
                           $"Latest supported version is {versions.First()}.\n" +
                           $"Earliest supported version is {versions.Last()}.\n" +
                           $"Detected version is {gameVer}.";
-                return (msg, lv);
+                return (LiveHeXValidation.GameVersion, msg, lv);
             }
 
             Remote.Bot = new PokeSysBotMini(lv, nx, _settings.UseCachedPointers);
-            return ("", lv);
+            var data = Remote.Bot.ReadSlot(1, 1);
+            var pkm = SAV.SAV.GetDecryptedPKM(data);
+            bool valid = pkm.Species <= pkm.MaxSpeciesID && pkm.Species > 0 && pkm.Language != (int)LanguageID.Hacked && pkm.Language != (int)LanguageID.UNUSED_6;
+            if (!_settings.EnableDevMode && !valid && InjectionBase.CheckRAMShift(Remote.Bot, out string err))
+                return (LiveHeXValidation.RAMShift, err, lv);
+            return (LiveHeXValidation.None, "", lv);
         }
 
         private void B_Disconnect_Click(object sender, EventArgs e)
@@ -297,6 +289,7 @@ namespace AutoModPlugins
             {
                 B_Connect.Enabled = B_Connect.Visible = TB_IP.Enabled = TB_Port.Enabled = true;
                 B_Disconnect.Enabled = B_Disconnect.Visible = groupBox1.Enabled = groupBox2.Enabled = groupBox3.Enabled = false;
+                Text = "LiveHeXUI";
 
                 if (Remote.Bot.com is ICommunicatorNX)
                     groupBox4.Enabled = groupBox6.Enabled = groupBox5.Enabled = false;
@@ -785,6 +778,74 @@ namespace AutoModPlugins
             }
 
             return sb != null;
+        }
+
+        private bool ConnectionValidated(PokeSysBotMini psb, string gameVer, LiveHeXVersion version, LiveHeXValidation validation, string msg)
+        {
+            if (psb.com is not ICommunicatorNX nx)
+            {
+                if (msg != "")
+                {
+                    var error = WinFormsUtil.ALMErrorBasic(msg);
+                    error.ShowDialog();
+
+                    var res = error.DialogResult;
+                    if (res == DialogResult.Retry)
+                        Process.Start(new ProcessStartInfo { FileName = "https://github.com/architdate/PKHeX-Plugins/wiki/FAQ-and-Troubleshooting#troubleshooting", UseShellExecute = true });
+                    return false;
+                }
+                return true;
+            }
+
+            var url = validation switch
+            {
+                LiveHeXValidation.Botbase when nx.Protocol is InjectorCommunicationType.SocketNetwork => "https://github.com/olliz0r/sys-botbase/releases/latest",
+                LiveHeXValidation.Botbase when nx.Protocol is InjectorCommunicationType.USB => "https://github.com/Koi-3088/usb-botbase/releases/latest",
+                LiveHeXValidation.BlankSAV => "https://github.com/architdate/PKHeX-Plugins/wiki/FAQ-and-Troubleshooting#pkhex-plugins-is-telling-me-that-the-detected-game-does-not-match-the-current-save-file-the-top-of-the-window-says-forced-for-the-game-version",
+                LiveHeXValidation.GameVersion => "https://github.com/architdate/PKHeX-Plugins/wiki/FAQ-and-Troubleshooting#pkhex-plugins-is-telling-me-that-the-detected-game-does-not-match-the-current-save-file-the-top-of-the-window-says-forced-for-the-game-version",
+                //LiveHeXValidation.RAMShift => "https://github.com/architdate/PKHeX-Plugins/wiki/FAQ-and-Troubleshooting#pkhex-plugins-is-telling-me-that-a-possible-ram-shift-is-detected", Uncomment once wiki is updated.
+                _ => "https://github.com/architdate/PKHeX-Plugins/wiki/FAQ-and-Troubleshooting#troubleshooting",
+            };
+
+            switch (validation)
+            {
+                case LiveHeXValidation.Botbase:
+                    {
+                        var error = WinFormsUtil.ALMErrorBasic(msg, true);
+                        error.ShowDialog();
+
+                        var res = error.DialogResult;
+                        if (res == DialogResult.Retry)
+                            Process.Start(new ProcessStartInfo { FileName = url, UseShellExecute = true });
+                        return false;
+                    };
+                case LiveHeXValidation.BlankSAV or LiveHeXValidation.GameVersion:
+                    {
+                        Remote.Bot = new PokeSysBotMini(version, nx, _settings.UseCachedPointers);
+                        Text += $" SAV/Version (Detected: {gameVer} | Forced: {version})";
+
+                        var error = WinFormsUtil.ALMErrorBasic(msg);
+                        error.ShowDialog();
+
+                        var res = error.DialogResult;
+                        if (res == DialogResult.Retry)
+                            Process.Start(new ProcessStartInfo { FileName = url, UseShellExecute = true });
+                        return false;
+                    };
+                case LiveHeXValidation.RAMShift:
+                    {
+                        Text += $" Possible RAM Shift | Detected: {version}";
+                        var error = WinFormsUtil.ALMErrorBasic(msg);
+                        error.ShowDialog();
+
+                        var res = error.DialogResult;
+                        if (res == DialogResult.Retry)
+                            Process.Start(new ProcessStartInfo { FileName = url, UseShellExecute = true });
+                        return false;
+                    };
+            };
+
+            return true;
         }
     }
 
