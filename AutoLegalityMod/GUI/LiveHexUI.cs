@@ -14,6 +14,7 @@ namespace AutoModPlugins
     public partial class LiveHeXUI : Form, ISlotViewer<PictureBox>
     {
         private ISaveFileProvider SAV { get; }
+        private static GameVersion SAV_Version = GameVersion.Unknown;
 
         public int ViewIndex => BoxSelect?.SelectedIndex ?? 0;
         public IList<PictureBox> SlotPictureBoxes => throw new InvalidOperationException();
@@ -30,6 +31,9 @@ namespace AutoModPlugins
         public LiveHeXUI(ISaveFileProvider sav, IPKMView editor, PluginSettings settings)
         {
             SAV = sav;
+            if (SAV.SAV.Version != GameVersion.Invalid)
+                SAV_Version = sav.SAV.Version;
+
             _settings = settings;
             CurrentInjectionType = _settings.USBBotBasePreferred ? InjectorCommunicationType.USB : InjectorCommunicationType.SocketNetwork;
             Remote = new LiveHeXController(sav, editor, CurrentInjectionType, _settings.UseCachedPointers);
@@ -154,26 +158,30 @@ namespace AutoModPlugins
         {
             try
             {
+                Text = "LiveHeXUI";
                 var communicator = RamOffsets.GetCommunicator(SAV.SAV, CurrentInjectionType);
                 communicator.IP = TB_IP.Text;
                 communicator.Port = int.Parse(TB_Port.Text);
                 communicator.Connect();
 
                 var (validation, msg, lv) = (LiveHeXValidation.None, "", LiveHeXVersion.Unknown);
-                string gameVer = "0";
+                string gameVer = "0", gameName = "";
 
                 var versions = RamOffsets.GetValidVersions(SAV.SAV).Reverse().ToArray();
                 if (communicator is not ICommunicatorNX nx)
                     (validation, msg, lv) = Connect_NTR(communicator, versions);
                 else
-                    (validation, msg, lv) = Connect_Switch(nx, versions, ref gameVer);
+                    (validation, msg, lv) = Connect_Switch(nx, versions, ref gameVer, ref gameName);
 
                 var currVer = lv is LiveHeXVersion.Unknown ? RamOffsets.GetValidVersions(SAV.SAV).Reverse().ToArray()[0] : lv;
                 bool validated = ConnectionValidated(Remote.Bot, gameVer, currVer, validation, msg);
                 if (!validated && !_settings.EnableDevMode)
                     return;
 
-                Text += $" Detected: {currVer}";
+                Text = $"Detected: {gameName} ({gameVer})";
+                if (_settings.EnableDevMode && lv is LiveHeXVersion.Unknown)
+                    Text += " [Forced DevMode]";
+
                 if (Remote.Bot.com is IPokeBlocks)
                 {
                     var cblist = GetSortedBlockList(currVer).ToArray();
@@ -188,11 +196,14 @@ namespace AutoModPlugins
                 if (Remote.Bot.com is ICommunicatorNX)
                     groupBox4.Enabled = groupBox6.Enabled = true;
 
-                // Load current box
-                Remote.ReadBox(SAV.CurrentBox);
+                if (lv is not LiveHeXVersion.Unknown)
+                {
+                    // Load current box
+                    Remote.ReadBox(SAV.CurrentBox);
 
-                // Set Trainer Data
-                SetTrainerData(SAV.SAV);
+                    // Set Trainer Data
+                    SetTrainerData(SAV.SAV);
+                }
             }
             // Console might be disconnected...
             catch (Exception ex)
@@ -231,7 +242,7 @@ namespace AutoModPlugins
             return (LiveHeXValidation.GameVersion, msg, LiveHeXVersion.Unknown);
         }
 
-        private (LiveHeXValidation, string, LiveHeXVersion) Connect_Switch(ICommunicatorNX nx, LiveHeXVersion[] versions, ref string gameVer)
+        private (LiveHeXValidation, string, LiveHeXVersion) Connect_Switch(ICommunicatorNX nx, LiveHeXVersion[] versions, ref string gameVer, ref string gameName)
         {
             var botbaseVer = nx.GetBotbaseVersion();
             var version = decimal.TryParse(botbaseVer, CultureInfo.InvariantCulture, out var v) ? v : 0;
@@ -245,14 +256,14 @@ namespace AutoModPlugins
             }
 
             var titleID = nx.GetTitleID();
-            var gameName = nx.GetGameInfo("name");
+            gameName = nx.GetGameInfo("name");
             gameVer = nx.GetGameInfo("version").Trim();
 
-            var saveName = GameInfo.GetVersionName((GameVersion)SAV.SAV.Game);
             var compatible = InjectionBase.SaveCompatibleWithTitle(SAV.SAV, titleID);
-            var lv = InjectionBase.GetVersionFromTitle(titleID, gameVer);
+            var lv = compatible ? InjectionBase.GetVersionFromTitle(titleID, gameVer) : LiveHeXVersion.Unknown;
             if (!compatible && !_settings.EnableDevMode)
             {
+                var saveName = GameInfo.GetVersionName(SAV_Version);
                 var msg = $"Detected game: {gameName} ({gameVer})\n" +
                           $"Save file loaded: Pokémon {saveName}\n\n" +
                           $"Have you selected the correct blank save in PKHeX?";
@@ -271,10 +282,20 @@ namespace AutoModPlugins
                 return (LiveHeXValidation.GameVersion, msg, lv);
             }
 
-            Remote.Bot = new PokeSysBotMini(lv, nx, _settings.UseCachedPointers);
+            var connect_ver = lv is LiveHeXVersion.Unknown ? RamOffsets.GetValidVersions(SAV.SAV).Reverse().ToArray()[0] : lv;
+            Remote.Bot = new PokeSysBotMini(connect_ver, nx, _settings.UseCachedPointers);
+            if (lv is LiveHeXVersion.Unknown && _settings.EnableDevMode)
+                return (LiveHeXValidation.None, "", lv);
+
             var data = Remote.Bot.ReadSlot(1, 1);
-            var pkm = SAV.SAV.GetDecryptedPKM(data);
-            bool valid = pkm.Species <= pkm.MaxSpeciesID && pkm.Species > 0 && pkm.Language != (int)LanguageID.Hacked && pkm.Language != (int)LanguageID.UNUSED_6;
+            PKM? pkm = null;
+            try
+            {
+                pkm = SAV.SAV.GetDecryptedPKM(data);
+            }
+            catch {}
+
+            bool valid = pkm is not null && pkm.Species <= pkm.MaxSpeciesID && pkm.Species > 0 && pkm.Language != (int)LanguageID.Hacked && pkm.Language != (int)LanguageID.UNUSED_6;
             if (!_settings.EnableDevMode && !valid && InjectionBase.CheckRAMShift(Remote.Bot, out string err))
                 return (LiveHeXValidation.RAMShift, err, lv);
             return (LiveHeXValidation.None, "", lv);
@@ -289,6 +310,7 @@ namespace AutoModPlugins
             {
                 B_Connect.Enabled = B_Connect.Visible = TB_IP.Enabled = TB_Port.Enabled = true;
                 B_Disconnect.Enabled = B_Disconnect.Visible = groupBox1.Enabled = groupBox2.Enabled = groupBox3.Enabled = false;
+                CB_BlockName.Items.Clear();
                 Text = "LiveHeXUI";
 
                 if (Remote.Bot.com is ICommunicatorNX)
@@ -761,7 +783,7 @@ namespace AutoModPlugins
                     _ => Array.Empty<BlockData>(),
                 };
 
-                if (subblocks.Length != 1)
+                if (subblocks.Length == 0)
                     return false;
 
                 // Check for SCBlocks or SaveBlocks based on name. (SCBlocks will invoke the hex editor, SaveBlocks will invoke a property grid
@@ -771,13 +793,13 @@ namespace AutoModPlugins
 
                 var allblocks = props.GetValue(sav) ?? throw new Exception("Blocks not present.");
                 var blockprop = allblocks.GetType().GetProperty(subblocks[0].Name);
-                if (allblocks is SCBlockAccessor scba && blockprop == null)
+                if (allblocks is SCBlockAccessor scba && blockprop is null)
                     sb = scba.GetBlock(subblocks[0].SCBKey);
                 else
                     sb = blockprop?.GetValue(allblocks);
             }
 
-            return sb != null;
+            return sb is not null;
         }
 
         private bool ConnectionValidated(PokeSysBotMini psb, string gameVer, LiveHeXVersion version, LiveHeXValidation validation, string msg)
