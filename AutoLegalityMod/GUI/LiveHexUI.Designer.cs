@@ -40,7 +40,6 @@
             groupBox1 = new System.Windows.Forms.GroupBox();
             checkBox2 = new System.Windows.Forms.CheckBox();
             groupBox2 = new System.Windows.Forms.GroupBox();
-            TB_Offset = new HexTextBox();
             L_ReadOffset = new System.Windows.Forms.Label();
             B_ReadOffset = new System.Windows.Forms.Button();
             L_Slot = new System.Windows.Forms.Label();
@@ -53,14 +52,12 @@
             B_ReadRAM = new System.Windows.Forms.Button();
             RamSize = new System.Windows.Forms.TextBox();
             L_ReadRamSize = new System.Windows.Forms.Label();
-            RamOffset = new HexTextBox();
             L_ReadRamOffset = new System.Windows.Forms.Label();
             L_USBState = new System.Windows.Forms.Label();
             groupBox4 = new System.Windows.Forms.GroupBox();
             B_ReadPointer = new System.Windows.Forms.Button();
             B_CopyAddress = new System.Windows.Forms.Button();
             B_EditPointer = new System.Windows.Forms.Button();
-            TB_Pointer = new HexTextBox();
             L_Pointer = new System.Windows.Forms.Label();
             groupBox5 = new System.Windows.Forms.GroupBox();
             CB_BlockName = new System.Windows.Forms.ComboBox();
@@ -71,7 +68,6 @@
             RB_Main = new System.Windows.Forms.RadioButton();
             RB_Heap = new System.Windows.Forms.RadioButton();
             L_OffsRelative = new System.Windows.Forms.Label();
-            checkBox3 = new System.Windows.Forms.CheckBox();
             groupBox1.SuspendLayout();
             groupBox2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)NUD_Slot).BeginInit();
@@ -104,17 +100,8 @@
             B_WriteCurrent.UseVisualStyleBackColor = true;
             B_WriteCurrent.Click += B_WriteCurrent_Click;
             // 
-            // CB_ReadBox
+            // checkBox1
             // 
-            this.CB_ReadBox.AutoSize = true;
-            this.CB_ReadBox.Checked = true;
-            this.CB_ReadBox.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.CB_ReadBox.Location = new System.Drawing.Point(13, 19);
-            this.CB_ReadBox.Name = "CB_ReadBox";
-            this.CB_ReadBox.Size = new System.Drawing.Size(130, 17);
-            this.CB_ReadBox.TabIndex = 2;
-            this.CB_ReadBox.Text = "Read On Change Box";
-            this.CB_ReadBox.UseVisualStyleBackColor = true;
             checkBox1.AutoSize = true;
             checkBox1.Checked = true;
             checkBox1.CheckState = System.Windows.Forms.CheckState.Checked;
@@ -191,7 +178,6 @@
             // 
             // groupBox1
             // 
-            groupBox1.Controls.Add(checkBox3);
             groupBox1.Controls.Add(checkBox2);
             groupBox1.Controls.Add(checkBox1);
             groupBox1.Controls.Add(B_ReadCurrent);
@@ -221,7 +207,6 @@
             // 
             // groupBox2
             // 
-            groupBox2.Controls.Add(TB_Offset);
             groupBox2.Controls.Add(L_ReadOffset);
             groupBox2.Controls.Add(B_ReadOffset);
             groupBox2.Controls.Add(L_Slot);
@@ -239,17 +224,6 @@
             groupBox2.TabIndex = 9;
             groupBox2.TabStop = false;
             groupBox2.Text = "PKM Editor";
-            // 
-            // TB_Offset
-            // 
-            TB_Offset.Font = new System.Drawing.Font("Courier New", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            TB_Offset.Location = new System.Drawing.Point(76, 163);
-            TB_Offset.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            TB_Offset.MaxLength = 16;
-            TB_Offset.Name = "TB_Offset";
-            TB_Offset.Size = new System.Drawing.Size(81, 20);
-            TB_Offset.TabIndex = 16;
-            TB_Offset.Text = "2E32206A";
             // 
             // L_ReadOffset
             // 
@@ -341,7 +315,6 @@
             groupBox3.Controls.Add(B_ReadRAM);
             groupBox3.Controls.Add(RamSize);
             groupBox3.Controls.Add(L_ReadRamSize);
-            groupBox3.Controls.Add(RamOffset);
             groupBox3.Controls.Add(L_ReadRamOffset);
             groupBox3.Enabled = false;
             groupBox3.Location = new System.Drawing.Point(14, 217);
@@ -385,17 +358,6 @@
             L_ReadRamSize.Text = "Size:";
             L_ReadRamSize.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
-            // RamOffset
-            // 
-            RamOffset.Font = new System.Drawing.Font("Courier New", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            RamOffset.Location = new System.Drawing.Point(68, 21);
-            RamOffset.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            RamOffset.MaxLength = 16;
-            RamOffset.Name = "RamOffset";
-            RamOffset.Size = new System.Drawing.Size(81, 20);
-            RamOffset.TabIndex = 18;
-            RamOffset.Text = "2E32206A";
-            // 
             // L_ReadRamOffset
             // 
             L_ReadRamOffset.Location = new System.Drawing.Point(12, 20);
@@ -422,7 +384,6 @@
             groupBox4.Controls.Add(B_ReadPointer);
             groupBox4.Controls.Add(B_CopyAddress);
             groupBox4.Controls.Add(B_EditPointer);
-            groupBox4.Controls.Add(TB_Pointer);
             groupBox4.Controls.Add(L_Pointer);
             groupBox4.Enabled = false;
             groupBox4.Location = new System.Drawing.Point(14, 279);
@@ -466,17 +427,6 @@
             B_EditPointer.Text = "Edit RAM";
             B_EditPointer.UseVisualStyleBackColor = true;
             B_EditPointer.Click += B_EditPointerData_Click;
-            // 
-            // TB_Pointer
-            // 
-            TB_Pointer.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.Suggest;
-            TB_Pointer.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.HistoryList;
-            TB_Pointer.Font = new System.Drawing.Font("Courier New", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            TB_Pointer.Location = new System.Drawing.Point(68, 21);
-            TB_Pointer.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            TB_Pointer.Name = "TB_Pointer";
-            TB_Pointer.Size = new System.Drawing.Size(278, 20);
-            TB_Pointer.TabIndex = 18;
             // 
             // L_Pointer
             // 
@@ -596,16 +546,6 @@
             L_OffsRelative.TabIndex = 0;
             L_OffsRelative.Text = "RAM offsets relative to:";
             // 
-            // checkBox3
-            // 
-            checkBox3.AutoSize = true;
-            checkBox3.Location = new System.Drawing.Point(100, 45);
-            checkBox3.Name = "checkBox3";
-            checkBox3.Size = new System.Drawing.Size(111, 19);
-            checkBox3.TabIndex = 4;
-            checkBox3.Text = "write on change";
-            checkBox3.UseVisualStyleBackColor = true;
-            // 
             // LiveHeXUI
             // 
             AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
@@ -635,13 +575,11 @@
             groupBox1.ResumeLayout(false);
             groupBox1.PerformLayout();
             groupBox2.ResumeLayout(false);
-            groupBox2.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)NUD_Slot).EndInit();
             ((System.ComponentModel.ISupportInitialize)NUD_Box).EndInit();
             groupBox3.ResumeLayout(false);
             groupBox3.PerformLayout();
             groupBox4.ResumeLayout(false);
-            groupBox4.PerformLayout();
             groupBox5.ResumeLayout(false);
             groupBox6.ResumeLayout(false);
             groupBox6.PerformLayout();
@@ -695,6 +633,5 @@
         private System.Windows.Forms.RadioButton RB_Main;
         private System.Windows.Forms.RadioButton RB_Heap;
         private System.Windows.Forms.Label L_OffsRelative;
-        private System.Windows.Forms.CheckBox checkBox3;
     }
 }

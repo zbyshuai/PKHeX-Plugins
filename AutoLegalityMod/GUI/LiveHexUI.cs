@@ -293,7 +293,7 @@ namespace AutoModPlugins
             {
                 pkm = SAV.SAV.GetDecryptedPKM(data);
             }
-            catch {}
+            catch { }
 
             bool valid = pkm is not null && pkm.Species <= pkm.MaxSpeciesID && pkm.Species > 0 && pkm.Language != (int)LanguageID.Hacked && pkm.Language != (int)LanguageID.UNUSED_6;
             if (!_settings.EnableDevMode && !valid && InjectionBase.CheckRAMShift(Remote.Bot, out string err))
