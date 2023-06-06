@@ -42,7 +42,8 @@ namespace AutoModPlugins
             this.TranslateInterface(WinFormsTranslator.CurrentLanguage);
 
             TB_IP.Text = _settings.LatestIP;
-            TB_Port.Text = _settings.LatestPort;
+            var default_port = RamOffsets.IsSwitchTitle(sav.SAV) ? 6000 : 8000; // default port for loaded save
+            TB_Port.Text = int.Parse(_settings.LatestPort) is 6000 or 8000 ? default_port.ToString() : _settings.LatestPort;
             SetInjectionTypeView();
 
             // add an event to the editor
@@ -229,9 +230,10 @@ namespace AutoModPlugins
             foreach (var version in versions)
             {
                 Remote.Bot = new PokeSysBotMini(version, com, _settings.UseCachedPointers);
-                var data = Remote.Bot.ReadSlot(1, 1);
+                var data = Remote.Bot.ReadSlot(0, 0);
                 var pkm = SAV.SAV.GetDecryptedPKM(data);
-                bool valid = pkm.Species <= pkm.MaxSpeciesID && pkm.Species > 0 && pkm.Language != (int)LanguageID.Hacked && pkm.Language != (int)LanguageID.UNUSED_6;
+                bool valid = pkm.Species <= pkm.MaxSpeciesID && pkm.ChecksumValid &&
+                        ((pkm.Species == 0 && pkm.EncryptionConstant == 0) || (pkm.Species > 0 && pkm.Language != (int)LanguageID.Hacked && pkm.Language != (int)LanguageID.UNUSED_6));
                 if (valid)
                     return (LiveHeXValidation.None, "", version);
             }
@@ -287,7 +289,7 @@ namespace AutoModPlugins
             if (lv is LiveHeXVersion.Unknown && _settings.EnableDevMode)
                 return (LiveHeXValidation.None, "", lv);
 
-            var data = Remote.Bot.ReadSlot(1, 1);
+            var data = Remote.Bot.ReadSlot(0, 0);
             PKM? pkm = null;
             try
             {
@@ -295,7 +297,8 @@ namespace AutoModPlugins
             }
             catch { }
 
-            bool valid = pkm is not null && pkm.Species <= pkm.MaxSpeciesID && pkm.Species > 0 && pkm.Language != (int)LanguageID.Hacked && pkm.Language != (int)LanguageID.UNUSED_6;
+            bool valid = pkm is not null && pkm.Species <= pkm.MaxSpeciesID && pkm.ChecksumValid && 
+                        ((pkm.Species == 0 && pkm.EncryptionConstant == 0) || (pkm.Species > 0 && pkm.Language != (int)LanguageID.Hacked && pkm.Language != (int)LanguageID.UNUSED_6));
             if (!_settings.EnableDevMode && !valid && InjectionBase.CheckRAMShift(Remote.Bot, out string err))
                 return (LiveHeXValidation.RAMShift, err, lv);
             return (LiveHeXValidation.None, "", lv);
@@ -825,7 +828,7 @@ namespace AutoModPlugins
                 LiveHeXValidation.Botbase when nx.Protocol is InjectorCommunicationType.USB => "https://github.com/Koi-3088/usb-botbase/releases/latest",
                 LiveHeXValidation.BlankSAV => "https://github.com/architdate/PKHeX-Plugins/wiki/FAQ-and-Troubleshooting#pkhex-plugins-is-telling-me-that-the-detected-game-does-not-match-the-current-save-file-the-top-of-the-window-says-forced-for-the-game-version",
                 LiveHeXValidation.GameVersion => "https://github.com/architdate/PKHeX-Plugins/wiki/FAQ-and-Troubleshooting#pkhex-plugins-is-telling-me-that-the-detected-game-does-not-match-the-current-save-file-the-top-of-the-window-says-forced-for-the-game-version",
-                //LiveHeXValidation.RAMShift => "https://github.com/architdate/PKHeX-Plugins/wiki/FAQ-and-Troubleshooting#pkhex-plugins-is-telling-me-that-a-possible-ram-shift-is-detected", Uncomment once wiki is updated.
+                LiveHeXValidation.RAMShift => "https://github.com/architdate/PKHeX-Plugins/wiki/FAQ-and-Troubleshooting#pkhex-plugins-is-telling-me-that-a-possible-ram-shift-is-detected",
                 _ => "https://github.com/architdate/PKHeX-Plugins/wiki/FAQ-and-Troubleshooting#troubleshooting",
             };
 
