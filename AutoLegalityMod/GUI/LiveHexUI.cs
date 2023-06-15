@@ -667,12 +667,19 @@ namespace AutoModPlugins
                 return;
             }
 
-            valid = TryGetObjectInSave(version, SAV.SAV, txt, data[0], out var sb);
-            if (!valid)
+            var objects = new List<object>();
+            for (var i = 0; i < data.Count; i++)
             {
-                WinFormsUtil.Error("Error fetching Block");
-                return;
+                var obj = data[i];
+                valid = TryGetObjectInSave(version, SAV.SAV, txt, i, obj, out var blk);
+                if (!valid || blk == null)
+                {
+                    WinFormsUtil.Error("Error fetching Block");
+                    return;
+                }
+                objects.Add(blk);
             }
+            var sb = objects[0];
 
             var write = false;
             if (txt.IsSpecialBlock(Remote.Bot, out var v) && v is not null)
@@ -691,10 +698,15 @@ namespace AutoModPlugins
                 // Invoke function
                 cc.GetType().GetMethod(v, BindingFlags.NonPublic | BindingFlags.Instance)?.Invoke(cc, new[] { s, e });
 
-                if (sb is SCBlock scb && scb.Data.SequenceEqual(data[0]))
-                    return;
-
-                write = true;
+                for (var i = 0; i <  objects.Count; i++)
+                {
+                    if (objects[i] is not SCBlock scb)
+                        write = true;
+                    else if (!scb.Data.SequenceEqual(data[i]))
+                        write = true;
+                    if (write)
+                        break;
+                }
             }
             else if (sb is SCBlock || sb is IDataIndirect || sb is ICustomBlock)
             {
@@ -766,7 +778,7 @@ namespace AutoModPlugins
             return (ofs, size);
         }
 
-        private bool TryGetObjectInSave(LiveHeXVersion version, SaveFile sav, string display, byte[]? customdata, out object? sb)
+        private bool TryGetObjectInSave(LiveHeXVersion version, SaveFile sav, string display, int index, byte[]? customdata, out object? sb)
         {
             sb = null;
             if (Remote.Bot.Injector is LPBDSP)
@@ -795,9 +807,9 @@ namespace AutoModPlugins
                     return false;
 
                 var allblocks = props.GetValue(sav) ?? throw new Exception("Blocks not present.");
-                var blockprop = allblocks.GetType().GetProperty(subblocks[0].Name);
+                var blockprop = allblocks.GetType().GetProperty(subblocks[index].Name);
                 if (allblocks is SCBlockAccessor scba && blockprop is null)
-                    sb = scba.GetBlock(subblocks[0].SCBKey);
+                    sb = scba.GetBlock(subblocks[index].SCBKey);
                 else
                     sb = blockprop?.GetValue(allblocks);
             }
