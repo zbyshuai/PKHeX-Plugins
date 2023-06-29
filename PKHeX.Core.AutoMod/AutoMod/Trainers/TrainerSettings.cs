@@ -11,6 +11,7 @@ namespace PKHeX.Core.AutoMod
     {
         private static readonly TrainerDatabase Database = new();
         private static readonly string TrainerPath = Path.Combine(Path.GetDirectoryName(Environment.ProcessPath)!, "trainers");
+        private static readonly SimpleTrainerInfo DefaultFallBack6 = new(GameVersion.AS);
         private static readonly SimpleTrainerInfo DefaultFallback8 = new(GameVersion.SW);
         private static readonly SimpleTrainerInfo DefaultFallback7 = new(GameVersion.UM);
         private static readonly SimpleTrainerInfo DefaultFallback9 = new(GameVersion.SL);
@@ -24,6 +25,7 @@ namespace PKHeX.Core.AutoMod
         {
             var fallback = gen switch
             {
+                6 => DefaultFallBack6,
                 7 => DefaultFallback7,
                 8 => DefaultFallback8,
                 9 => DefaultFallback9,

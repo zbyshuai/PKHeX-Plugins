@@ -669,6 +669,7 @@ namespace PKHeX.Core.AutoMod
         {
             return ver switch
             {
+                
                 GameVersion.BD or GameVersion.SP => GameVersion.BDSP,
                 GameVersion.SW or GameVersion.SH => GameVersion.SWSH,
                 GameVersion.GP or GameVersion.GE => GameVersion.GG,

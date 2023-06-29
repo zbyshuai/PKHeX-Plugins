@@ -151,7 +151,7 @@ namespace AutoModPlugins
 
         private void ChangeBox(object? sender, EventArgs e)
         {
-            if (CB_ReadBox.Checked && Remote.Bot.Connected)
+            if (checkBox1.Checked && Remote.Bot.Connected)
                 Remote.ChangeBox(ViewIndex);
         }
 

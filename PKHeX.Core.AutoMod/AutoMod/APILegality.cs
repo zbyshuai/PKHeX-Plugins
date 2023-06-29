@@ -74,7 +74,7 @@ namespace PKHeX.Core.AutoMod
             if (dest.Generation <= 2)
                 template.EXP = 0; // no relearn moves in gen 1/2 so pass level 1 to generator
 
-            var encounters = GetAllEncounters(pk: template, moves: set.Moves, gamelist);
+            var encounters = GetAllEncounters(pk: template, moves: Array.Empty<ushort>(), gamelist);
             var criteria = EncounterCriteria.GetCriteria(set, template.PersonalInfo);
             criteria.ForceMinLevelRange = true;
             if (regen.EncounterFilters != null)
