@@ -789,7 +789,7 @@ namespace PKHeX.Core.AutoMod
         /// <param name="set">Set to pass in requested IVs</param>
         private static void PreSetPIDIV(this PKM pk, IEncounterable enc, IBattleTemplate set)
         {
-            if (enc is EncounterTera9 tera)
+            if (enc is EncounterStatic tera)
             {
                 var pk9 = (PK9)pk;
                 FindTeraPIDIV(pk9, tera, set);
@@ -883,7 +883,7 @@ namespace PKHeX.Core.AutoMod
             }
         }
 
-        private static void FindTeraPIDIV(PK9 pk, EncounterTera9 enc, IBattleTemplate set)
+        private static void FindTeraPIDIV(PK9 pk, EncounterStatic enc, IBattleTemplate set)
         {
             if (IsMatchCriteria9(pk, set))
                 return;
@@ -899,14 +899,17 @@ namespace PKHeX.Core.AutoMod
                 var param = new GenerateParam9(pk.Species, pi.Gender, enc.FlawlessIVCount, rollCount,
                     undefinedSize, undefinedSize, undefinedSize, undefinedSize,
                     enc.Ability, enc.Shiny);
-                enc.TryApply32(pk, seed, param, EncounterCriteria.Unrestricted);
+                if(enc is EncounterTera9 encount)
+                    encount.TryApply32(pk, seed, param, EncounterCriteria.Unrestricted);
+                if(enc is EncounterDist9 dist)
+                    dist.TryApply32(pk,seed,param,EncounterCriteria.Unrestricted);
                 if (IsMatchCriteria9(pk, set, compromise))
                     break;
                 if (count == 5_000)
                     compromise = true;
             } while (++count < 15_000);
         }
-
+        
         /// <summary>
         /// Method to find the PID and IV associated with a nest. Shinies are just allowed
         /// since there is no way GameFreak actually brute-forces top half of the PID to flag illegals.
