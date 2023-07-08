@@ -789,10 +789,17 @@ namespace PKHeX.Core.AutoMod
         /// <param name="set">Set to pass in requested IVs</param>
         private static void PreSetPIDIV(this PKM pk, IEncounterable enc, IBattleTemplate set)
         {
-            if (enc is EncounterStatic tera)
+            if (enc is EncounterTera9 tera)
             {
                 var pk9 = (PK9)pk;
                 FindTeraPIDIV(pk9, tera, set);
+                if (set.TeraType != MoveType.Any && set.TeraType != pk9.TeraType)
+                    pk9.SetTeraType(set.TeraType);
+            }
+            if (enc is EncounterDist9 dist)
+            {
+                var pk9 = (PK9)pk;
+                FindTeraPIDIV(pk9, dist, set);
                 if (set.TeraType != MoveType.Any && set.TeraType != pk9.TeraType)
                     pk9.SetTeraType(set.TeraType);
             }
