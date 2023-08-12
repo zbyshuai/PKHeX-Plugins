@@ -161,21 +161,18 @@ namespace PKHeX.Core.AutoMod
                 return;
 
             // don't bother checking encountertrade nicknames for length validity
-            if (enc is EncounterTrade { HasNickname: true } et)
+            if (enc is IFixedNickname { IsFixedNickname: true } et)
             {
                 // Nickname matches the requested nickname already
                 if (pk.Nickname == set.Nickname)
                     return;
                 // This should be illegal except Meister Magikarp in BDSP, however trust the user and set corresponding OT
                 const CompareOptions options = CompareOptions.IgnoreCase | CompareOptions.IgnoreNonSpace | CompareOptions.IgnoreSymbols | CompareOptions.IgnoreWidth;
-                var index = et.Nicknames.ToList().FindIndex(z => CompareInfo.Compare(set.Nickname, z, options) == 0);
-                if (index >= 0)
-                {
-                    pk.Nickname = et.Nicknames[index];
-                    if (pk.Format >= 3)
-                        pk.OT_Name = et.TrainerNames[index];
-                    return;
-                }
+
+                pk.Nickname = et.GetNickname(pk.Language);
+                pk.OT_Name = pk.OT_Name;
+                return;
+            
             }
 
             var gen = enc.Generation;
@@ -303,7 +300,7 @@ namespace PKHeX.Core.AutoMod
         /// </summary>
         /// <param name="t">EncounterTrade</param>
         /// <param name="pk">Pokemon to modify</param>
-        public static void SetEncounterTradeIVs(this EncounterTrade t, PKM pk)
+        public static void SetEncounterTradeIVs(this EncounterTrade4PID t, PKM pk)
         {
             if (t.IVs.IsSpecified)
                 pk.SetRandomIVsTemplate(t.IVs, 0);

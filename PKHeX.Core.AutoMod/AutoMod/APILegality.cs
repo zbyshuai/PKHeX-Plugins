@@ -92,8 +92,9 @@ namespace PKHeX.Core.AutoMod
                 }
 
                 // Look before we leap -- don't waste time generating invalid / incompatible junk.
-                if (!IsEncounterValid(set, enc, abilityreq, destVer))
-                    continue;
+                /*if (!IsEncounterValid(set, enc, abilityreq, destVer))
+                    continue;*/
+          
 
                 // Create the PKM from the template.
                 var tr = SimpleEdits.IsUntradeableEncounter(enc) ? dest : GetTrainer(regen, enc.Version, enc.Generation);
@@ -159,7 +160,7 @@ namespace PKHeX.Core.AutoMod
                 Debug.WriteLine($"{la.Report()}\n");
             }
             satisfied = LegalizationResult.Failed;
-            return last ?? template;
+            return last;
         }
 
         private static IEnumerable<IEncounterable> GetAllEncounters(PKM pk, ReadOnlyMemory<ushort> moves, IReadOnlyList<GameVersion> vers)
@@ -337,7 +338,7 @@ namespace PKHeX.Core.AutoMod
                 return false;
 
             // Don't process if encounter is HA but requested pkm is not HA
-            if (abilityreq == AbilityRequest.NotHidden && enc is EncounterStatic { Ability: AbilityPermission.OnlyHidden })
+            if (abilityreq == AbilityRequest.NotHidden && enc is IEncounterable { Ability: AbilityPermission.OnlyHidden })
                 return false;
 
             // Don't process if PKM is definitely Hidden Ability and the PKM is from Gen 3 or Gen 4 and Hidden Capsule doesn't exist
@@ -349,7 +350,7 @@ namespace PKHeX.Core.AutoMod
             {
                 switch (enc.Generation)
                 {
-                    case 6 when set.Form != (enc is EncounterStatic ? enc.Form : 0):
+                    case 6 when set.Form != (enc is EncounterStatic6 ? enc.Form : 0):
                     case >= 7 when set.Form != (enc is EncounterInvalid or EncounterEgg ? 0 : enc.Form):
                         return false;
                 }
@@ -464,8 +465,8 @@ namespace PKHeX.Core.AutoMod
             const int MaxLair = 244; // Dynamax Adventures
             pk.Met_Location = enc switch
             {
-                EncounterStatic8N or EncounterStatic8ND or EncounterStatic8NC { Location: 0 } => SharedNest,
-                EncounterStatic8U { Location: 0 } => MaxLair,
+                EncounterStatic8N or EncounterStatic8ND or EncounterStatic8NC => SharedNest,
+                EncounterStatic8U => MaxLair,
                 _ => pk.Met_Location,
             };
             return pk;
@@ -734,7 +735,7 @@ namespace PKHeX.Core.AutoMod
                 if (enc.Generation is not (3 or 4))
                     return;
             }
-            else if (enc is EncounterStatic specified && specified.IVs.IsSpecified)
+            else if (pk.IVTotal != 0)
                 return;
 
             else if (enc.Generation is not (3 or 4))
@@ -752,7 +753,7 @@ namespace PKHeX.Core.AutoMod
 
             switch (enc)
             {
-                case EncounterSlot3PokeSpot es3ps:
+                case EncounterSlot3 es3ps:
                     var abil = pk.PersonalInfo.AbilityCount > 0 && pk.PersonalInfo is IPersonalAbility12 a ? (a.Ability1 == pk.Ability ? 0 : 1) : 1;
                     do PIDGenerator.SetRandomPokeSpotPID(pk, pk.Nature, pk.Gender, abil, es3ps.SlotNumber);
                     while (pk.PID % 25 != pk.Nature);
@@ -769,9 +770,9 @@ namespace PKHeX.Core.AutoMod
                     pk.SetPIDNature(pk.Nature);
                     return;
                 // EncounterTrade4 doesn't have fixed PIDs, so don't early return
-                case EncounterTrade t:
+                case EncounterTrade4PID t:
                     t.SetEncounterTradeIVs(pk);
-                    return; // Fixed PID, no need to mutate
+                    return; // Fixed PID, no need to mutate*/
                 default:
                     FindPIDIV(pk, method, hpType, set.Shiny, enc);
                     ValidateGender(pk);
@@ -812,7 +813,7 @@ namespace PKHeX.Core.AutoMod
             }
             if (enc is EncounterStatic8N or EncounterStatic8NC or EncounterStatic8ND or EncounterStatic8U)
             {
-                var e = (EncounterStatic)enc;
+                var e = enc;
                 var isShiny = set.Shiny;
                 if (pk.AbilityNumber == 4 && e.Ability is AbilityPermission.Any12 or AbilityPermission.OnlyFirst or AbilityPermission.OnlySecond)
                     return;
@@ -913,7 +914,7 @@ namespace PKHeX.Core.AutoMod
                 var param = enc switch
                 {
                     EncounterDist9 e => new GenerateParam9(pk.Species, pi.Gender, e.FlawlessIVCount, rollCount,
-                        undefinedSize, undefinedSize, e.ScaleType, e.Scale, e.Ability, e.Shiny, e.Nature, e.IVs),
+                        undefinedSize, undefinedSize, e.ScaleType, e.Scale, e.Ability, e.Shiny, undefinedSize, e.IVs),
                     EncounterMight9 e => new GenerateParam9(pk.Species, pi.Gender, e.FlawlessIVCount, rollCount,
                         undefinedSize, undefinedSize, e.ScaleType, e.Scale, e.Ability, e.Shiny, e.Nature, e.IVs),
                     EncounterTera9 e => new GenerateParam9(pk.Species, pi.Gender, e.FlawlessIVCount, rollCount,
@@ -1217,12 +1218,13 @@ namespace PKHeX.Core.AutoMod
                 if (enc is WC3 wc3)
                     Method = wc3.Method;
                 else
-                    Method = FindLikelyPIDType(pk);
+                    Method = FindLikelyPIDType(pk,enc);
 
                 if (pk.Version == (int)GameVersion.CXD && Method != PIDType.PokeSpot)
                     Method = PIDType.CXD;
                 if (Method == PIDType.None && pk.Generation >= 3)
                     pk.SetPIDGender(pk.Gender);
+               
             }
             switch (Method)
             {
@@ -1253,12 +1255,12 @@ namespace PKHeX.Core.AutoMod
                     continue;
                 if (pk.PID % 25 != iterPKM.Nature) // Util.Rand32 is the way to go
                     continue;
-                if (pk.Version == (int)GameVersion.CXD && Method == PIDType.CXD) // verify locks
+                if (pk.Version == (int)GameVersion.CXD) // verify locks
                 {
                     pk.EncryptionConstant = pk.PID;
                     var ec = pk.PID;
                     bool xorPID = ((pk.TID16 ^ pk.SID16 ^ (int)(ec & 0xFFFF) ^ (int)(ec >> 16)) & ~0x7) == 8;
-                    if (enc is EncounterStatic3 && enc.Species == (int)Species.Eevee && (shiny != pk.IsShiny || xorPID)) // Starter Correlation
+                    if ( enc.Species == (int)Species.Eevee && (shiny != pk.IsShiny || xorPID)) // Starter Correlation
                         continue;
                     var la = new LegalityAnalysis(pk);
                     if ((la.Info.PIDIV.Type != PIDType.CXD && la.Info.PIDIV.Type != PIDType.CXD_ColoStarter) || !la.Info.PIDIVMatches || !pk.IsValidGenderPID(enc))
@@ -1301,7 +1303,7 @@ namespace PKHeX.Core.AutoMod
         /// </summary>
         /// <param name="pk">PKM to modify</param>
         /// <returns>PIDType that is likely used</returns>
-        private static PIDType FindLikelyPIDType(PKM pk)
+        private static PIDType FindLikelyPIDType(PKM pk, IEncounterable enc)
         {
             if (pk.Species == (int)Species.Manaphy && pk.Gen4)
             {
@@ -1315,22 +1317,22 @@ namespace PKHeX.Core.AutoMod
                 3 => info.EncounterMatch switch
                 {
                     WC3 g => g.Method,
-                    EncounterStatic => pk.Version switch
+                    EncounterStatic3 => pk.Version switch
                     {
                         (int)GameVersion.CXD => PIDType.CXD,
                         (int)GameVersion.E => PIDType.Method_1,
                         (int)GameVersion.FR or (int)GameVersion.LG => PIDType.Method_1, // roamer glitch
                         _ => PIDType.Method_1,
                     },
-                    EncounterSlot when pk.Version == (int)GameVersion.CXD => PIDType.PokeSpot,
-                    EncounterSlot => pk.Species == (int)Species.Unown ? PIDType.Method_1_Unown : PIDType.Method_1,
+                    EncounterSlot3XD when pk.Version == (int)GameVersion.CXD => PIDType.PokeSpot,
+                    EncounterSlot3 => pk.Species == (int)Species.Unown ? PIDType.Method_1_Unown : PIDType.Method_1,
                     _ => PIDType.None,
                 },
 
                 4 => info.EncounterMatch switch
                 {
                     EncounterStatic4Pokewalker => PIDType.Pokewalker,
-                    EncounterStatic s => (s.Shiny == Shiny.Always ? PIDType.ChainShiny : PIDType.Method_1),
+                    EncounterStatic4 s => (s.Shiny == Shiny.Always ? PIDType.ChainShiny : PIDType.Method_1),
                     PGT => PIDType.Method_1,
                     _ => PIDType.None,
                 },

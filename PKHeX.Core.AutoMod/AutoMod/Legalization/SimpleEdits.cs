@@ -423,13 +423,14 @@ namespace PKHeX.Core.AutoMod
                 return;
             Span<byte> result = stackalloc byte[6];
             AwakeningUtil.SetExpectedMinimumAVs(result, (PB7)pb7);
+            var maxAV = (byte)200;
             var EVs = set.EVs;
-            pb7.AV_HP  = Math.Max(result[0], (byte)EVs[0]);
-            pb7.AV_ATK = Math.Max(result[1], (byte)EVs[1]);
-            pb7.AV_DEF = Math.Max(result[2], (byte)EVs[2]);
-            pb7.AV_SPA = Math.Max(result[3], (byte)EVs[4]);
-            pb7.AV_SPD = Math.Max(result[4], (byte)EVs[5]);
-            pb7.AV_SPE = Math.Max(result[5], (byte)EVs[3]);
+            pb7.AV_HP  = Math.Clamp( (byte)EVs[0],result[0], maxAV);
+            pb7.AV_ATK = Math.Clamp( (byte)EVs[1],result[1], maxAV);
+            pb7.AV_DEF = Math.Clamp((byte)EVs[2], result[2], maxAV);
+            pb7.AV_SPA = Math.Clamp((byte)EVs[4], result[3], maxAV);
+            pb7.AV_SPD = Math.Clamp((byte)EVs[5], result[4], maxAV);
+            pb7.AV_SPE = Math.Clamp((byte)EVs[3], result[5], maxAV);
         }
 
         public static void SetHTLanguage(this PKM pk, byte prefer)
@@ -658,7 +659,9 @@ namespace PKHeX.Core.AutoMod
                 return PersonalTable.LA.IsPresentInGame(species, form);
             if (GameVersion.SV.Contains(destVer))
                 return PersonalTable.SV.IsPresentInGame(species, form);
-            return (uint)species <= destVer.GetMaxSpeciesID();
+            if (destVer is GameVersion.Any or GameVersion.Invalid or GameVersion.Unknown)
+                return species <= GameVersion.USUM.GetMaxSpeciesID();
+            return species <= destVer.GetMaxSpeciesID();
         }
 
         public static GameVersion GetIsland(this GameVersion ver)
