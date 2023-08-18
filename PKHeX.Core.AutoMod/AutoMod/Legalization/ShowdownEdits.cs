@@ -307,7 +307,34 @@ namespace PKHeX.Core.AutoMod
             else
                 pk.SetRandomIVs(minFlawless: 3);
         }
-
+        public static void SetEncounterTradeIVs6(this EncounterTrade6 t, PKM pk)
+        {
+            if (t.IVs.IsSpecified)
+                pk.SetRandomIVsTemplate(t.IVs, 0);
+            else
+                pk.SetRandomIVs(minFlawless: 3);
+        }
+        public static void SetEncounterTradeIVs7(this EncounterTrade7 t, PKM pk)
+        {
+            if (t.IVs.IsSpecified)
+                pk.SetRandomIVsTemplate(t.IVs, 0);
+            else
+                pk.SetRandomIVs(minFlawless: 3);
+        }
+        public static void SetEncounterTradeIVs8(this EncounterTrade8 t, PKM pk)
+        {
+            if (t.IVs.IsSpecified)
+                pk.SetRandomIVsTemplate(t.IVs, 0);
+            else
+                pk.SetRandomIVs(minFlawless: 3);
+        }
+        public static void SetEncounterTradeIVs9(this EncounterTrade9 t, PKM pk)
+        {
+            if (t.IVs.IsSpecified)
+                pk.SetRandomIVsTemplate(t.IVs, 0);
+            else
+                pk.SetRandomIVs(minFlawless: 3);
+        }
         /// <summary>
         /// Set held items after sanity checking for forms and invalid items
         /// </summary>

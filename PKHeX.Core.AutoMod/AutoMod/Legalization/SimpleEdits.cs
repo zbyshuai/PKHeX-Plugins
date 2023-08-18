@@ -456,7 +456,14 @@ namespace PKHeX.Core.AutoMod
             if (pk is IDynamaxLevel d)
                 d.DynamaxLevel = d.GetSuggestedDynamaxLevel(pk, requested: set.DynamaxLevel);
             if (pk is ITeraType t && set.TeraType != MoveType.Any && t.GetTeraType() != set.TeraType)
+            {
                 t.SetTeraType(set.TeraType);
+                if (pk.Version < 50)
+                    t.TeraTypeOverride = t.TeraTypeOriginal;
+            }
+           
+
+
         }
 
         public static void RestoreIVs(this PKM pk, int[] IVs)
@@ -486,6 +493,9 @@ namespace PKHeX.Core.AutoMod
         {
             switch (pk)
             {
+                case PK9 pk9 when !pk.IsUntraded:
+                    pk9.ClearMemoriesHT();
+                    break;
                 case PK8 pk8 when !pk.IsUntraded:
                     pk8.SetTradeMemoryHT8();
                     break;
