@@ -142,6 +142,7 @@ namespace PKHeX.Core.AutoMod
                     raw.CurrentHandler = 1;
                     return raw;
                 }
+             
                 if (raw.OT_Name.Length == 0)
                 {
                     raw.Language = tr.Language;
@@ -186,7 +187,11 @@ namespace PKHeX.Core.AutoMod
                     if (!BatchEditing.TryModify(pk, b.Filters, b.Instructions) && b.Filters.Count > 0)
                         continue;
                 }
-
+                if (pk is IScaledSizeValue sv) //correct height/weight absolute after batch edits adjust size
+                {
+                    sv.ResetWeight();
+                    sv.ResetHeight();
+                }
                 if (pk is PK1 pk1 && pk1.TradebackValid())
                 {
                     satisfied = LegalizationResult.Regenerated;
@@ -964,7 +969,7 @@ namespace PKHeX.Core.AutoMod
                 var param = enc switch
                 {
                     EncounterDist9 e => new GenerateParam9(pk.Species, pi.Gender, e.FlawlessIVCount, rollCount,
-                        undefinedSize, undefinedSize, e.ScaleType, e.Scale, e.Ability, e.Shiny, undefinedSize, e.IVs),
+                        undefinedSize, undefinedSize, e.ScaleType, e.Scale, e.Ability, e.Shiny, IVs:e.IVs),
                     EncounterMight9 e => new GenerateParam9(pk.Species, pi.Gender, e.FlawlessIVCount, rollCount,
                         undefinedSize, undefinedSize, e.ScaleType, e.Scale, e.Ability, e.Shiny, e.Nature, e.IVs),
                     EncounterTera9 e => new GenerateParam9(pk.Species, pi.Gender, e.FlawlessIVCount, rollCount,

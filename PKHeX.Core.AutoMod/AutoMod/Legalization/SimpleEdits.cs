@@ -496,6 +496,12 @@ namespace PKHeX.Core.AutoMod
                 case PK9 pk9 when !pk.IsUntraded:
                     pk9.ClearMemoriesHT();
                     break;
+                case PA8 pa8 when !pk.IsUntraded:
+                    pa8.ClearMemoriesHT();
+                    break;
+                case PB8 pb8 when !pk.IsUntraded:
+                    pb8.ClearMemoriesHT();
+                    break;
                 case PK8 pk8 when !pk.IsUntraded:
                     pk8.SetTradeMemoryHT8();
                     break;
