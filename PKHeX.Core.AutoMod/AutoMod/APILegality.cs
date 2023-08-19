@@ -112,7 +112,7 @@ namespace PKHeX.Core.AutoMod
                     raw.CurrentHandler = 1;
                     return raw;
                 }
-                if(enc.Context == EntityContext.Gen2)
+                if(enc.Context == EntityContext.Gen2 && enc.Species != (ushort)Species.Poliwag)
                 {
                     satisfied = LegalizationResult.Regenerated;
                     raw.CurrentHandler = 1;
@@ -121,6 +121,8 @@ namespace PKHeX.Core.AutoMod
                 if(enc is EncounterStatic4 && enc.Species == (ushort)Species.Giratina)
                 {
                     satisfied = LegalizationResult.Regenerated;
+                    if (raw.Form == 1)
+                        raw.HeldItem = 112;
                     raw.CurrentHandler = 1;
                     return raw;
                 }
@@ -142,7 +144,12 @@ namespace PKHeX.Core.AutoMod
                     raw.CurrentHandler = 1;
                     return raw;
                 }
-             
+                if(enc is EncounterTrade5B2W2 && enc.Species == (ushort)Species.Gigalith)
+                {
+                    satisfied = LegalizationResult.Regenerated;
+                    raw.CurrentHandler = 1;
+                    return raw;
+                }
                 if (raw.OT_Name.Length == 0)
                 {
                     raw.Language = tr.Language;
