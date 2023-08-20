@@ -22,7 +22,7 @@ namespace AutoModTests
                 RibbonStrings.ResetDictionary(GameInfo.Strings.ribbons);
                 Legalizer.EnableEasterEggs = false;
                 APILegality.SetAllLegalRibbons = false;
-                APILegality.Timeout = 99999;
+                APILegality.Timeout = 9999;
                 Initialized = true;
             }
         }

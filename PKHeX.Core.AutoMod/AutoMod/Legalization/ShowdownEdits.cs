@@ -69,7 +69,7 @@ namespace PKHeX.Core.AutoMod
             var la2 = new LegalityAnalysis(pk);
             var enc1 = la.EncounterMatch;
             var enc2 = la2.EncounterMatch;
-            if (((!ReferenceEquals(enc1, enc2) && enc1 is not EncounterEgg) || 
+            if (((!ReferenceEquals(enc1, enc2) && enc1 is not EncounterEgg) ||
                 la2.Results.Any(z => (z.Identifier == CheckIdentifier.Nature || z.Identifier == CheckIdentifier.Encounter) && !z.Valid)) && enc is not EncounterEgg)
                 pk.Nature = orig;
             if (pk.Format >= 8 && pk.StatNature != pk.Nature && pk.StatNature is 0 or 6 or 18 or >= 24) // Only Serious Mint for Neutral Natures
@@ -161,21 +161,18 @@ namespace PKHeX.Core.AutoMod
                 return;
 
             // don't bother checking encountertrade nicknames for length validity
-            if (enc is EncounterTrade { HasNickname: true } et)
+            if (enc is IFixedNickname { IsFixedNickname: true } et)
             {
                 // Nickname matches the requested nickname already
                 if (pk.Nickname == set.Nickname)
                     return;
                 // This should be illegal except Meister Magikarp in BDSP, however trust the user and set corresponding OT
                 const CompareOptions options = CompareOptions.IgnoreCase | CompareOptions.IgnoreNonSpace | CompareOptions.IgnoreSymbols | CompareOptions.IgnoreWidth;
-                var index = et.Nicknames.ToList().FindIndex(z => CompareInfo.Compare(set.Nickname, z, options) == 0);
-                if (index >= 0) 
-                {
-                    pk.Nickname = et.Nicknames[index];
-                    if (pk.Format >= 3)
-                        pk.OT_Name = et.TrainerNames[index];
-                    return;
-                }
+
+                pk.Nickname = et.GetNickname(pk.Language);
+                pk.OT_Name = pk.OT_Name;
+                return;
+            
             }
 
             var gen = enc.Generation;
@@ -270,7 +267,7 @@ namespace PKHeX.Core.AutoMod
                 pk.FixMoves();
             }
 
-            if (la.Parsed && !pk.FatefulEncounter )
+            if (la.Parsed && !pk.FatefulEncounter)
             {
                 // For dexnav. Certain encounters come with "random" relearn moves, and our requested moves might require one of them.
                 Span<ushort> moves = stackalloc ushort[4];
@@ -278,6 +275,9 @@ namespace PKHeX.Core.AutoMod
                 pk.ClearRelearnMoves();
                 pk.SetRelearnMoves(moves);
             }
+            la = new LegalityAnalysis(pk);
+            if (la.Info.Relearn.Any(z => z.Judgement == Severity.Invalid))
+                pk.ClearRelearnMoves();
 
             if (pk is PB7)
             {
@@ -300,14 +300,41 @@ namespace PKHeX.Core.AutoMod
         /// </summary>
         /// <param name="t">EncounterTrade</param>
         /// <param name="pk">Pokemon to modify</param>
-        public static void SetEncounterTradeIVs(this EncounterTrade t, PKM pk)
+        public static void SetEncounterTradeIVs(this EncounterTrade4PID t, PKM pk)
         {
             if (t.IVs.IsSpecified)
                 pk.SetRandomIVsTemplate(t.IVs, 0);
             else
                 pk.SetRandomIVs(minFlawless: 3);
         }
-
+        public static void SetEncounterTradeIVs6(this EncounterTrade6 t, PKM pk)
+        {
+            if (t.IVs.IsSpecified)
+                pk.SetRandomIVsTemplate(t.IVs, 0);
+            else
+                pk.SetRandomIVs(minFlawless: 3);
+        }
+        public static void SetEncounterTradeIVs7(this EncounterTrade7 t, PKM pk)
+        {
+            if (t.IVs.IsSpecified)
+                pk.SetRandomIVsTemplate(t.IVs, 0);
+            else
+                pk.SetRandomIVs(minFlawless: 3);
+        }
+        public static void SetEncounterTradeIVs8(this EncounterTrade8 t, PKM pk)
+        {
+            if (t.IVs.IsSpecified)
+                pk.SetRandomIVsTemplate(t.IVs, 0);
+            else
+                pk.SetRandomIVs(minFlawless: 3);
+        }
+        public static void SetEncounterTradeIVs9(this EncounterTrade9 t, PKM pk)
+        {
+            if (t.IVs.IsSpecified)
+                pk.SetRandomIVsTemplate(t.IVs, 0);
+            else
+                pk.SetRandomIVs(minFlawless: 3);
+        }
         /// <summary>
         /// Set held items after sanity checking for forms and invalid items
         /// </summary>
@@ -339,25 +366,25 @@ namespace PKHeX.Core.AutoMod
                     pk.Form = pk.Form != forma ? (byte)0 : forma;
                     break;
                 case Species.Silvally:
-                    byte forms = (byte)FormVerifier.GetSilvallyFormFromHeldItem(pk.HeldItem);
+                    byte forms = FormVerifier.GetSilvallyFormFromHeldItem(pk.HeldItem);
                     pk.HeldItem = pk.Form != forms ? 0 : pk.HeldItem;
                     pk.Form = pk.Form != forms ? (byte)0 : forms;
                     break;
                 case Species.Genesect:
-                    byte formg = (byte)FormVerifier.GetGenesectFormFromHeldItem(pk.HeldItem);
+                    byte formg = FormVerifier.GetGenesectFormFromHeldItem(pk.HeldItem);
                     pk.HeldItem = pk.Form != formg ? 0 : pk.HeldItem;
                     pk.Form = pk.Form != formg ? (byte)0 : formg;
                     break;
-               case Species.Giratina when pk.Form == 1 && pk.HeldItem != 112 && pk.HeldItem != 1779:
-                    if (pk.Context != EntityContext.Gen9)
-                        pk.HeldItem = 112;
-                    else
+                case Species.Giratina when pk.Form == 1 && pk.HeldItem != 112 && pk.HeldItem != 1779:
+                    if (pk.Context >= EntityContext.Gen9)
                         pk.HeldItem = 1779;
+                    else
+                        pk.HeldItem = 112;
                     break;
-                case Species.Dialga when pk.Form == 1 && pk.Context == EntityContext.Gen9 && pk.HeldItem != 1777:
+                case Species.Dialga when pk.Form == 1 && pk.HeldItem != 1777:
                     pk.HeldItem = 1777;
                     break;
-                case Species.Palkia when pk.Form == 1 && pk.Context == EntityContext.Gen9 && pk.HeldItem != 1778:
+                case Species.Palkia when pk.Form == 1 && pk.HeldItem != 1778:
                     pk.HeldItem = 1778;
                     break;
             }
