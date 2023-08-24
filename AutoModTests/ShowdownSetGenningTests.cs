@@ -1,6 +1,7 @@
 ﻿using FluentAssertions;
 using PKHeX.Core;
 using PKHeX.Core.AutoMod;
+using System.Diagnostics;
 using Xunit;
 
 namespace AutoModTests
@@ -13,6 +14,7 @@ namespace AutoModTests
         [InlineData(GameVersion.US, Meowstic)]
         [InlineData(GameVersion.US, Darkrai)]
         [InlineData(GameVersion.B2, Genesect)]
+        [InlineData(GameVersion.BD, problemsolving)]
         public static void VerifyManually(GameVersion game, string txt)
         {
             var dev = APILegality.EnableDevMode;
@@ -29,9 +31,22 @@ namespace AutoModTests
             APILegality.EnableDevMode = dev;
 
             var la = new LegalityAnalysis(pkm);
+            if (!la.Valid)
+                Debug.WriteLine(la.Report()+"\n");
             la.Valid.Should().BeTrue();
         }
-
+        private const string problemsolving =
+            @"ポッちゃん (Magikarp) (F) @ Lum Berry
+IVs: 3 HP / 3 Atk / 11 SpA / 3 SpD / 2 Spe
+Ability: Swift Swim
+Level: 45
+Mild Nature
+Language: Japanese
+=OT_Name=マイスター
+=Met_Location=30001
+.Version=48
+~=Generation=8
+- Splash";
         private const string Darkrai =
 @"Darkrai
 IVs: 7 Atk
