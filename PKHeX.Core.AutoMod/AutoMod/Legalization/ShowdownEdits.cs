@@ -110,7 +110,7 @@ namespace PKHeX.Core.AutoMod
         /// <param name="Form">Form to apply</param>
         /// <param name="enc">Encounter detail</param>
         /// <param name="lang">Language to apply</param>
-        public static void SetSpeciesLevel(this PKM pk, IBattleTemplate set, byte Form, IEncounterable enc, LanguageID? lang = null)
+        public static void SetSpeciesLevel(this PKM pk, IBattleTemplate set, byte Form, IEncounterable enc,ITrainerInfo handler, LanguageID? lang = null)
         {
             pk.ApplySetGender(set);
             pk.SetRecordFlags(set.Moves); // Set record flags before evolution (TODO: what if middle evolution has exclusive record moves??)
@@ -164,6 +164,8 @@ namespace PKHeX.Core.AutoMod
             {
                 // Set this before hand incase it is true. Will early return if it is also IFixedNickname
                 // Wait for PKHeX to expose this instead of using reflection
+
+                //from santa: why would we need this if PKHeX is setting OT for fixed trainers on pk conversion?
             }
             // don't bother checking encountertrade nicknames for length validity
             if (enc is IFixedNickname { IsFixedNickname: true } et)
@@ -172,10 +174,13 @@ namespace PKHeX.Core.AutoMod
                 if (pk.Nickname == set.Nickname)
                     return;
                 // This should be illegal except Meister Magikarp in BDSP, however trust the user and set corresponding OT
+
                 var nick = et.GetNickname(pk.Language);
+                if (enc is EncounterTrade8b && enc.Species == (int)Species.Magikarp)
+                    nick = et.GetNickname(handler.Language);
                 if (nick != null)
                 {
-                    pk.Nickname = nick;
+                    pk.SetNickname(nick);
                     return;
                 }
             }

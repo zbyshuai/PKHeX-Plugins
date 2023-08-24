@@ -486,7 +486,7 @@ namespace PKHeX.Core.AutoMod
             var pidiv = MethodFinder.Analyze(pk);
             var abilitypref = GetAbilityPreference(pk, enc);
 
-            pk.SetSpeciesLevel(set, Form, enc, language);
+            pk.SetSpeciesLevel(set, Form, enc, handler,language);
             pk.SetDateLocks(enc);
             pk.SetHeldItem(set);
 
