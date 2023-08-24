@@ -1,7 +1,6 @@
 ﻿using FluentAssertions;
 using PKHeX.Core;
 using PKHeX.Core.AutoMod;
-using System.Diagnostics;
 using Xunit;
 
 namespace AutoModTests
@@ -31,8 +30,6 @@ namespace AutoModTests
             APILegality.EnableDevMode = dev;
 
             var la = new LegalityAnalysis(pkm);
-            if (!la.Valid)
-                Debug.WriteLine(la.Report()+"\n");
             la.Valid.Should().BeTrue();
         }
         private const string problemsolving =
@@ -41,7 +38,7 @@ IVs: 3 HP / 3 Atk / 11 SpA / 3 SpD / 2 Spe
 Ability: Swift Swim
 Level: 45
 Mild Nature
-Language: Japanese
+Language: German
 =OT_Name=マイスター
 =Met_Location=30001
 .Version=48
