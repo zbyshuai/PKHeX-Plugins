@@ -1,6 +1,7 @@
 ﻿using FluentAssertions;
 using PKHeX.Core;
 using PKHeX.Core.AutoMod;
+using System.Diagnostics;
 using Xunit;
 
 namespace AutoModTests
@@ -30,6 +31,8 @@ namespace AutoModTests
             APILegality.EnableDevMode = dev;
 
             var la = new LegalityAnalysis(pkm);
+            if (!la.Valid)
+                Debug.WriteLine(la.Report() + "\n");
             la.Valid.Should().BeTrue();
         }
         private const string problemsolving =

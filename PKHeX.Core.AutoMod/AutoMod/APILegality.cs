@@ -115,6 +115,16 @@ namespace PKHeX.Core.AutoMod
 
                 // Bring to the target generation and filter
                 var pk = EntityConverter.ConvertToType(raw, destType, out _);
+                if(enc is EncounterTrade8b { Species: (ushort)Species.Magikarp} && set.Nickname== "ポッちゃん")
+                {
+                    tr = SaveUtil.GetBlankSAV(pk.Context, "WhyFail?", LanguageID.Japanese);
+                    raw = enc.ConvertToPKM(tr);
+                    pk = EntityConverter.ConvertToType(raw, destType, out _);
+                    pk.CurrentHandler = 1;
+                    satisfied = LegalizationResult.Regenerated;
+                    return pk;
+
+                }
                 if (pk == null)
                     continue;
                 if (EntityConverter.IsIncompatibleGB(pk, template.Japanese, pk.Japanese))
