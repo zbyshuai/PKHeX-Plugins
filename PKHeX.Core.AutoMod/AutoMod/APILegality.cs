@@ -501,40 +501,62 @@ namespace PKHeX.Core.AutoMod
             var language = regen.Extra.Language;
             var pidiv = MethodFinder.Analyze(pk);
             var abilitypref = GetAbilityPreference(pk, enc);
-
+            var la = new LegalityAnalysis(pk).Valid;
             pk.SetSpeciesLevel(set, Form, enc, handler,language);
+            la = new LegalityAnalysis(pk).Valid;
             pk.SetDateLocks(enc);
+            la = new LegalityAnalysis(pk).Valid;
             pk.SetHeldItem(set);
-
+            la = new LegalityAnalysis(pk).Valid;
             // Actions that do not affect set legality
             pk.SetHandlerandMemory(handler, enc);
+            la = new LegalityAnalysis(pk).Valid;
             pk.SetFriendship(enc);
+            la = new LegalityAnalysis(pk).Valid;
             pk.SetRecordFlags(set.Moves);
-
+            la = new LegalityAnalysis(pk).Valid;
             // Legality Fixing
             pk.SetMovesEVs(set, enc);
+            la = new LegalityAnalysis(pk).Valid;
             pk.SetCorrectMetLevel();
-            pk.SetNatureAbility(set, enc, abilitypref);
+            la = new LegalityAnalysis(pk).Valid;
+            if(enc is not EncounterStatic4Pokewalker && enc.Generation > 2)
+                pk.SetNatureAbility(set, enc, abilitypref);
+            la = new LegalityAnalysis(pk).Valid;
             pk.SetIVsPID(set, pidiv.Type, set.HiddenPowerType, enc);
+            la = new LegalityAnalysis(pk).Valid;
             pk.SetGVs();
+            la = new LegalityAnalysis(pk).Valid;
             pk.SetHyperTrainingFlags(set, enc); // Hypertrain
+            la = new LegalityAnalysis(pk).Valid;
             pk.SetEncryptionConstant(enc);
+            la = new LegalityAnalysis(pk).Valid;
             pk.SetShinyBoolean(set.Shiny, enc, regen.Extra.ShinyType);
+            la = new LegalityAnalysis(pk).Valid;
             pk.FixGender(set);
-
+            la = new LegalityAnalysis(pk).Valid;
             // Final tweaks
             pk.SetGimmicks(set);
+            la = new LegalityAnalysis(pk).Valid;
             pk.SetGigantamaxFactor(set, enc);
+            la = new LegalityAnalysis(pk).Valid;
             pk.SetSuggestedRibbons(set, enc, SetAllLegalRibbons);
+            la = new LegalityAnalysis(pk).Valid;
             pk.SetBelugaValues();
+            la = new LegalityAnalysis(pk).Valid;
             pk.SetSuggestedContestStats(enc);
+            la = new LegalityAnalysis(pk).Valid;
             pk.FixEdgeCases(enc);
-
+            la = new LegalityAnalysis(pk).Valid;
             // Aesthetics
             pk.ApplyHeightWeight(enc);
+            la = new LegalityAnalysis(pk).Valid;
             pk.SetSuggestedBall(SetMatchingBalls, ForceSpecifiedBall, regen.Extra.Ball, enc);
+            la = new LegalityAnalysis(pk).Valid;
             pk.ApplyMarkings(UseMarkings);
+            la = new LegalityAnalysis(pk).Valid;
             pk.ApplyBattleVersion(handler);
+            la = new LegalityAnalysis(pk).Valid;
         }
 
         /// <summary>
@@ -737,10 +759,11 @@ namespace PKHeX.Core.AutoMod
 
             if (IsPIDIVSet(pk, enc) && !changeec)
                 return;
-
-            if (changeec)
-                pk.SetRandomEC(); // break correlation
-
+            if (pk.Context == EntityContext.Gen8)
+            {
+                if (changeec)
+                    pk.SetRandomEC(); // break correlation
+            }
             if (enc is MysteryGift mg)
             {
                 var ivs = pk.IVs;
@@ -755,7 +778,8 @@ namespace PKHeX.Core.AutoMod
 
             else if (enc.Generation is not (3 or 4))
             {
-                pk.IVs = set.IVs;
+                if(enc.Generation > 4)
+                    pk.IVs = set.IVs;
                 if (pk is IAwakened)
                 {
                     pk.SetAwakenedValues(set);
@@ -1298,7 +1322,7 @@ namespace PKHeX.Core.AutoMod
         /// <param name="pk">pokemon</param>
         /// <param name="enc">encounter</param>
         /// <returns>int indicating ability preference</returns>
-        private static AbilityPermission GetAbilityPreference(PKM pk, IEncounterable enc) => enc.Ability > 0 ? enc.Ability : (AbilityPermission)pk.AbilityNumber;
+        private static AbilityPermission GetAbilityPreference(PKM pk, IEncounterable enc) => enc.Ability;
 
         /// <summary>
         /// Method to get the correct met level for a pokemon. Move up the met level till all moves are legal
