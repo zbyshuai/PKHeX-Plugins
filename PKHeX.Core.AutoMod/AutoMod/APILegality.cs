@@ -115,28 +115,20 @@ namespace PKHeX.Core.AutoMod
 
                 // Bring to the target generation and filter
                 var pk = EntityConverter.ConvertToType(raw, destType, out _);
-                // I am struggling to figure out how to handle when a user submits the language as German, which sets the trainer
-                // info to German, but is doing that for the Japanese version of Meister Magikarp
-                /* see this set ポッちゃん (Magikarp) (F) @ Lum Berry
-IVs: 3 HP / 3 Atk / 11 SpA / 3 SpD / 2 Spe
-Ability: Swift Swim
-Level: 45
-Mild Nature
-Language: German
-=OT_Name=マイスター
-=Met_Location=30001
-.Version=48
-~=Generation=8
-- Splash
-*/
-                if (enc is EncounterTrade8b { Species: (ushort)Species.Magikarp} && set.Nickname== "ポッちゃん")
+               
+                if (enc is EncounterTrade8b { Species: (ushort)Species.Magikarp})
                 {
-                    tr = SaveUtil.GetBlankSAV(pk.Context, "WhyFail?", LanguageID.Japanese);
-                    raw = enc.ConvertToPKM(tr);
-                    pk = EntityConverter.ConvertToType(raw, destType, out _);
-                    pk.CurrentHandler = 1;
-                    satisfied = LegalizationResult.Regenerated;
-                    return pk;
+
+                    tr = set.Nickname switch
+                    {
+                        "ポッちゃん" => SaveUtil.GetBlankSAV(tr.Context, tr.OT, LanguageID.Japanese),
+                        "Bloupi" => SaveUtil.GetBlankSAV(tr.Context,tr.OT, LanguageID.French),
+                        "Mossy" => SaveUtil.GetBlankSAV(tr.Context, tr.OT, LanguageID.Italian),
+                        "Pador" => SaveUtil.GetBlankSAV(tr.Context, tr.OT, LanguageID.German),
+                        _ => tr
+
+                    };
+                    pk = enc.ConvertToPKM(tr);
 
                 }
                 if (pk == null)
