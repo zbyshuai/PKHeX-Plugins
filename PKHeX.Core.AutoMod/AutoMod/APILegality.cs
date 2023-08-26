@@ -778,8 +778,8 @@ namespace PKHeX.Core.AutoMod
 
             else if (enc.Generation is not (3 or 4))
             {
-                if(enc.Generation > 4)
-                    pk.IVs = set.IVs;
+                
+                pk.IVs = set.IVs;
                 if (pk is IAwakened)
                 {
                     pk.SetAwakenedValues(set);
