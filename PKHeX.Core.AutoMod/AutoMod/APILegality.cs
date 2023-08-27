@@ -862,6 +862,12 @@ namespace PKHeX.Core.AutoMod
                 if (set.TeraType != MoveType.Any && set.TeraType != pk9.TeraType)
                     pk9.SetTeraType(set.TeraType);
             }
+            if (enc is EncounterStatic8U && set.Shiny)
+            {
+                // Dynamax Adventure shinies are always XOR 1
+                pk.PID = SimpleEdits.GetShinyPID(pk.TID16, pk.SID16, pk.PID, 1);
+
+            }
             else if (enc is IOverworldCorrelation8 eo)
             {
                 var flawless = 0;
