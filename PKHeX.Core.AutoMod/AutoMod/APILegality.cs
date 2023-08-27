@@ -93,8 +93,8 @@ namespace PKHeX.Core.AutoMod
                 }
 
                 // Look before we leap -- don't waste time generating invalid / incompatible junk.
-                if (!IsEncounterValid(set, enc, abilityreq, destVer))
-                    continue;
+               if (!IsEncounterValid(set, enc, abilityreq, destVer))
+                   continue;
 
                 // Create the PKM from the template.
                 var tr = SimpleEdits.IsUntradeableEncounter(enc) ? dest : GetTrainer(regen, enc.Version, enc.Generation);
@@ -112,7 +112,7 @@ namespace PKHeX.Core.AutoMod
 
                 // Transfer any VC1 via VC2, as there may be GSC exclusive moves requested.
                 if (dest.Generation >= 7 && raw is PK1 basepk1)
-                    raw = basepk1.ConvertToPK2();
+                   raw = basepk1.ConvertToPK2();
 
                 // Bring to the target generation and filter
                 var pk = EntityConverter.ConvertToType(raw, destType, out _);
@@ -126,7 +126,7 @@ namespace PKHeX.Core.AutoMod
                         "Bloupi" => SaveUtil.GetBlankSAV(tr.Context,tr.OT, LanguageID.French),
                         "Mossy" => SaveUtil.GetBlankSAV(tr.Context, tr.OT, LanguageID.Italian),
                         "Pador" => SaveUtil.GetBlankSAV(tr.Context, tr.OT, LanguageID.German),
-                        _ => tr
+                        _ => SaveUtil.GetBlankSAV(tr.Context, tr.OT, LanguageID.English)
 
                     };
                     pk = enc.ConvertToPKM(tr);
@@ -342,8 +342,9 @@ namespace PKHeX.Core.AutoMod
         private static bool IsEncounterValid(IBattleTemplate set, IEncounterable enc, AbilityRequest abilityreq, GameVersion destVer)
         {
             // Don't process if encounter min level is higher than requested level
-            if (!IsRequestedLevelValid(set, enc))
-                return false;
+            if(enc.Generation > 2)
+                if (!IsRequestedLevelValid(set, enc))
+                    return false;
 
             // Don't process if the ball requested is invalid
             if (!IsRequestedBallValid(set, enc))
@@ -456,6 +457,7 @@ namespace PKHeX.Core.AutoMod
         public static bool IsPIDIVSet(PKM pk, IEncounterable enc)
         {
             // If PID and IV is handled in PreSetPIDIV, don't set it here again and return out
+            
             if (enc is ITeraRaid9)
                 return true;
             if (enc is EncounterStatic8N or EncounterStatic8NC or EncounterStatic8ND or EncounterStatic8U)
@@ -502,62 +504,62 @@ namespace PKHeX.Core.AutoMod
             var language = regen.Extra.Language;
             var pidiv = MethodFinder.Analyze(pk);
             var abilitypref = GetAbilityPreference(pk, enc);
-            var la = new LegalityAnalysis(pk).Valid;
+            var la = new LegalityAnalysis(pk);
             pk.SetSpeciesLevel(set, Form, enc, handler,language);
-            la = new LegalityAnalysis(pk).Valid;
+            la = new LegalityAnalysis(pk);
             pk.SetDateLocks(enc);
-            la = new LegalityAnalysis(pk).Valid;
+            la = new LegalityAnalysis(pk);
             pk.SetHeldItem(set);
-            la = new LegalityAnalysis(pk).Valid;
+            la = new LegalityAnalysis(pk);
             // Actions that do not affect set legality
             pk.SetHandlerandMemory(handler, enc);
-            la = new LegalityAnalysis(pk).Valid;
+            la = new LegalityAnalysis(pk);
             pk.SetFriendship(enc);
-            la = new LegalityAnalysis(pk).Valid;
+            la = new LegalityAnalysis(pk);
             pk.SetRecordFlags(set.Moves);
-            la = new LegalityAnalysis(pk).Valid;
+            la = new LegalityAnalysis(pk);
             // Legality Fixing
             pk.SetMovesEVs(set, enc);
-            la = new LegalityAnalysis(pk).Valid;
+            la = new LegalityAnalysis(pk);
             pk.SetCorrectMetLevel();
-            la = new LegalityAnalysis(pk).Valid;
+            la = new LegalityAnalysis(pk);
             if(enc is not EncounterStatic4Pokewalker && enc.Generation > 2)
                 pk.SetNatureAbility(set, enc, abilitypref);
-            la = new LegalityAnalysis(pk).Valid;
+            la = new LegalityAnalysis(pk);
             pk.SetIVsPID(set, pidiv.Type, set.HiddenPowerType, enc);
-            la = new LegalityAnalysis(pk).Valid;
+            la = new LegalityAnalysis(pk);
             pk.SetGVs();
-            la = new LegalityAnalysis(pk).Valid;
+            la = new LegalityAnalysis(pk);
             pk.SetHyperTrainingFlags(set, enc); // Hypertrain
-            la = new LegalityAnalysis(pk).Valid;
+            la = new LegalityAnalysis(pk);
             pk.SetEncryptionConstant(enc);
-            la = new LegalityAnalysis(pk).Valid;
+            la = new LegalityAnalysis(pk);
             pk.SetShinyBoolean(set.Shiny, enc, regen.Extra.ShinyType);
-            la = new LegalityAnalysis(pk).Valid;
+            la = new LegalityAnalysis(pk);
             pk.FixGender(set);
-            la = new LegalityAnalysis(pk).Valid;
+            la = new LegalityAnalysis(pk);
             // Final tweaks
             pk.SetGimmicks(set);
-            la = new LegalityAnalysis(pk).Valid;
+            la = new LegalityAnalysis(pk);
             pk.SetGigantamaxFactor(set, enc);
-            la = new LegalityAnalysis(pk).Valid;
+            la = new LegalityAnalysis(pk);
             pk.SetSuggestedRibbons(set, enc, SetAllLegalRibbons);
-            la = new LegalityAnalysis(pk).Valid;
+            la = new LegalityAnalysis(pk);
             pk.SetBelugaValues();
-            la = new LegalityAnalysis(pk).Valid;
+            la = new LegalityAnalysis(pk);
             pk.SetSuggestedContestStats(enc);
-            la = new LegalityAnalysis(pk).Valid;
+            la = new LegalityAnalysis(pk);
             pk.FixEdgeCases(enc);
-            la = new LegalityAnalysis(pk).Valid;
+            la = new LegalityAnalysis(pk);
             // Aesthetics
             pk.ApplyHeightWeight(enc);
-            la = new LegalityAnalysis(pk).Valid;
+            la = new LegalityAnalysis(pk);
             pk.SetSuggestedBall(SetMatchingBalls, ForceSpecifiedBall, regen.Extra.Ball, enc);
-            la = new LegalityAnalysis(pk).Valid;
+            la = new LegalityAnalysis(pk);
             pk.ApplyMarkings(UseMarkings);
-            la = new LegalityAnalysis(pk).Valid;
+            la = new LegalityAnalysis(pk);
             pk.ApplyBattleVersion(handler);
-            la = new LegalityAnalysis(pk).Valid;
+            la = new LegalityAnalysis(pk);
         }
 
         /// <summary>
@@ -762,7 +764,7 @@ namespace PKHeX.Core.AutoMod
                 return;
 
             object? Individualvalueset = null;
-            try { enc.GetType().GetProperty("IndividualValueSet").GetValue(enc); } catch { }
+            try { Individualvalueset=enc.GetType().GetProperty("IVs")?.GetValue(enc,null); } catch { }
             if (pk.Context == EntityContext.Gen8)
             {
                 if (changeec)

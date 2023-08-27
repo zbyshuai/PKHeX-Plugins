@@ -112,9 +112,11 @@ namespace PKHeX.Core.AutoMod
         /// <param name="lang">Language to apply</param>
         public static void SetSpeciesLevel(this PKM pk, IBattleTemplate set, byte Form, IEncounterable enc,ITrainerInfo handler, LanguageID? lang = null)
         {
+            var la = new LegalityAnalysis(pk);
             pk.ApplySetGender(set);
+            la = new LegalityAnalysis(pk);
             pk.SetRecordFlags(set.Moves); // Set record flags before evolution (TODO: what if middle evolution has exclusive record moves??)
-
+            la = new LegalityAnalysis(pk);
             var evolutionRequired = pk.Species != set.Species;
             var formchange = Form != pk.Form;
             if (evolutionRequired)
@@ -139,17 +141,17 @@ namespace PKHeX.Core.AutoMod
                     pk.Nature = Util.Rand.Next(25);
                 }
             }
-
+           
             pk.SetSuggestedFormArgument(enc.Species);
             if (evolutionRequired)
                 pk.RefreshAbility(pk.AbilityNumber >> 1);
-
-            pk.CurrentLevel = set.Level;
+            if(pk.CurrentLevel!=set.Level)
+                pk.CurrentLevel = set.Level;
             if (pk.Met_Level > pk.CurrentLevel)
                 pk.Met_Level = pk.CurrentLevel;
             if (set.Level != 100 && set.Level == enc.LevelMin && pk.Format is 3 or 4)
                 pk.EXP = Experience.GetEXP(enc.LevelMin + 1, PersonalTable.HGSS[enc.Species].EXPGrowth) - 1;
-
+            la = new LegalityAnalysis(pk);
             var currentlang = (LanguageID)pk.Language;
             var finallang = lang ?? currentlang;
             if (finallang == LanguageID.Hacked)

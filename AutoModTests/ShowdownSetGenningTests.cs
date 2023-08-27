@@ -14,7 +14,7 @@ namespace AutoModTests
         [InlineData(GameVersion.US, Meowstic)]
         [InlineData(GameVersion.US, Darkrai)]
         [InlineData(GameVersion.B2, Genesect)]
-        [InlineData(GameVersion.E, problemsolving)]
+        [InlineData(GameVersion.US, problemsolving)]
         public static void VerifyManually(GameVersion game, string txt)
         {
             var dev = APILegality.EnableDevMode;
@@ -36,19 +36,15 @@ namespace AutoModTests
             la.Valid.Should().BeTrue();
         }
         private const string problemsolving =
-            @"Eevee (M)
-IVs: 24 HP / 1 Atk / 30 Def / 24 SpA / 30 SpD / 20 Spe
-Ability: Run Away
-Level: 10
-Shiny: Yes
-Modest Nature
-=Met_Level=10
-.Version=15
-~=Generation=3
-- Tackle
-- Tail Whip
-- Bite
-- Sand Attack";
+            @"Dodrio (M)
+IVs: 8 HP / 2 Def / 20 Spe
+Ability: Tangled Feet
+Level: 29
+Naive Nature
+~=Generation=2
+- Peck
+- Growl
+- Fury Attack";
         private const string Darkrai =
 @"Darkrai
 IVs: 7 Atk

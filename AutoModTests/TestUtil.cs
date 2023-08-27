@@ -17,7 +17,7 @@ namespace AutoModTests
             {
                 if (Initialized)
                     return;
-                if (!EncounterEvent.Initialized)
+               // if (!EncounterEvent.Initialized)
                     EncounterEvent.RefreshMGDB();
                 RibbonStrings.ResetDictionary(GameInfo.Strings.ribbons);
                 Legalizer.EnableEasterEggs = false;
