@@ -504,62 +504,36 @@ namespace PKHeX.Core.AutoMod
             var language = regen.Extra.Language;
             var pidiv = MethodFinder.Analyze(pk);
             var abilitypref = GetAbilityPreference(pk, enc);
-            var la = new LegalityAnalysis(pk);
             pk.SetSpeciesLevel(set, Form, enc, handler,language);
-            la = new LegalityAnalysis(pk);
             pk.SetDateLocks(enc);
-            la = new LegalityAnalysis(pk);
             pk.SetHeldItem(set);
-            la = new LegalityAnalysis(pk);
             // Actions that do not affect set legality
             pk.SetHandlerandMemory(handler, enc);
-            la = new LegalityAnalysis(pk);
             pk.SetFriendship(enc);
-            la = new LegalityAnalysis(pk);
             pk.SetRecordFlags(set.Moves);
-            la = new LegalityAnalysis(pk);
             // Legality Fixing
             pk.SetMovesEVs(set, enc);
-            la = new LegalityAnalysis(pk);
             pk.SetCorrectMetLevel();
-            la = new LegalityAnalysis(pk);
             if(enc is not EncounterStatic4Pokewalker && enc.Generation > 2)
                 pk.SetNatureAbility(set, enc, abilitypref);
-            la = new LegalityAnalysis(pk);
             pk.SetIVsPID(set, pidiv.Type, set.HiddenPowerType, enc);
-            la = new LegalityAnalysis(pk);
             pk.SetGVs();
-            la = new LegalityAnalysis(pk);
             pk.SetHyperTrainingFlags(set, enc); // Hypertrain
-            la = new LegalityAnalysis(pk);
             pk.SetEncryptionConstant(enc);
-            la = new LegalityAnalysis(pk);
             pk.SetShinyBoolean(set.Shiny, enc, regen.Extra.ShinyType);
-            la = new LegalityAnalysis(pk);
             pk.FixGender(set);
-            la = new LegalityAnalysis(pk);
             // Final tweaks
             pk.SetGimmicks(set);
-            la = new LegalityAnalysis(pk);
             pk.SetGigantamaxFactor(set, enc);
-            la = new LegalityAnalysis(pk);
             pk.SetSuggestedRibbons(set, enc, SetAllLegalRibbons);
-            la = new LegalityAnalysis(pk);
             pk.SetBelugaValues();
-            la = new LegalityAnalysis(pk);
             pk.SetSuggestedContestStats(enc);
-            la = new LegalityAnalysis(pk);
             pk.FixEdgeCases(enc);
-            la = new LegalityAnalysis(pk);
             // Aesthetics
             pk.ApplyHeightWeight(enc);
-            la = new LegalityAnalysis(pk);
             pk.SetSuggestedBall(SetMatchingBalls, ForceSpecifiedBall, regen.Extra.Ball, enc);
-            la = new LegalityAnalysis(pk);
             pk.ApplyMarkings(UseMarkings);
-            la = new LegalityAnalysis(pk);
             pk.ApplyBattleVersion(handler);
-            la = new LegalityAnalysis(pk);
         }
 
         /// <summary>
@@ -1527,11 +1501,11 @@ namespace PKHeX.Core.AutoMod
         {
             using var cts = new CancellationTokenSource(timeout);
             var delay = Task.Delay(timeout, cts.Token);
-            var completedTask = await Task.WhenAny(task, delay);
+            var completedTask = await Task.WhenAny(task, delay).ConfigureAwait(false);
             if (completedTask != task)
                 return null;
 
-            return await task; // will re-fire exception if present
+            return await task.ConfigureAwait(false); // will re-fire exception if present
         }
 
         private static GameVersion[] GetPairedVersions(GameVersion version)
