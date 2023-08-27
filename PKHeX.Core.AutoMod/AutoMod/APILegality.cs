@@ -805,9 +805,12 @@ namespace PKHeX.Core.AutoMod
             switch (enc)
             {
                 case EncounterSlot3XD es3ps:
-                    var abil = pk.PersonalInfo.AbilityCount > 0 && pk.PersonalInfo is IPersonalAbility12 a ? (a.Ability1 == pk.Ability ? 0 : 1) : 1;
-                    do PIDGenerator.SetRandomPokeSpotPID(pk, pk.Nature, pk.Gender, abil, es3ps.SlotNumber);
-                    while (pk.PID % 25 != pk.Nature);
+                    var abil = pk.PersonalInfo.AbilityCount > 0 && enc is IPersonalAbility12 a ? (a.Ability1 == pk.Ability ? 0 : 1) : 1;
+                     
+                    while (pk.PID % 25 != pk.Nature)
+                    {
+                        PIDGenerator.SetRandomPokeSpotPID(pk, pk.Nature, pk.Gender, abil, es3ps.SlotNumber);
+                    }
                     return;
                 case PCD d:
                     {
@@ -1524,11 +1527,11 @@ namespace PKHeX.Core.AutoMod
         {
             using var cts = new CancellationTokenSource(timeout);
             var delay = Task.Delay(timeout, cts.Token);
-            var completedTask = await Task.WhenAny(task, delay).ConfigureAwait(false);
+            var completedTask = await Task.WhenAny(task, delay);
             if (completedTask != task)
                 return null;
 
-            return await task.ConfigureAwait(false); // will re-fire exception if present
+            return await task; // will re-fire exception if present
         }
 
         private static GameVersion[] GetPairedVersions(GameVersion version)

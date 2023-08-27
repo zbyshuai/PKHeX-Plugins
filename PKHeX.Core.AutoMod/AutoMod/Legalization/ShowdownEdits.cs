@@ -18,6 +18,7 @@ namespace PKHeX.Core.AutoMod
         /// <param name="set">Showdown Set for Gender reference</param>
         public static void FixGender(this PKM pk, IBattleTemplate set)
         {
+            
             pk.ApplySetGender(set);
             var la = new LegalityAnalysis(pk);
             if (la.Valid)
