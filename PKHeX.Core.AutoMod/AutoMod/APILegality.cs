@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -759,6 +760,9 @@ namespace PKHeX.Core.AutoMod
 
             if (IsPIDIVSet(pk, enc) && !changeec)
                 return;
+
+            object? Individualvalueset = null;
+            try { enc.GetType().GetProperty("IndividualValueSet").GetValue(enc); } catch { }
             if (pk.Context == EntityContext.Gen8)
             {
                 if (changeec)
@@ -773,8 +777,14 @@ namespace PKHeX.Core.AutoMod
                 if (enc.Generation is not (3 or 4))
                     return;
             }
-            else if (pk.IVTotal != 0)
-                return;
+            else if(Individualvalueset is not null)
+            {
+                if(((IndividualValueSet)Individualvalueset).IsSpecified)
+                {
+                    return;
+                }
+            }
+                
 
             else if (enc.Generation is not (3 or 4))
             {
