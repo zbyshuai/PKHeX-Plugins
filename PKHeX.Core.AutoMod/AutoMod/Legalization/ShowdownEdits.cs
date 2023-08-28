@@ -311,11 +311,7 @@ namespace PKHeX.Core.AutoMod
         /// <param name="pk">Pokemon to modify</param>
         public static void SetEncounterTradeIVs(this IEncounterable t, PKM pk)
         {
-            if (t is EncounterTrade3 { IVs.IsSpecified: true } et3)
-                pk.SetRandomIVsTemplate(et3.IVs, 0);
-            else if (t is EncounterTrade4PID { IVs.IsSpecified: true } et4p)
-                pk.SetRandomIVsTemplate(et4p.IVs, 0);
-            else
+           
                 pk.SetRandomIVs(minFlawless: 3);
         }
 
