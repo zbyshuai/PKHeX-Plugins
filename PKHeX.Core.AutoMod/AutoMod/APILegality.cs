@@ -737,15 +737,7 @@ namespace PKHeX.Core.AutoMod
             if (IsPIDIVSet(pk, enc) && !changeec)
                 return;
 
-            object? Individualvalueset = null;
-           var allprops =  enc.GetType().GetProperties();
-            foreach(var prop in allprops)
-            {
-                if (prop.GetType() == typeof(IndividualValueSet))
-                {
-                    try { Individualvalueset = enc.GetType().GetProperty("IVs")?.GetValue(enc, null); } catch { Individualvalueset = null; }
-                }
-            }
+    
             
             if (pk.Context == EntityContext.Gen8)
             {
@@ -761,16 +753,33 @@ namespace PKHeX.Core.AutoMod
                 if (enc.Generation is not (3 or 4))
                     return;
             }
-            else if(Individualvalueset != null)
-            {
-                if(((IndividualValueSet)Individualvalueset).IsSpecified)
+           
+                switch (enc)
                 {
-                    return;
-                }
-            }
-                
+                    case EncounterGift1 eg1: if (eg1.IVs.IsSpecified) return;break;
+                    case EncounterGift2 eg2: if(eg2.IVs.IsSpecified)return;break;
+                    case EncounterTrade2 et2: if (et2.IVs.IsSpecified) return;break;
+                    case EncounterStatic2 es2:  if (es2.IVs.IsSpecified) return;break;
+                    case EncounterTrade3 et3: if (et3.IVs.IsSpecified) return;break;
+                    case EncounterTrade4PID et4: if (et4.IVs.IsSpecified) return;break;
+                    case EncounterTrade5B2W2 et25:if (et25.IVs.IsSpecified) return;break;
+                    case EncounterTrade5BW et5: if (et5.IVs.IsSpecified) return;break;
+                    case EncounterStatic6 es6: if (es6.IVs.IsSpecified) return;break;
+                    case EncounterTrade6 et6: if (et6.IVs.IsSpecified) return;break;
+                    case EncounterStatic7 es7: if (es7.IVs.IsSpecified) return;break;
+                    case EncounterTrade7 et7: if (et7.IVs.IsSpecified) return;break;
+                    case EncounterStatic7b es7b: if (es7b.IVs.IsSpecified) return;break;
+                    case EncounterTrade7b et7b: if (et7b.IVs.IsSpecified) return;break;
+                    case EncounterStatic8 es8: if (es8.IVs.IsSpecified) return;break;
+                    case EncounterTrade8 et8: if (et8.IVs.IsSpecified) return;break;
+                    case EncounterTrade8b et8b:if (et8b.IVs.IsSpecified) return;break;
+                    case EncounterStatic9 es9: if(es9.IVs.IsSpecified) return;break;
+                    case EncounterTrade9 et9: if (et9.IVs.IsSpecified) return;break;
 
-            else if (enc.Generation is not (3 or 4))
+                       
+                }
+
+            if (enc.Generation is not (3 or 4))
             {
                 
                 pk.IVs = set.IVs;

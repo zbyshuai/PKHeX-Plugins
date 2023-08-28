@@ -14,7 +14,7 @@ namespace AutoModTests
         [InlineData(GameVersion.US, Meowstic)]
         [InlineData(GameVersion.US, Darkrai)]
         [InlineData(GameVersion.B2, Genesect)]
-        [InlineData(GameVersion.SW, problemsolving)]
+        [InlineData(GameVersion.VL, problemsolving)]
         public static void VerifyManually(GameVersion game, string txt)
         {
             var dev = APILegality.EnableDevMode;
@@ -36,19 +36,19 @@ namespace AutoModTests
             la.Valid.Should().BeTrue();
         }
         private const string problemsolving =
-            @"Heatran (M)
-IVs: 28 Def / 27 Spe
-Ability: Flash Fire
-Tera Type: Fire
-Level: 70
-Docile Nature
-=Met_Location=244
-.Version=44
-~=Generation=8
+            @"Miraidon @ Beast Ball
+EVs: 252 HP / 6 Def / 252 SpA
+Ability: Hadron Engine
+Tera Type: Electric
+Modest Nature
+Ball: Master Ball
+=Met_Location=124
+.Version=51
+~=Generation=9
+- Charge
 - Metal Sound
-- Earth Power
-- Heat Wave
-- Stone Edge";
+- Parabolic Charge
+- Electro Drift";
         private const string Darkrai =
 @"Darkrai
 IVs: 7 Atk
