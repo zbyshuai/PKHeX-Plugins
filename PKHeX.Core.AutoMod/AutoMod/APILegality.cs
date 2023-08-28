@@ -738,7 +738,15 @@ namespace PKHeX.Core.AutoMod
                 return;
 
             object? Individualvalueset = null;
-            try { Individualvalueset=enc.GetType().GetProperty("IVs")?.GetValue(enc,null); } catch { }
+           var allprops =  enc.GetType().GetProperties();
+            foreach(var prop in allprops)
+            {
+                if (prop.GetType() == typeof(IndividualValueSet))
+                {
+                    try { Individualvalueset = enc.GetType().GetProperty("IVs")?.GetValue(enc, null); } catch { Individualvalueset = null; }
+                }
+            }
+            
             if (pk.Context == EntityContext.Gen8)
             {
                 if (changeec)
@@ -753,7 +761,7 @@ namespace PKHeX.Core.AutoMod
                 if (enc.Generation is not (3 or 4))
                     return;
             }
-            else if(Individualvalueset is not null)
+            else if(Individualvalueset != null)
             {
                 if(((IndividualValueSet)Individualvalueset).IsSpecified)
                 {

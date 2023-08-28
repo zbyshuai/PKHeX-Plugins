@@ -14,7 +14,7 @@ namespace AutoModTests
         [InlineData(GameVersion.US, Meowstic)]
         [InlineData(GameVersion.US, Darkrai)]
         [InlineData(GameVersion.B2, Genesect)]
-        [InlineData(GameVersion.US, problemsolving)]
+        [InlineData(GameVersion.SW, problemsolving)]
         public static void VerifyManually(GameVersion game, string txt)
         {
             var dev = APILegality.EnableDevMode;
@@ -36,15 +36,19 @@ namespace AutoModTests
             la.Valid.Should().BeTrue();
         }
         private const string problemsolving =
-            @"Dodrio (M)
-IVs: 8 HP / 2 Def / 20 Spe
-Ability: Tangled Feet
-Level: 29
-Naive Nature
-~=Generation=2
-- Peck
-- Growl
-- Fury Attack";
+            @"Heatran (M)
+IVs: 28 Def / 27 Spe
+Ability: Flash Fire
+Tera Type: Fire
+Level: 70
+Docile Nature
+=Met_Location=244
+.Version=44
+~=Generation=8
+- Metal Sound
+- Earth Power
+- Heat Wave
+- Stone Edge";
         private const string Darkrai =
 @"Darkrai
 IVs: 7 Atk
