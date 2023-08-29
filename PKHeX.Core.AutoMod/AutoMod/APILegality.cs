@@ -935,6 +935,7 @@ namespace PKHeX.Core.AutoMod
 
             var count = 0;
             var compromise = false;
+            var applied = true;
             do
             {
                 ulong seed = Util.Rand.Rand64();
@@ -951,11 +952,14 @@ namespace PKHeX.Core.AutoMod
                         undefinedSize, undefinedSize, undefinedSize, undefinedSize, e.Ability, e.Shiny),
                     _ => throw new NotImplementedException("Unknown ITeraRaid9 type detected"),
                 };
-                enc.TryApply32(pk, seed, param, criteria);
+               applied = enc.TryApply32(pk, seed, param, criteria);
+                
                 if (IsMatchCriteria9(pk, set, criteria, compromise))
                     break;
                 if (count == 5_000)
                     compromise = true;
+                if (count == 2 && !applied)
+                    break;
             } while (++count < 15_000);
         }
 
