@@ -525,7 +525,7 @@ namespace PKHeX.Core.AutoMod
             pk.SetHyperTrainingFlags(set, enc); // Hypertrain
             pk.SetEncryptionConstant(enc);
             pk.SetShinyBoolean(set.Shiny, enc, regen.Extra.ShinyType);
-            pk.FixGender(set);
+            pk.FixGender(enc,set);
             // Final tweaks
             pk.SetGimmicks(set);
             pk.SetGigantamaxFactor(set, enc);

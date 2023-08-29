@@ -16,7 +16,7 @@ namespace PKHeX.Core.AutoMod
         /// </summary>
         /// <param name="pk">PKM whose gender needs to be toggled</param>
         /// <param name="set">Showdown Set for Gender reference</param>
-        public static void FixGender(this PKM pk, IBattleTemplate set)
+        public static void FixGender(this PKM pk, IEncounterable enc, IBattleTemplate set)
         {
             pk.ApplySetGender(set);
             var la = new LegalityAnalysis(pk);
@@ -24,9 +24,10 @@ namespace PKHeX.Core.AutoMod
                 return;
             string Report = la.Report();
 
-            if (Report.Contains(LegalityCheckStrings.LPIDGenderMismatch))
+            if (Report.Contains(LegalityCheckStrings.LEncInvalid))
                 pk.Gender = pk.Gender == 0 ? 1 : 0;
-
+            if (enc is IFixedGender { IsFixedGender: true } fg)
+                pk.Gender = fg.Gender;
             if (pk.Gender is not 0 and not 1)
                 pk.Gender = pk.GetSaneGender();
         }
