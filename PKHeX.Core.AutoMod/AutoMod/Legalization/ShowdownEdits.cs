@@ -18,7 +18,6 @@ namespace PKHeX.Core.AutoMod
         /// <param name="set">Showdown Set for Gender reference</param>
         public static void FixGender(this PKM pk, IBattleTemplate set)
         {
-            
             pk.ApplySetGender(set);
             var la = new LegalityAnalysis(pk);
             if (la.Valid)
@@ -139,7 +138,7 @@ namespace PKHeX.Core.AutoMod
                     pk.Nature = Util.Rand.Next(25);
                 }
             }
-           
+
             pk.SetSuggestedFormArgument(enc.Species);
             if (evolutionRequired)
                 pk.RefreshAbility(pk.AbilityNumber >> 1);
@@ -163,8 +162,7 @@ namespace PKHeX.Core.AutoMod
             {
                 // Set this before hand incase it is true. Will early return if it is also IFixedNickname
                 // Wait for PKHeX to expose this instead of using reflection
-               
-                
+
             }
             // don't bother checking encountertrade nicknames for length validity
             if (enc is IFixedNickname { IsFixedNickname: true } et)
@@ -172,7 +170,7 @@ namespace PKHeX.Core.AutoMod
                 // Nickname matches the requested nickname already
                 if (pk.Nickname == set.Nickname)
                     return;
-              
+
                 var nick = et.GetNickname(pk.Language);
                 //Meister Magikarp's nickname is based on the save language instead of the pk language
                 if (enc is EncounterTrade8b {Species:(int)Species.Magikarp })
@@ -311,7 +309,6 @@ namespace PKHeX.Core.AutoMod
         /// <param name="pk">Pokemon to modify</param>
         public static void SetEncounterTradeIVs(this IEncounterable t, PKM pk)
         {
-           
                 pk.SetRandomIVs(minFlawless: 3);
         }
 
