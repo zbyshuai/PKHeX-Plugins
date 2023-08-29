@@ -24,7 +24,7 @@ namespace PKHeX.Core.AutoMod
                 return;
             string Report = la.Report();
 
-            if (Report.Contains(LegalityCheckStrings.LEncInvalid))
+            if (Report.Contains(LegalityCheckStrings.LPIDGenderMismatch))
                 pk.Gender = pk.Gender == 0 ? 1 : 0;
             if (enc is IFixedGender { IsFixedGender: true } fg)
                 pk.Gender = fg.Gender;
