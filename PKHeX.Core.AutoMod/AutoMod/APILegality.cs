@@ -104,58 +104,6 @@ namespace PKHeX.Core.AutoMod
                 // Create the PKM from the template.
                 var tr = SimpleEdits.IsUntradeableEncounter(enc) ? dest : GetTrainer(regen, enc.Version, enc.Generation);
                 var raw = enc.ConvertToPKM(tr, criteria);
-                var pk = EntityConverter.ConvertToType(raw, destType, out _);
-                if (enc is EncounterTrade8b && enc.Species == (ushort)Species.Magikarp)
-                {
-                    satisfied = LegalizationResult.Regenerated;
-                    pk.CurrentHandler = 1;
-                    
-                    return pk;
-                }
-                if(enc is EncounterStatic3XD && enc.Species == (ushort)Species.Eevee)
-                {
-                    satisfied = LegalizationResult.Regenerated;
-                    pk.CurrentHandler = 1;
-                    return pk;
-                }
-                if(enc.Context == EntityContext.Gen2 && enc.Species != (ushort)Species.Poliwag)
-                {
-                    satisfied = LegalizationResult.Regenerated;
-                    pk.CurrentHandler = 1;
-                    return pk;
-                }
-                if(enc is EncounterStatic4 && enc.Species == (ushort)Species.Giratina)
-                {
-                    satisfied = LegalizationResult.Regenerated;
-                    if (pk.Form == 1)
-                        pk.HeldItem = 112;
-                    pk.CurrentHandler = 1;
-                    return pk;
-                }
-                if(enc is EncounterStatic4Pokewalker)
-                {
-                    satisfied = LegalizationResult.Regenerated;
-                    pk.CurrentHandler = 1;
-                    return pk;
-                }
-                if (enc is EncounterStatic5Radar)
-                {
-                    satisfied = LegalizationResult.Regenerated;
-                    pk.CurrentHandler = 1;
-                    return pk;
-                }
-                if (enc is EncounterTrade5BW)
-                {
-                    satisfied = LegalizationResult.Regenerated;
-                    pk.CurrentHandler = 1;
-                    return pk;
-                }
-                if(enc is EncounterTrade5B2W2 && enc.Species == (ushort)Species.Gigalith)
-                {
-                    satisfied = LegalizationResult.Regenerated;
-                    pk.CurrentHandler = 1;
-                    return pk;
-                }
                 if (raw.OT_Name.Length == 0)
                 {
                     raw.Language = tr.Language;
