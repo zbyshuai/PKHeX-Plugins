@@ -95,9 +95,11 @@ namespace PKHeX.Core.AutoMod
                 // Look before we leap -- don't waste time generating invalid / incompatible junk.
                if (!IsEncounterValid(set, enc, abilityreq, destVer))
                    continue;
-
-                if (enc is IFixedNature { IsFixedNature: true } fixedNature)
-                    criteria = criteria with { Nature = Nature.Random };
+                if (enc is not EncounterTrade9)
+                {
+                    if (enc is IFixedNature { IsFixedNature: true } fixedNature)
+                        criteria = criteria with { Nature = Nature.Random };
+                }
 
                 // Create the PKM from the template.
                 var tr = SimpleEdits.IsUntradeableEncounter(enc) ? dest : GetTrainer(regen, enc.Version, enc.Generation);
