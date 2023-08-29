@@ -77,7 +77,6 @@ namespace AutoModPlugins
                 {
                     msg = $"Uploading to GPSS returned an unexpected status code {response.StatusCode}\nError details (if any returned from server): {error}";
                 }
-                
 
                 if (copyToClipboard)
                 {
