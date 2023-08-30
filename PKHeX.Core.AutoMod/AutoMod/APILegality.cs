@@ -30,6 +30,7 @@ namespace PKHeX.Core.AutoMod
         public static bool SetBattleVersion { get; set; }
         public static bool AllowTrainerOverride { get; set; }
         public static bool AllowBatchCommands { get; set; } = true;
+        public static bool ForceLevel100for50 { get; set; } = true;
         public static int Timeout { get; set; } = 15;
 
         /// <summary>
@@ -95,11 +96,10 @@ namespace PKHeX.Core.AutoMod
                 // Look before we leap -- don't waste time generating invalid / incompatible junk.
                if (!IsEncounterValid(set, enc, abilityreq, destVer))
                    continue;
-                if (enc is not EncounterTrade9)
-                {
-                    if (enc is IFixedNature { IsFixedNature: true } fixedNature)
-                        criteria = criteria with { Nature = Nature.Random };
-                }
+              
+               if (enc is IFixedNature { IsFixedNature: true } fixedNature)
+                   criteria = criteria with { Nature = Nature.Random };
+                
 
                 // Create the PKM from the template.
                 var tr = SimpleEdits.IsUntradeableEncounter(enc) ? dest : GetTrainer(regen, enc.Version, enc.Generation);
@@ -119,8 +119,7 @@ namespace PKHeX.Core.AutoMod
                 if (dest.Generation >= 7 && raw is PK1 basepk1)
                    raw = basepk1.ConvertToPK2();
 
-                // Bring to the target generation and filter
-                var pk = EntityConverter.ConvertToType(raw, destType, out _);
+                
 
                 if (enc is EncounterTrade8b { Species: (ushort)Species.Magikarp})
                 {
@@ -133,8 +132,10 @@ namespace PKHeX.Core.AutoMod
                         _ => SaveUtil.GetBlankSAV(tr.Context, tr.OT, LanguageID.English)
 
                     };
-                    pk = enc.ConvertToPKM(tr);
+                    raw = enc.ConvertToPKM(tr);
                 }
+                // Bring to the target generation and filter
+                var pk = EntityConverter.ConvertToType(raw, destType, out _);
                 if (pk == null)
                     continue;
                 if (EntityConverter.IsIncompatibleGB(pk, template.Japanese, pk.Japanese))
