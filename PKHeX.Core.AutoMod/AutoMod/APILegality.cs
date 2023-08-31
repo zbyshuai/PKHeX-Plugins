@@ -99,8 +99,10 @@ namespace PKHeX.Core.AutoMod
               
                if (enc is IFixedNature { IsFixedNature: true } fixedNature)
                    criteria = criteria with { Nature = Nature.Random };
-                
-
+                if (enc.Context == EntityContext.Gen8a)
+                    criteria = criteria with { IV_ATK = criteria.IV_ATK==0?0: -1, IV_DEF = -1, IV_HP = -1, IV_SPA = -1, IV_SPD = -1, IV_SPE = criteria.IV_SPE == 0? 0 : -1 };
+                if(enc.Species == (ushort)Species.Stakataka)
+                    criteria = criteria with { IV_ATK = criteria.IV_ATK == 0 ? 0 : -1, IV_DEF = 17, IV_HP = -1, IV_SPA = -1, IV_SPD = -1, IV_SPE = criteria.IV_SPE == 0 ? 0 : -1 };
                 // Create the PKM from the template.
                 var tr = SimpleEdits.IsUntradeableEncounter(enc) ? dest : GetTrainer(regen, enc.Version, enc.Generation);
                 var raw = enc.ConvertToPKM(tr, criteria);
@@ -627,7 +629,7 @@ namespace PKHeX.Core.AutoMod
         /// <param name="set">showdown set to base hypertraining on</param>
         private static void SetHyperTrainingFlags(this PKM pk, IBattleTemplate set, IEncounterable enc)
         {
-            if (pk is not IHyperTrain t)
+            if (pk is not IHyperTrain t || pk.Species == (ushort)Species.Stakataka)
                 return;
 
             // Game exceptions (IHyperTrain exists because of the field but game disallows hypertraining)
@@ -642,7 +644,7 @@ namespace PKHeX.Core.AutoMod
                 case (int)Species.Kartana when pk.Nature == (int)Nature.Timid && set.IVs[1] <= 21: // Speed boosting Timid Kartana ATK IVs <= 19
                     t.HT_ATK = false;
                     break;
-                case (int)Species.Stakataka when pk.Nature == (int)Nature.Lonely && set.IVs[2] <= 17: // Atk boosting Lonely Stakataka DEF IVs <= 15
+                case (int)Species.Stakataka when pk.StatNature == (int)Nature.Lonely && set.IVs[2] <= 17: // Atk boosting Lonely Stakataka DEF IVs <= 15
                     t.HT_DEF = false;
                     break;
                 case (int)Species.Pyukumuku when set.IVs[2] == 0 && set.IVs[5] == 0 && pk.Ability == (int)Ability.InnardsOut: // 0 Def / 0 Spd Pyukumuku with innards out
