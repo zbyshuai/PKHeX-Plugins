@@ -81,7 +81,7 @@ namespace PKHeX.Core.AutoMod
             criteria.ForceMinLevelRange = true;
             if (regen.EncounterFilters != null)
                 encounters = encounters.Where(enc => BatchEditing.IsFilterMatch(regen.EncounterFilters, enc));
-
+         
             PKM? last = null;
             foreach (var enc in encounters)
             {
@@ -99,10 +99,7 @@ namespace PKHeX.Core.AutoMod
               
                if (enc is IFixedNature { IsFixedNature: true } fixedNature)
                    criteria = criteria with { Nature = Nature.Random };
-                if (enc.Context == EntityContext.Gen8a)
-                    criteria = criteria with { IV_ATK = criteria.IV_ATK==0?0: -1, IV_DEF = -1, IV_HP = -1, IV_SPA = -1, IV_SPD = -1, IV_SPE = criteria.IV_SPE == 0? 0 : -1 };
-                if(enc.Species == (ushort)Species.Stakataka)
-                    criteria = criteria with { IV_ATK = criteria.IV_ATK == 0 ? 0 : -1, IV_DEF = 17, IV_HP = -1, IV_SPA = -1, IV_SPD = -1, IV_SPE = criteria.IV_SPE == 0 ? 0 : -1 };
+                criteria = SetSpecialCriteria(criteria,enc, set);
                 // Create the PKM from the template.
                 var tr = SimpleEdits.IsUntradeableEncounter(enc) ? dest : GetTrainer(regen, enc.Version, enc.Generation);
                 var raw = enc.ConvertToPKM(tr, criteria);
@@ -142,7 +139,7 @@ namespace PKHeX.Core.AutoMod
                     continue;
                 if (EntityConverter.IsIncompatibleGB(pk, template.Japanese, pk.Japanese))
                     continue;
-
+            
                 // Apply final details
                 ApplySetDetails(pk, set, dest, enc, regen);
 
@@ -202,7 +199,7 @@ namespace PKHeX.Core.AutoMod
             foreach (var enc in all_encs)
             {
                 if (!old_encs.Contains(enc))
-                    yield return enc;
+                   yield return enc;
             }
             var pi = pk.PersonalInfo;
             var orig_form = pk.Form;
@@ -641,7 +638,7 @@ namespace PKHeX.Core.AutoMod
             // Handle special cases here for ultrabeasts
             switch (pk.Species)
             {
-                case (int)Species.Kartana when pk.Nature == (int)Nature.Timid && set.IVs[1] <= 21: // Speed boosting Timid Kartana ATK IVs <= 19
+                case (int)Species.Kartana when pk.StatNature == (int)Nature.Timid && set.IVs[1] <= 21: // Speed boosting Timid Kartana ATK IVs <= 19
                     t.HT_ATK = false;
                     break;
                 case (int)Species.Stakataka when pk.StatNature == (int)Nature.Lonely && set.IVs[2] <= 17: // Atk boosting Lonely Stakataka DEF IVs <= 15
@@ -1409,7 +1406,29 @@ namespace PKHeX.Core.AutoMod
                 }
             }
         }
+        ///<summary>
+        /// Handle search criteria for very specific encounters
+        /// </summary>
+        /// 
+        public static EncounterCriteria SetSpecialCriteria(EncounterCriteria criteria, IEncounterable enc, IBattleTemplate set)
+        {
+            
+           
 
+            switch (enc.Species)
+            {
+                case (int)Species.Kartana when criteria.Nature == Nature.Timid && criteria.IV_ATK <= 21: // Speed boosting Timid Kartana ATK IVs <= 19
+                    return criteria with { IV_HP = -1, IV_ATK = criteria.IV_ATK, IV_DEF = -1, IV_SPA = -1, IV_SPD = -1, IV_SPE = -1 };
+                    
+                case (int)Species.Stakataka when criteria.Nature == Nature.Lonely && criteria.IV_DEF <= 17: // Atk boosting Lonely Stakataka DEF IVs <= 15
+                    return criteria with { IV_HP = -1, IV_ATK = -1, IV_DEF = criteria.IV_DEF, IV_SPA = -1, IV_SPD = -1, IV_SPE = criteria.IV_SPE };
+                    
+                case (int)Species.Pyukumuku when criteria.IV_DEF == 0 && criteria.IV_SPD == 0 && set.Ability == (int)Ability.InnardsOut : // 0 Def / 0 Spd Pyukumuku with innards out
+                    return criteria with { IV_HP = -1, IV_ATK = -1, IV_DEF = criteria.IV_DEF, IV_SPA = -1, IV_SPD = criteria.IV_SPD, IV_SPE = -1 };
+                default: break;
+            }
+            return criteria with { IV_ATK = criteria.IV_ATK == 0 ? 0 : -1, IV_DEF = -1, IV_HP = -1, IV_SPA = -1, IV_SPD = -1, IV_SPE = criteria.IV_SPE == 0 ? 0 : -1 };
+        }
         /// <summary>
         /// Handle edge case vivillon legality if the trainerdata region is invalid
         /// </summary>
