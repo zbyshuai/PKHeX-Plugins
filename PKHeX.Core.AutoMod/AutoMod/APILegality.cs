@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -72,16 +72,16 @@ namespace PKHeX.Core.AutoMod
                 destVer = s.Version;
 
             var timer = Stopwatch.StartNew();
-            var gamelist = FilteredGameList(template, destVer, batchedit ? regen.Batch.Filters : null, native);
+            var gamelist = FilteredGameList(template, destVer, AllowBatchCommands, set, native);
             if (dest.Generation <= 2)
                 template.EXP = 0; // no relearn moves in gen 1/2 so pass level 1 to generator
 
             var encounters = GetAllEncounters(pk: template, moves: new ReadOnlyMemory<ushort>(set.Moves), gamelist);
             var criteria = EncounterCriteria.GetCriteria(set, template.PersonalInfo);
             criteria.ForceMinLevelRange = true;
-            if (regen.EncounterFilters != null)
+            if (regen.EncounterFilters.Count != 0)
                 encounters = encounters.Where(enc => BatchEditing.IsFilterMatch(regen.EncounterFilters, enc));
-         
+
             PKM? last = null;
             foreach (var enc in encounters)
             {
@@ -96,7 +96,7 @@ namespace PKHeX.Core.AutoMod
                 // Look before we leap -- don't waste time generating invalid / incompatible junk.
                if (!IsEncounterValid(set, enc, abilityreq, destVer))
                    continue;
-              
+
                if (enc is IFixedNature { IsFixedNature: true } fixedNature)
                    criteria = criteria with { Nature = Nature.Random };
                 criteria = SetSpecialCriteria(criteria,enc, set);
@@ -118,8 +118,6 @@ namespace PKHeX.Core.AutoMod
                 if (dest.Generation >= 7 && raw is PK1 basepk1)
                    raw = basepk1.ConvertToPK2();
 
-                
-
                 if (enc is EncounterTrade8b { Species: (ushort)Species.Magikarp})
                 {
                     tr = set.Nickname switch
@@ -139,7 +137,7 @@ namespace PKHeX.Core.AutoMod
                     continue;
                 if (EntityConverter.IsIncompatibleGB(pk, template.Japanese, pk.Japanese))
                     continue;
-            
+
                 // Apply final details
                 ApplySetDetails(pk, set, dest, enc, regen);
 
@@ -258,31 +256,18 @@ namespace PKHeX.Core.AutoMod
         /// </summary>
         /// <param name="template">Template pokemon with basic details set</param>
         /// <param name="destVer">Version in which the pokemon needs to be imported</param>
-        /// <param name="filters">Optional list of filters to remove games</param>
+        /// <param name="batchEdit">Whether settings currently allow batch commands</param>
+        /// <param name="set">Set information to be used to filter the game list</param>
+        /// <param nativeOnly="set">Whether to only return encounters from the current version</param>
         /// <returns>List of filtered games to check encounters for</returns>
-        internal static GameVersion[] FilteredGameList(PKM template, GameVersion destVer, IReadOnlyList<StringInstruction>? filters, bool nativeOnly = false)
+        internal static GameVersion[] FilteredGameList(PKM template, GameVersion destVer, bool batchEdit, IBattleTemplate set, bool nativeOnly = false)
         {
+            if (batchEdit && set is RegenTemplate { Regen.VersionFilters: { Count: not 0 } x } && TryGetSingleVersion(x, out var single))
+                return single;
+
             var gamelist = !nativeOnly
                            ? GameUtil.GetVersionsWithinRange(template, template.Format).OrderByDescending(c => c.GetGeneration()).ToArray()
                            : GetPairedVersions(destVer);
-
-            if (filters != null)
-            {
-                foreach (var f in filters)
-                {
-                    if (f.PropertyName == nameof(PKM.Version) && int.TryParse(f.PropertyValue, out int gv))
-                        gamelist = f.Comparer switch
-                        {
-                            InstructionComparer.IsEqual => new[] { (GameVersion)gv },
-                            InstructionComparer.IsNotEqual => gamelist.Where(z => z != (GameVersion)gv).ToArray(),
-                            InstructionComparer.IsGreaterThan => gamelist.Where(z => (int)z > gv).ToArray(),
-                            InstructionComparer.IsGreaterThanOrEqual => gamelist.Where(z => (int)z >= gv).ToArray(),
-                            InstructionComparer.IsLessThan => gamelist.Where(z => (int)z < gv).ToArray(),
-                            InstructionComparer.IsLessThanOrEqual => gamelist.Where(z => (int)z <= gv).ToArray(),
-                            _ => gamelist,
-                        };
-                }
-            }
 
             if (PrioritizeGame && !nativeOnly)
                 gamelist = PrioritizeGameVersion == GameVersion.Any ? PrioritizeVersion(gamelist, SimpleEdits.GetIsland(destVer)) : PrioritizeVersion(gamelist, PrioritizeGameVersion);
@@ -290,6 +275,43 @@ namespace PKHeX.Core.AutoMod
             if (template.AbilityNumber == 4 && destVer.GetGeneration() < 8)
                 gamelist = gamelist.Where(z => z.GetGeneration() is not 3 and not 4).ToArray();
             return gamelist;
+        }
+
+        private static bool TryGetSingleVersion(IReadOnlyList<StringInstruction> filters, [NotNullWhen(true)] out GameVersion[]? gamelist)
+        {
+            gamelist = null;
+            foreach (var filter in filters)
+            {
+                if (filter.PropertyName != nameof(IVersion.Version))
+                    continue;
+
+                GameVersion value;
+                if (int.TryParse(filter.PropertyValue, out var i))
+                    value = (GameVersion)i;
+                else if (Enum.TryParse<GameVersion>(filter.PropertyValue, out var g))
+                    value = g;
+                else
+                    return false;
+
+                GameVersion[] result;
+                if (value.IsValidSavedVersion())
+                    result = new GameVersion[] {value};
+                else
+                    result = GameUtil.GameVersions.Where(z => value.Contains(z)).ToArray();
+
+                gamelist = filter.Comparer switch
+                {
+                    InstructionComparer.IsEqual              => result,
+                    InstructionComparer.IsNotEqual           => GameUtil.GameVersions.Where(z => !result.Contains(z)).ToArray(),
+                    InstructionComparer.IsGreaterThan        => GameUtil.GameVersions.Where(z => result.Any(g => z > g)).ToArray(),
+                    InstructionComparer.IsGreaterThanOrEqual => GameUtil.GameVersions.Where(z => result.Any(g => z >=g)).ToArray(),
+                    InstructionComparer.IsLessThan           => GameUtil.GameVersions.Where(z => result.Any(g => z < g)).ToArray(),
+                    InstructionComparer.IsLessThanOrEqual    => GameUtil.GameVersions.Where(z => result.Any(g => z <=g)).ToArray(),
+                    _ => result,
+                };
+                return gamelist.Length != 0;
+            }
+            return false;
         }
 
         /// <summary>
@@ -591,7 +613,6 @@ namespace PKHeX.Core.AutoMod
         /// </summary>
         /// <param name="pk"></param>
         /// <param name="apply">boolean to apply or not to apply markings</param>
-        /// <param name="competitive">boolean to apply competitive IVs instead of the default behaviour</param>
         private static void ApplyMarkings(this PKM pk, bool apply = true)
         {
             if (!apply || pk.Format <= 3) // No markings if pk.Format is less than or equal to 3
@@ -603,7 +624,6 @@ namespace PKHeX.Core.AutoMod
         /// Custom Marking applicator method
         /// </summary>
         /// <param name="pk">PK input</param>
-        /// <returns></returns>
         public static Func<int, int, int> CompetitiveMarking(PKM pk)
         {
             if (pk.Format < 7)
@@ -955,7 +975,7 @@ namespace PKHeX.Core.AutoMod
                     _ => throw new NotImplementedException("Unknown ITeraRaid9 type detected"),
                 };
                applied = enc.TryApply32(pk, seed, param, criteria);
-                
+
                 if (IsMatchCriteria9(pk, set, criteria, compromise))
                     break;
                 if (count == 5_000)
@@ -1409,20 +1429,19 @@ namespace PKHeX.Core.AutoMod
         ///<summary>
         /// Handle search criteria for very specific encounters
         /// </summary>
-        /// 
+        ///
         public static EncounterCriteria SetSpecialCriteria(EncounterCriteria criteria, IEncounterable enc, IBattleTemplate set)
         {
-            
            
 
             switch (enc.Species)
             {
                 case (int)Species.Kartana when criteria.Nature == Nature.Timid && criteria.IV_ATK <= 21: // Speed boosting Timid Kartana ATK IVs <= 19
                     return criteria with { IV_HP = -1, IV_ATK = criteria.IV_ATK, IV_DEF = -1, IV_SPA = -1, IV_SPD = -1, IV_SPE = -1 };
-                    
+
                 case (int)Species.Stakataka when criteria.Nature == Nature.Lonely && criteria.IV_DEF <= 17: // Atk boosting Lonely Stakataka DEF IVs <= 15
                     return criteria with { IV_HP = -1, IV_ATK = -1, IV_DEF = criteria.IV_DEF, IV_SPA = -1, IV_SPD = -1, IV_SPE = criteria.IV_SPE };
-                    
+
                 case (int)Species.Pyukumuku when criteria.IV_DEF == 0 && criteria.IV_SPD == 0 && set.Ability == (int)Ability.InnardsOut : // 0 Def / 0 Spd Pyukumuku with innards out
                     return criteria with { IV_HP = -1, IV_ATK = -1, IV_DEF = criteria.IV_DEF, IV_SPA = -1, IV_SPD = criteria.IV_SPD, IV_SPE = -1 };
                 default: break;
