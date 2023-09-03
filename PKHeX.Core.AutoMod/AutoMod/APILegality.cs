@@ -960,7 +960,7 @@ namespace PKHeX.Core.AutoMod
             var applied = true;
             do
             {
-                ulong seed = Util.Rand.Rand64();
+                ulong seed = Util.Rand32();
                 const byte rollCount = 1;
                 const byte undefinedSize = 0;
                 var pi = PersonalTable.SV.GetFormEntry(enc.Species, enc.Form);
@@ -975,11 +975,11 @@ namespace PKHeX.Core.AutoMod
                     _ => throw new NotImplementedException("Unknown ITeraRaid9 type detected"),
                 };
                applied = enc.TryApply32(pk, seed, param, criteria);
-
-                if (IsMatchCriteria9(pk, set, criteria, compromise))
-                    break;
-                if (count == 5_000)
-                    compromise = true;
+                if(applied)
+                    if (IsMatchCriteria9(pk, set, criteria, compromise))
+                        break;
+                if (count == 1_000)
+                compromise = true;
                 if (count == 2 && !applied)
                     break;
             } while (++count < 15_000);
