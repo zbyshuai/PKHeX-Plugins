@@ -979,9 +979,7 @@ namespace PKHeX.Core.AutoMod
                     if (IsMatchCriteria9(pk, set, criteria, compromise))
                         break;
                 if (count == 1_000)
-                compromise = true;
-                if (count == 2 && !applied)
-                    break;
+                    compromise = true;
             } while (++count < 15_000);
         }
 
