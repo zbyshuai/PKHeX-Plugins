@@ -1,7 +1,8 @@
 # About  
 This project uses `PKHeX.Core` and PKHeX's `IPlugin` interface to add enhancements to the PKHeX program, namely **Auto**mated **Mod**ifications to simplify creation of legal Pokémon.
 
-This project is owned by [@architdate](https://github.com/architdate) (Discord: thecommondude#8240) and [@kwsch](https://github.com/kwsch) (Discord: Kurt#6024).
+The project this fork is based on is owned by [@architdate](https://github.com/architdate) (Discord: thecommondude#8240) and [@kwsch](https://github.com/kwsch) (Discord: Kurt#6024).
+This fork is owned by [@santacrab2](https://github.com/santacrab2).
 
 [Feature Demonstration Video](https://www.youtube.com/watch?v=pKuElH0hWWA) by AAron#2420.  
 This is an older video but features are still largely similar.
@@ -40,7 +41,7 @@ To use the plugins:
 ## Support Server
 Please refer to the [Wiki](https://github.com/architdate/PKHeX-Plugins/wiki) first for usage information and help first, as most queries are answered there. If you have looked and need additional help, you can join the dedicated Discord server for this mod!
 
-[<img src="https://canary.discordapp.com/api/guilds/401014193211441153/widget.png?style=banner2">](https://discord.gg/tDMvSRv)
+[<img src="https://canary.discordapp.com/api/guilds/401014193211441153/widget.png?style=banner2">](https://www.piplup.net)
 
 ## Contributing
 To contribute to the repository, you can submit a pull request to the repository. Try to follow a format similar to the current codebase. All contributions are greatly appreciated! If you would like to discuss possible contributions without using GitHub, please contact us on the support server above.

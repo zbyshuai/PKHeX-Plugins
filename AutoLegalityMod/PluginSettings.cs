@@ -70,7 +70,8 @@ namespace AutoModPlugins
 
         [Category(Customization), Description("Attempts to choose a matching Poké Ball based on Pokémon color.")]
         public bool SetMatchingBalls { get; set; } = true;
-
+        [Category(Customization), Description("Force Showdown sets with level 50 to level 100")]
+        public bool ForceLevel100for50 { get; set; } = true;
         // Legality
 
         [Category(Legality), Description("Global timeout per Pokémon being generated (in seconds)")]
