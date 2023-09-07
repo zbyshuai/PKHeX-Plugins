@@ -814,7 +814,7 @@ namespace PKHeX.Core.AutoMod
                     enc.SetEncounterTradeIVs(pk);
                     return; // Fixed PID, no need to mutate
                 default:
-                    FindPIDIV(pk, method, hpType, set.Shiny, enc);
+                    FindPIDIV(pk, method, hpType, set.Shiny, enc,set);
                     ValidateGender(pk, enc.Species);
                     break;
             }
@@ -1161,7 +1161,7 @@ namespace PKHeX.Core.AutoMod
         /// <param name="HPType">HPType INT for preserving Hidden powers</param>
         /// <param name="shiny">Only used for CHANNEL RNG type</param>
         /// <param name="enc"></param>
-        private static void FindPIDIV(PKM pk, PIDType Method, int HPType, bool shiny, IEncounterable enc)
+        private static void FindPIDIV(PKM pk, PIDType Method, int HPType, bool shiny, IEncounterable enc, IBattleTemplate set)
         {
             if (Method == PIDType.None)
             {
@@ -1183,6 +1183,11 @@ namespace PKHeX.Core.AutoMod
             }
 
             var iterPKM = pk.Clone();
+            if(iterPKM.Ability != set.Ability && set.Ability != -1)
+            {
+                var abilitypref = enc.Ability;
+                iterPKM.SetAbility(set.Ability>>1);
+            }
             var count = 0;
             var isWishmaker = Method == PIDType.BACD_R && shiny && enc is WC3 { OT_Name: "WISHMKR" };
             var gr = pk.PersonalInfo.Gender;
@@ -1197,7 +1202,7 @@ namespace PKHeX.Core.AutoMod
                 if (PokeWalkerSeedFail(seed, Method, pk, iterPKM))
                     continue;
                 PIDGenerator.SetValuesFromSeed(pk, Method, seed);
-                if (!(pk.Ability == iterPKM.Ability && pk.AbilityNumber == iterPKM.AbilityNumber && pk.Nature == iterPKM.Nature))
+                if (!(pk.AbilityNumber == iterPKM.AbilityNumber && pk.Nature == iterPKM.Nature))
                     continue;
                 if (pk.PIDAbility != iterPKM.PIDAbility)
                     continue;
