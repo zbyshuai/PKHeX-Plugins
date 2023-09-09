@@ -815,7 +815,7 @@ namespace PKHeX.Core.AutoMod
                     enc.SetEncounterTradeIVs(pk);
                     return; // Fixed PID, no need to mutate
                 default:
-                    FindPIDIV(pk, method, hpType, set.Shiny, enc);
+                    FindPIDIV(pk, method, hpType, set.Shiny, enc,set);
                     ValidateGender(pk, enc.Species);
                     break;
             }
@@ -1162,7 +1162,7 @@ namespace PKHeX.Core.AutoMod
         /// <param name="HPType">HPType INT for preserving Hidden powers</param>
         /// <param name="shiny">Only used for CHANNEL RNG type</param>
         /// <param name="enc"></param>
-        private static void FindPIDIV(PKM pk, PIDType Method, int HPType, bool shiny, IEncounterable enc)
+        private static void FindPIDIV(PKM pk, PIDType Method, int HPType, bool shiny, IEncounterable enc, IBattleTemplate set)
         {
            
                 if (enc is WC3 wc3)
@@ -1187,11 +1187,19 @@ namespace PKHeX.Core.AutoMod
             }
 
             var iterPKM = pk.Clone();
+            if(iterPKM.Ability != set.Ability && set.Ability != -1)
+            {
+                var abilitypref = enc.Ability;
+                iterPKM.SetAbility(set.Ability>>1);
+            }
             var count = 0;
             var isWishmaker = Method == PIDType.BACD_R && shiny && enc is WC3 { OT_Name: "WISHMKR" };
+            var compromise = false;
             var gr = pk.PersonalInfo.Gender;
             do
             {
+                if (count >= 2_500_000)
+                    compromise = true;
                 uint seed = Util.Rand32();
                 if (isWishmaker)
                 {
@@ -1201,9 +1209,9 @@ namespace PKHeX.Core.AutoMod
                 if (PokeWalkerSeedFail(seed, Method, pk, iterPKM))
                     continue;
                 PIDGenerator.SetValuesFromSeed(pk, Method, seed);
-                if (!(pk.Ability == iterPKM.Ability && pk.AbilityNumber == iterPKM.AbilityNumber && pk.Nature == iterPKM.Nature))
+                if ((pk.AbilityNumber != iterPKM.AbilityNumber && compromise) && pk.Nature != iterPKM.Nature)
                     continue;
-                if (pk.PIDAbility != iterPKM.PIDAbility)
+                if (pk.PIDAbility != iterPKM.PIDAbility && !compromise)
                     continue;
                 if (HPType >= 0 && pk.HPType != HPType)
                     continue;
@@ -1233,7 +1241,7 @@ namespace PKHeX.Core.AutoMod
                 if (Method == PIDType.Channel && (shiny != pk.IsShiny || pidxor))
                     continue;
                 break;
-            } while (++count < 1_000_000);
+            } while (++count < 5_000_000);
         }
 
         /// <summary>
@@ -1402,17 +1410,21 @@ namespace PKHeX.Core.AutoMod
         ///
         public static EncounterCriteria SetSpecialCriteria(EncounterCriteria criteria, IEncounterable enc, IBattleTemplate set)
         {
+            if(enc is EncounterStatic8U)
+                criteria = criteria with { Shiny = Shiny.Never };
+            
             switch (enc.Species)
             {
                 case (int)Species.Kartana when criteria.Nature == Nature.Timid && criteria.IV_ATK <= 21: // Speed boosting Timid Kartana ATK IVs <= 19
                     return criteria with { IV_HP = -1, IV_ATK = criteria.IV_ATK, IV_DEF = -1, IV_SPA = -1, IV_SPD = -1, IV_SPE = -1 };
 
                 case (int)Species.Stakataka when criteria.Nature == Nature.Lonely && criteria.IV_DEF <= 17: // Atk boosting Lonely Stakataka DEF IVs <= 15
-                    return criteria with { IV_HP = -1, IV_ATK = -1, IV_DEF = criteria.IV_DEF, IV_SPA = -1, IV_SPD = -1, IV_SPE = criteria.IV_SPE };
+                    return criteria with { IV_HP = -1, IV_ATK = -1, IV_DEF = criteria.IV_DEF, IV_SPA = -1, IV_SPD = -1, IV_SPE = criteria.IV_SPE};
 
                 case (int)Species.Pyukumuku when criteria.IV_DEF == 0 && criteria.IV_SPD == 0 && set.Ability == (int)Ability.InnardsOut : // 0 Def / 0 Spd Pyukumuku with innards out
                     return criteria with { IV_HP = -1, IV_ATK = -1, IV_DEF = criteria.IV_DEF, IV_SPA = -1, IV_SPD = criteria.IV_SPD, IV_SPE = -1 };
             }
+            
             return criteria with { IV_ATK = criteria.IV_ATK == 0 ? 0 : -1, IV_DEF = -1, IV_HP = -1, IV_SPA = -1, IV_SPD = -1, IV_SPE = criteria.IV_SPE == 0 ? 0 : -1 };
         }
 
