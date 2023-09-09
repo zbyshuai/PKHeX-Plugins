@@ -1190,9 +1190,12 @@ namespace PKHeX.Core.AutoMod
             }
             var count = 0;
             var isWishmaker = Method == PIDType.BACD_R && shiny && enc is WC3 { OT_Name: "WISHMKR" };
+            var compromise = false;
             var gr = pk.PersonalInfo.Gender;
             do
             {
+                if (count >= 2_500_000)
+                    compromise = true;
                 uint seed = Util.Rand32();
                 if (isWishmaker)
                 {
@@ -1202,9 +1205,9 @@ namespace PKHeX.Core.AutoMod
                 if (PokeWalkerSeedFail(seed, Method, pk, iterPKM))
                     continue;
                 PIDGenerator.SetValuesFromSeed(pk, Method, seed);
-                if (!(pk.AbilityNumber == iterPKM.AbilityNumber && pk.Nature == iterPKM.Nature))
+                if ((pk.AbilityNumber != iterPKM.AbilityNumber && compromise) && pk.Nature != iterPKM.Nature)
                     continue;
-                if (pk.PIDAbility != iterPKM.PIDAbility)
+                if (pk.PIDAbility != iterPKM.PIDAbility && !compromise)
                     continue;
                 if (HPType >= 0 && pk.HPType != HPType)
                     continue;
@@ -1234,7 +1237,7 @@ namespace PKHeX.Core.AutoMod
                 if (Method == PIDType.Channel && (shiny != pk.IsShiny || pidxor))
                     continue;
                 break;
-            } while (++count < 1_000_000);
+            } while (++count < 5_000_000);
         }
 
         /// <summary>
