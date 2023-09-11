@@ -1205,7 +1205,7 @@ namespace PKHeX.Core.AutoMod
                 if (PokeWalkerSeedFail(seed, Method, pk, iterPKM))
                     continue;
                 PIDGenerator.SetValuesFromSeed(pk, Method, seed);
-                if ((pk.AbilityNumber != iterPKM.AbilityNumber && compromise) && pk.Nature != iterPKM.Nature)
+                if ((pk.AbilityNumber != iterPKM.AbilityNumber && !compromise) && pk.Nature != iterPKM.Nature)
                     continue;
                 if (pk.PIDAbility != iterPKM.PIDAbility && !compromise)
                     continue;
