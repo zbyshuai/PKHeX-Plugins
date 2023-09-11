@@ -1,3 +1,6 @@
+using AutoModPlugins.GUI;
+using PKHeX.Core;
+using PKHeX.Core.Injection;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -5,9 +8,6 @@ using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Windows.Forms;
-using AutoModPlugins.GUI;
-using PKHeX.Core;
-using PKHeX.Core.Injection;
 
 namespace AutoModPlugins
 {
@@ -698,7 +698,7 @@ namespace AutoModPlugins
                 // Invoke function
                 cc.GetType().GetMethod(v, BindingFlags.NonPublic | BindingFlags.Instance)?.Invoke(cc, new[] { s, e });
 
-                for (var i = 0; i <  objects.Count; i++)
+                for (var i = 0; i < objects.Count; i++)
                 {
                     if (objects[i] is not SCBlock scb)
                         write = true;

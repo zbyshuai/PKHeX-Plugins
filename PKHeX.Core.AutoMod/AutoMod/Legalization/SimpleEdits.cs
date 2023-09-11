@@ -118,7 +118,7 @@ namespace PKHeX.Core.AutoMod
             ( IronLeaves, 0 ),
         };
 
-        public static readonly HashSet<int> Gen1TradeEvos = new () { (int)Kadabra, (int)Machoke, (int)Graveler, (int)Haunter };
+        public static readonly HashSet<int> Gen1TradeEvos = new() { (int)Kadabra, (int)Machoke, (int)Graveler, (int)Haunter };
 
         private static Func<int, int, int> FlagIVsAutoMod(PKM pk)
         {
@@ -341,7 +341,7 @@ namespace PKHeX.Core.AutoMod
             if (enc is WC9 wc9)
             {
                 size.WeightScalar = (byte)wc9.WeightValue;
-                size.HeightScalar= (byte)wc9.HeightValue;
+                size.HeightScalar = (byte)wc9.HeightValue;
                 return;
             }
 
@@ -478,7 +478,7 @@ namespace PKHeX.Core.AutoMod
                 return;
 
             IVs ??= pk.IVs;
-            t.HT_HP  = pk.IV_HP  != 31;
+            t.HT_HP = pk.IV_HP != 31;
             t.HT_ATK = pk.IV_ATK != 31 && IVs[1] > 2;
             t.HT_DEF = pk.IV_DEF != 31;
             t.HT_SPA = pk.IV_SPA != 31 && IVs[4] > 2;
