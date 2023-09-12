@@ -253,8 +253,8 @@ namespace PKHeX.Core.AutoMod
         /// <summary>
         /// Filter down the gamelist to search based on requested sets
         /// </summary>
-        /// <param name="template">Template pokemon with basic details set</param>
-        /// <param name="destVer">Version in which the pokemon needs to be imported</param>
+        /// <param name="template">Template Pokémon with basic details set</param>
+        /// <param name="destVer">Version in which the Pokémon needs to be imported</param>
         /// <param name="batchEdit">Whether settings currently allow batch commands</param>
         /// <param name="set">Set information to be used to filter the game list</param>
         /// <param nativeOnly="set">Whether to only return encounters from the current version</param>
@@ -659,7 +659,7 @@ namespace PKHeX.Core.AutoMod
         }
 
         /// <summary>
-        /// Sets past-generation Pokemon as Battle Ready for games that support it
+        /// Sets past-generation Pokémon as Battle Ready for games that support it
         /// </summary>
         /// <param name="pk">Return PKM</param>
         /// <param name="trainer">Trainer to handle the <see cref="pk"/></param>
@@ -687,7 +687,7 @@ namespace PKHeX.Core.AutoMod
         }
 
         /// <summary>
-        /// Set matching colored pokeballs based on the color API in personal table
+        /// Set matching colored Pokémon balls based on the color API in personal table
         /// </summary>
         /// <param name="pk">Return PKM</param>
         public static void SetMatchingBall(this PKM pk) => BallApplicator.ApplyBallLegalByColor(pk);
@@ -695,7 +695,7 @@ namespace PKHeX.Core.AutoMod
         /// <summary>
         /// Set forms of specific species to form 0 since they cannot have a form while boxed
         /// </summary>
-        /// <param name="pk">pokemon passed to the method</param>
+        /// <param name="pk">Pokémon passed to the method</param>
         public static void SetBoxForm(this PKM pk)
         {
             if (pk.Format > 6)
@@ -734,7 +734,7 @@ namespace PKHeX.Core.AutoMod
         }
 
         /// <summary>
-        /// Set IV Values for the pokemon
+        /// Set IV Values for the Pokémon
         /// </summary>
         /// <param name="pk"></param>
         /// <param name="set"></param>
@@ -836,7 +836,7 @@ namespace PKHeX.Core.AutoMod
         /// <summary>
         /// Set PIDIV for raid PKM via XOROSHIRO incase it is transferred to future generations to preserve the IVs
         /// </summary>
-        /// <param name="pk">Pokemon to be edited</param>
+        /// <param name="pk">Pokémon to be edited</param>
         /// <param name="enc">Raid encounter encounterable</param>
         /// <param name="set">Set to pass in requested IVs</param>
         private static void PreSetPIDIV(this PKM pk, IEncounterable enc, IBattleTemplate set, EncounterCriteria criteria)
@@ -956,12 +956,12 @@ namespace PKHeX.Core.AutoMod
                     compromise = true;
             } while (++count < 15_000);
         }
-        
+
         /// <summary>
         /// Wild PID IVs being set through XOROSHIRO128
         /// </summary>
-        /// <param name="pk">pokemon to edit</param>
-        /// <param name="shiny">Shinytype requested</param>
+        /// <param name="pk">Pokémon to edit</param>
+        /// <param name="shiny">Shiny type requested</param>
         /// <param name="flawless">number of flawless ivs</param>
         /// <param name="fixedseed">Optional fixed RNG seed</param>
         public static void FindWildPIDIV8(PK8 pk, Shiny shiny, int flawless = 0, uint? fixedseed = null)
@@ -1042,8 +1042,8 @@ namespace PKHeX.Core.AutoMod
         /// <summary>
         /// Egg PID IVs being set through XOROSHIRO1288b
         /// </summary>
-        /// <param name="pk">pokemon to edit</param>
-        /// <param name="shiny">Shinytype requested</param>
+        /// <param name="pk">Pokémon to edit</param>
+        /// <param name="shiny">Shiny type requested</param>
         /// <param name="gender"></param>
         public static void FindEggPIDIV8b(PKM pk, Shiny shiny, int gender)
         {
@@ -1311,9 +1311,9 @@ namespace PKHeX.Core.AutoMod
         }
 
         /// <summary>
-        /// Method to get the correct met level for a pokemon. Move up the met level till all moves are legal
+        /// Method to get the correct met level for a Pokémon. Move up the met level till all moves are legal
         /// </summary>
-        /// <param name="pk">pokemon</param>
+        /// <param name="pk">Pokémon</param>
         public static void SetCorrectMetLevel(this PKM pk)
         {
             var lvl = pk.CurrentLevel;
@@ -1335,9 +1335,9 @@ namespace PKHeX.Core.AutoMod
         }
 
         /// <summary>
-        /// Edge case memes for weird properties that I have no interest in setting for other pokemon.
+        /// Edge case memes for weird properties that I have no interest in setting for other Pokémon.
         /// </summary>
-        /// <param name="pk">Pokemon to edit</param>
+        /// <param name="pk">Pokémon to edit</param>
         /// <param name="enc">Encounter the <see cref="pk"/> originated rom</param>
         private static void FixEdgeCases(this PKM pk, IEncounterable enc)
         {
