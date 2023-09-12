@@ -9,8 +9,6 @@ namespace PKHeX.Core.AutoMod
     /// </summary>
     public static class ShowdownEdits
     {
-        private static readonly CompareInfo CompareInfo = CultureInfo.CurrentCulture.CompareInfo;
-
         /// <summary>
         /// Quick Gender Toggle
         /// </summary>
@@ -57,8 +55,7 @@ namespace PKHeX.Core.AutoMod
             var la2 = new LegalityAnalysis(pk);
             var enc1 = la.EncounterMatch;
             var enc2 = la2.EncounterMatch;
-            if (((!ReferenceEquals(enc1, enc2) && enc1 is not EncounterEgg) ||
-                la2.Results.Any(z => (z.Identifier == CheckIdentifier.Nature || z.Identifier == CheckIdentifier.Encounter) && !z.Valid)) && enc is not EncounterEgg)
+            if (((!ReferenceEquals(enc1, enc2) && enc1 is not EncounterEgg) || la2.Results.Any(z => (z.Identifier == CheckIdentifier.Nature || z.Identifier == CheckIdentifier.Encounter) && !z.Valid)) && enc is not EncounterEgg)
                 pk.Nature = orig;
             if (pk.Format >= 8 && pk.StatNature != pk.Nature && pk.StatNature is 0 or 6 or 18 or >= 24) // Only Serious Mint for Neutral Natures
                 pk.StatNature = (int)Nature.Serious;
@@ -199,7 +196,7 @@ namespace PKHeX.Core.AutoMod
         /// </summary>
         /// <param name="pkm">PKM to modify</param>
         /// <param name="enc">Base encounter</param>
-        /// <returns>boolean indicating if the gender is valid</returns>
+        /// <returns>Boolean indicating if the gender is valid</returns>
         public static bool IsValidGenderPID(this PKM pkm, IEncounterable enc)
         {
             bool genderValid = pkm.IsGenderValid();
@@ -218,7 +215,7 @@ namespace PKHeX.Core.AutoMod
         /// </summary>
         /// <param name="pkm">pkm to modify</param>
         /// <param name="original">original species (encounter)</param>
-        /// <returns>boolean indicating validaity</returns>
+        /// <returns>Boolean indicating validaity</returns>
         private static bool IsValidFixedGenderFromBiGender(PKM pkm, ushort original)
         {
             var current = pkm.Gender;
@@ -232,7 +229,7 @@ namespace PKHeX.Core.AutoMod
         /// Check if a gender mismatch is a valid possibility
         /// </summary>
         /// <param name="pkm">PKM to modify</param>
-        /// <returns>boolean indicating validity</returns>
+        /// <returns>Boolean indicating validity</returns>
         private static bool IsValidGenderMismatch(PKM pkm) => pkm.Species switch
         {
             // Shedinja evolution gender glitch, should match original Gender
@@ -297,9 +294,8 @@ namespace PKHeX.Core.AutoMod
         /// <summary>
         /// Set encounter trade IVs for a specific encounter trade
         /// </summary>
-        /// <param name="t">EncounterTrade</param>
-        /// <param name="pk">Pokemon to modify</param>
-        public static void SetEncounterTradeIVs(this IEncounterable t, PKM pk)
+        /// <param name="pk">Pokémon to modify</param>
+        public static void SetEncounterTradeIVs(PKM pk)
         {
             pk.SetRandomIVs(minFlawless: 3);
         }
@@ -307,7 +303,7 @@ namespace PKHeX.Core.AutoMod
         /// <summary>
         /// Set held items after sanity checking for forms and invalid items
         /// </summary>
-        /// <param name="pk">Pokemon to modify</param>
+        /// <param name="pk">Pokémon to modify</param>
         /// <param name="set">IBattleset to grab the item</param>
         public static void SetHeldItem(this PKM pk, IBattleTemplate set)
         {
@@ -320,7 +316,7 @@ namespace PKHeX.Core.AutoMod
         /// <summary>
         /// Fix invalid form items
         /// </summary>
-        /// <param name="pk">Pokemon to modify</param>
+        /// <param name="pk">Pokémon to modify</param>
         private static void FixInvalidFormItems(this PKM pk)
         {
             // Ignore games where items don't exist in the first place. They would still allow forms

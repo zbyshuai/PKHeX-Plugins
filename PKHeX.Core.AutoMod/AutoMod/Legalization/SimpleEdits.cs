@@ -181,7 +181,7 @@ namespace PKHeX.Core.AutoMod
         }
 
         /// <summary>
-        /// Sets shiny value to whatever boolean is specified. Takes in specific shiny as a boolean. Ignores it for stuff that is gen 5 or lower. Cant be asked to find out all legality quirks
+        /// Sets shiny value to whatever Boolean is specified. Takes in specific shiny as a Boolean. Ignores it for stuff that is gen 5 or lower. Cant be asked to find out all legality quirks
         /// </summary>
         /// <param name="pk">PKM to modify</param>
         /// <param name="isShiny">Shiny value that needs to be set</param>
@@ -209,7 +209,7 @@ namespace PKHeX.Core.AutoMod
                 var isHOMEGift = w8.Location == 30018 || w8.GetOT(2) == "HOME";
                 if (isHOMEGift)
                 {
-                    // Set XOR as 0 so SID comes out as 8 or less, Set TID based on that (kinda like a setshinytid)
+                    // Set XOR as 0 so SID comes out as 8 or less, Set TID based on that (kind of like a setshinytid)
                     pk.TID16 = (ushort)(0 ^ (pk.PID & 0xFFFF) ^ (pk.PID >> 16));
                     pk.SID16 = (ushort)Util.Rand.Next(8);
                     return;
@@ -436,7 +436,7 @@ namespace PKHeX.Core.AutoMod
         {
             var pref_lang = (LanguageID)prefer;
             if (pref_lang == LanguageID.Hacked || pref_lang == LanguageID.UNUSED_6)
-                prefer = 2; // prefer english
+                prefer = 2; // prefer English
             if (pk is IHandlerLanguage pkm)
                 pkm.HT_Language = prefer;
         }
@@ -569,7 +569,7 @@ namespace PKHeX.Core.AutoMod
         /// </summary>
         /// <param name="pk">Legal PKM for setting the data</param>
         /// <param name="trainer"></param>
-        /// <returns>PKM with the necessary values modified to reflect trainerdata changes</returns>
+        /// <returns>PKM with the necessary values modified to reflect trainer data changes</returns>
         public static void SetAllTrainerData(this PKM pk, ITrainerInfo trainer)
         {
             pk.SetBelugaValues(); // trainer details changed?
@@ -595,7 +595,7 @@ namespace PKHeX.Core.AutoMod
         }
 
         /// <summary>
-        /// Sets a moveset which is suggested based on calculated legality.
+        /// Sets a move set which is suggested based on calculated legality.
         /// </summary>
         /// <param name="pk">Legal PKM for setting the data</param>
         /// <param name="random">True for Random assortment of legal moves, false if current moves only.</param>
@@ -614,10 +614,10 @@ namespace PKHeX.Core.AutoMod
         }
 
         /// <summary>
-        /// Set Dates for datelocked pokemon
+        /// Set Dates for date locked Pokémon
         /// </summary>
-        /// <param name="pk">pokemon file to modify</param>
-        /// <param name="enc">encounter used to generate pokemon file</param>
+        /// <param name="pk">Pokémon file to modify</param>
+        /// <param name="enc">encounter used to generate Pokémon file</param>
         public static void SetDateLocks(this PKM pk, IEncounterable enc)
         {
             if (enc is WC8 { IsHOMEGift: true } wc8)
@@ -704,7 +704,9 @@ namespace PKHeX.Core.AutoMod
             if (pk is ITechRecord tr and not PA8)
             {
                 if (moves.Length != 0)
+                {
                     tr.SetRecordFlags(moves);
+                }
                 else
                 {
                     var permit = tr.Permit;
@@ -718,7 +720,7 @@ namespace PKHeX.Core.AutoMod
             }
 
             if (pk is IMoveShop8Mastery master)
-                MoveShopRecordApplicator.SetMoveShopFlags(master, pk);
+                master.SetMoveShopFlags(pk);
         }
 
         public static void SetSuggestedContestStats(this PKM pk, IEncounterable enc)
