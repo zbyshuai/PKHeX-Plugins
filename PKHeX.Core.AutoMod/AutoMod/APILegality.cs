@@ -251,7 +251,7 @@ namespace PKHeX.Core.AutoMod
         }
 
         /// <summary>
-        /// Filter down the gamelist to search based on requested sets
+        /// Filter down the game list to search based on requested sets
         /// </summary>
         /// <param name="template">Template Pokémon with basic details set</param>
         /// <param name="destVer">Version in which the Pokémon needs to be imported</param>
@@ -269,7 +269,7 @@ namespace PKHeX.Core.AutoMod
                            : GetPairedVersions(destVer);
 
             if (PrioritizeGame && !nativeOnly)
-                gamelist = PrioritizeGameVersion == GameVersion.Any ? PrioritizeVersion(gamelist, SimpleEdits.GetIsland(destVer)) : PrioritizeVersion(gamelist, PrioritizeGameVersion);
+                gamelist = PrioritizeGameVersion == GameVersion.Any ? PrioritizeVersion(gamelist, destVer.GetIsland()) : PrioritizeVersion(gamelist, PrioritizeGameVersion);
 
             if (template.AbilityNumber == 4 && destVer.GetGeneration() < 8)
                 gamelist = gamelist.Where(z => z.GetGeneration() is not 3 and not 4).ToArray();
@@ -316,10 +316,10 @@ namespace PKHeX.Core.AutoMod
         /// <summary>
         /// Grab a trainer from trainer database with mutated language
         /// </summary>
-        /// <param name="regen">Regenset</param>
-        /// <param name="ver">Gameversion for the saved trainerdata</param>
-        /// <param name="gen">Generation of the saved trainerdata</param>
-        /// <returns>ITrainerInfo of the trainerdetails</returns>
+        /// <param name="regen">Regen set</param>
+        /// <param name="ver">Game version for the saved trainer data</param>
+        /// <param name="gen">Generation of the saved trainer data</param>
+        /// <returns>ITrainerInfo of the trainer details</returns>
         private static ITrainerInfo GetTrainer(RegenSet regen, GameVersion ver, int gen)
         {
             if (AllowTrainerOverride && regen.HasTrainerSettings && regen.Trainer != null)
@@ -332,9 +332,9 @@ namespace PKHeX.Core.AutoMod
         /// <summary>
         /// Gives the currently loaded save priority over other saves in the same generation. Otherwise generational order is preserved
         /// </summary>
-        /// <param name="gamelist">Array of gameversions which needs to be prioritized</param>
-        /// <param name="game">Gameversion to prioritize</param>
-        /// <returns>A prioritized gameversion list</returns>
+        /// <param name="gamelist">Array of game versions which needs to be prioritized</param>
+        /// <param name="game">Game version to prioritize</param>
+        /// <returns>A prioritized game version list</returns>
         private static GameVersion[] PrioritizeVersion(GameVersion[] gamelist, GameVersion game)
         {
             var matched = 0;
@@ -365,15 +365,14 @@ namespace PKHeX.Core.AutoMod
         private static bool IsEncounterValid(IBattleTemplate set, IEncounterable enc, AbilityRequest abilityreq, GameVersion destVer)
         {
             // Don't process if encounter min level is higher than requested level
-            if (enc.Generation > 2)
-                if (!IsRequestedLevelValid(set, enc))
-                    return false;
+            if (enc.Generation > 2 && !IsRequestedLevelValid(set, enc))
+                return false;
 
             // Don't process if the ball requested is invalid
             if (!IsRequestedBallValid(set, enc))
                 return false;
 
-            // Don't process if encounter and set shinies dont match
+            // Don't process if encounter and set shinies don't match
             if (!IsRequestedShinyValid(set, enc))
                 return false;
 
@@ -457,7 +456,7 @@ namespace PKHeX.Core.AutoMod
             if (enc is MysteryGift mg && mg.CardID >= 9000)
                 return true;
 
-            // Don't process if shiny value doesnt match
+            // Don't process if shiny value doesn't match
             if (set.Shiny && enc.Shiny == Shiny.Never)
                 return false;
             if (!set.Shiny && enc.Shiny.IsShiny())
@@ -542,7 +541,7 @@ namespace PKHeX.Core.AutoMod
             pk.SetMovesEVs(set, enc);
             pk.SetCorrectMetLevel();
             pk.SetGVs();
-            pk.SetHyperTrainingFlags(set, enc); // Hypertrain
+            pk.SetHyperTrainingFlags(set, enc); // Hyper train
             pk.SetEncryptionConstant(enc);
             pk.SetShinyBoolean(set.Shiny, enc, regen.Extra.ShinyType);
             pk.FixGender(enc, set);
@@ -596,10 +595,10 @@ namespace PKHeX.Core.AutoMod
         }
 
         /// <summary>
-        /// Comptitive IVs or PKHeX default IVs implementation
+        /// Competitive IVs or PKHeX default IVs implementation
         /// </summary>
         /// <param name="pk"></param>
-        /// <param name="apply">boolean to apply or not to apply markings</param>
+        /// <param name="apply">Boolean to apply or not to apply markings</param>
         private static void ApplyMarkings(this PKM pk, bool apply = true)
         {
             if (!apply || pk.Format <= 3) // No markings if pk.Format is less than or equal to 3
@@ -627,22 +626,22 @@ namespace PKHeX.Core.AutoMod
         }
 
         /// <summary>
-        /// Proper method to hypertrain based on Showdown Sets. Also handles edge cases like ultrabeasts
+        /// Proper method to hyper train based on Showdown Sets. Also handles edge cases like ultra beasts
         /// </summary>
         /// <param name="pk">passed pkm object</param>
-        /// <param name="set">showdown set to base hypertraining on</param>
+        /// <param name="set">showdown set to base hyper training on</param>
         private static void SetHyperTrainingFlags(this PKM pk, IBattleTemplate set, IEncounterable enc)
         {
             if (pk is not IHyperTrain t || pk.Species == (ushort)Species.Stakataka)
                 return;
 
-            // Game exceptions (IHyperTrain exists because of the field but game disallows hypertraining)
+            // Game exceptions (IHyperTrain exists because of the field but game disallows hyper training)
             if (!t.IsHyperTrainingAvailable(EvolutionChain.GetEvolutionChainsAllGens(pk, enc)))
                 return;
 
             pk.HyperTrain(set.IVs);
 
-            // Handle special cases here for ultrabeasts
+            // Handle special cases here for ultra beasts
             switch (pk.Species)
             {
                 case (int)Species.Kartana when pk.StatNature == (int)Nature.Timid && set.IVs[1] <= 21: // Speed boosting Timid Kartana ATK IVs <= 19
@@ -812,7 +811,7 @@ namespace PKHeX.Core.AutoMod
                 case EncounterTrade3:
                 case EncounterTrade4PID:
                 case EncounterTrade4RanchGift:
-                    enc.SetEncounterTradeIVs(pk);
+                    ShowdownEdits.SetEncounterTradeIVs(pk);
                     return; // Fixed PID, no need to mutate
                 default:
 
@@ -949,9 +948,8 @@ namespace PKHeX.Core.AutoMod
                     _ => throw new NotImplementedException("Unknown ITeraRaid9 type detected"),
                 };
                 applied = enc.TryApply32(pk, seed, param, criteria);
-                if (applied)
-                    if (IsMatchCriteria9(pk, set, criteria, compromise))
-                        break;
+                if (applied && IsMatchCriteria9(pk, set, criteria, compromise))
+                    break;
                 if (count == 1_000)
                     compromise = true;
             } while (++count < 15_000);
@@ -1189,9 +1187,8 @@ namespace PKHeX.Core.AutoMod
 
             var iterPKM = pk.Clone();
 
-
-            if(iterPKM.Ability != set.Ability && set.Ability != -1)
-                iterPKM.SetAbility(set.Ability>>1);
+            if (iterPKM.Ability != set.Ability && set.Ability != -1)
+                iterPKM.SetAbility(set.Ability >> 1);
             var count = 0;
             var isWishmaker = Method == PIDType.BACD_R && shiny && enc is WC3 { OT_Name: "WISHMKR" };
             var compromise = false;
@@ -1209,7 +1206,7 @@ namespace PKHeX.Core.AutoMod
                 if (PokeWalkerSeedFail(seed, Method, pk, iterPKM))
                     continue;
                 PIDGenerator.SetValuesFromSeed(pk, Method, seed);
-                if ((pk.AbilityNumber != iterPKM.AbilityNumber && !compromise) && pk.Nature != iterPKM.Nature)
+                if (pk.AbilityNumber != iterPKM.AbilityNumber && !compromise && pk.Nature != iterPKM.Nature)
                     continue;
                 if (pk.PIDAbility != iterPKM.PIDAbility && !compromise)
                     continue;
@@ -1413,12 +1410,11 @@ namespace PKHeX.Core.AutoMod
             if (enc is EncounterStatic8U)
                 criteria = criteria with { Shiny = Shiny.Never };
 
-
             return (Species)enc.Species switch
             {
                 Species.Kartana when criteria.Nature == Nature.Timid && criteria.IV_ATK <= 21 // Speed boosting Timid Kartana ATK IVs <= 19
                     => criteria with { IV_HP = -1, IV_ATK = criteria.IV_ATK, IV_DEF = -1, IV_SPA = -1, IV_SPD = -1, IV_SPE = -1 },
-                
+
                 Species.Stakataka when criteria.Nature == Nature.Lonely && criteria.IV_DEF <= 17 // Atk boosting Lonely Stakataka DEF IVs <= 15
                     => criteria with { IV_HP = -1, IV_ATK = -1, IV_DEF = criteria.IV_DEF, IV_SPA = -1, IV_SPD = -1, IV_SPE = criteria.IV_SPE },
 
@@ -1430,7 +1426,7 @@ namespace PKHeX.Core.AutoMod
         }
 
         /// <summary>
-        /// Handle edge case vivillon legality if the trainerdata region is invalid
+        /// Handle edge case vivillon legality if the trainer data region is invalid
         /// </summary>
         /// <param name="pk">pkm to fix</param>
         public static void FixVivillonRegion(this PKM pk)

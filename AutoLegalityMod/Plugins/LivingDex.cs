@@ -32,7 +32,7 @@ namespace AutoModPlugins
             var copied = pkms.TryCopyTo(bd);
             if (!copied)
             {
-                pkms = pkms.Slice(0, bd.Length);
+                pkms = pkms[..bd.Length];
                 pkms.TryCopyTo(bd);
             }
             sav.BoxData = bd.ToArray();
