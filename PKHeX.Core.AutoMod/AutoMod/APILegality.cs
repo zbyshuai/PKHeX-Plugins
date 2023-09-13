@@ -117,7 +117,6 @@ namespace PKHeX.Core.AutoMod
                     raw.Language = tr.Language;
                     tr.ApplyTo(raw);
                 }
-                
                 raw = raw.SanityCheckLocation(enc);
                 if (raw.IsEgg) // PGF events are sometimes eggs. Force hatch them before proceeding
                     raw.HandleEggEncounters(enc, tr);
@@ -147,7 +146,6 @@ namespace PKHeX.Core.AutoMod
                     continue;
                 if (EntityConverter.IsIncompatibleGB(pk, template.Japanese, pk.Japanese))
                     continue;
-               
                 // Apply final details
                 ApplySetDetails(pk, set, dest, enc, regen);
 
@@ -1163,7 +1161,6 @@ namespace PKHeX.Core.AutoMod
         /// <param name="enc"></param>
         private static void FindPIDIV(PKM pk, PIDType Method, int HPType, bool shiny, IEncounterable enc, IBattleTemplate set)
         {
-           
                 if (enc is WC3 wc3)
                     Method = wc3.Method;
                 else
@@ -1173,11 +1170,6 @@ namespace PKHeX.Core.AutoMod
                     Method = PIDType.CXD;
                 if (Method == PIDType.None && pk.Generation >= 3)
                     pk.SetPIDGender(pk.Gender);
-               if(enc.Species == 133)
-                {
-                    Debug.WriteLine($"{Method.ToString()}");
-                }
-            
             switch (Method)
             {
                 case PIDType.Method_1_Roamer when pk.HPType != (int)MoveType.Fighting - 1: // M1 Roamers can only be HP fighting
