@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace PKHeX.Core.AutoMod
@@ -43,7 +43,15 @@ namespace PKHeX.Core.AutoMod
                     }
             }
         }
-
+        /// <summary>
+        /// TeraType restrictions being fixed before the set is even generated
+        /// </summary>
+        /// <param name="set"></param>
+        public static void SanitizeTeraTypes(this RegenTemplate set)
+        {
+            if (set.Species == (int)Species.Ogerpon && !TeraTypeUtil.IsValidOgerpon((byte)set.TeraType, set.Form))
+                set.TeraType = ShowdownEdits.GetValidOpergonTeraType(set.Form);
+        }
         /// <summary>
         /// General method to preprocess sets excluding invalid forms. (handled in a future method)
         /// </summary>
