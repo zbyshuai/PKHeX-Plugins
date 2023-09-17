@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using static PKHeX.Core.Species;
@@ -349,10 +349,8 @@ namespace PKHeX.Core.AutoMod
                 return;
 
             if (enc is EncounterStatic8N or EncounterStatic8NC or EncounterStatic8ND)
-            {
-                if (APILegality.UseXOROSHIRO && !pk.IsShiny)
-                    return;
-            }
+                return;
+            
 
             var height = 0x12;
             var weight = 0x97;

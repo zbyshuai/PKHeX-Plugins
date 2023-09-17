@@ -24,14 +24,12 @@ namespace PKHeX.Core.AutoMod
         public static bool UseMarkings { get; set; } = true;
         public static bool EnableDevMode { get; set; } = false;
         public static string LatestAllowedVersion { get; set; } = "0.0.0.0";
-        public static bool UseXOROSHIRO { get; set; } = true;
         public static bool PrioritizeGame { get; set; } = true;
         public static GameVersion PrioritizeGameVersion { get; set; }
         public static bool SetBattleVersion { get; set; }
         public static bool AllowTrainerOverride { get; set; }
         public static bool AllowBatchCommands { get; set; } = true;
         public static bool ForceLevel100for50 { get; set; } = true;
-        public static bool AllowHOMETransferGeneration { get; set; } = true;
         public static int Timeout { get; set; } = 15;
 
         /// <summary>
