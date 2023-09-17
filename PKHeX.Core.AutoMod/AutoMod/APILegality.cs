@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
@@ -146,11 +146,6 @@ namespace PKHeX.Core.AutoMod
                 if (pk == null)
                     continue;
                 if (EntityConverter.IsIncompatibleGB(pk, template.Japanese, pk.Japanese))
-                    continue;
-                var isNative = enc.Generation >= 8 && pk.IsNative;
-                if (isNative && pk is PK8 pk8 && LocationsHOME.IsLocationSWSH(pk8.Met_Location))
-                    isNative = false;
-                if (!isNative && !AllowHOMETransferGeneration)
                     continue;
                 // Apply final details
                 ApplySetDetails(pk, set, dest, enc, regen);
@@ -384,12 +379,6 @@ namespace PKHeX.Core.AutoMod
             if (!IsRequestedAlphaValid(set, enc))
                 return false;
 
-            var trackerrequired = enc is EncounterSlot8GO or WC8 { IsHOMEGift: true }
-                              or WB8 { IsHOMEGift: true } or WA8 { IsHOMEGift: true }
-                              or WC9 { IsHOMEGift: true };
-
-            if (trackerrequired && !AllowHOMETransferGeneration)
-                return false;
             // Don't process if the gender does not match the set
             if (set.Gender != -1 && enc is IFixedGender { IsFixedGender: true } fg && fg.Gender != set.Gender)
                 return false;
