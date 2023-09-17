@@ -1,4 +1,4 @@
-﻿namespace PKHeX.Core.Injection
+namespace PKHeX.Core.Injection
 {
     public enum LiveHeXVersion
     {
@@ -40,5 +40,6 @@
         SV_v130 = 27,
         SV_v131 = 28,
         SV_v132 = 29,
+        SV_v201 = 30,
     }
 }

@@ -294,7 +294,7 @@ namespace PKHeX.Core.AutoMod
         /// <summary>
         /// Set encounter trade IVs for a specific encounter trade
         /// </summary>
-        /// <param name="pk">Pokémon to modify</param>
+        /// <param name="pk">PokÃ©mon to modify</param>
         public static void SetEncounterTradeIVs(PKM pk)
         {
             pk.SetRandomIVs(minFlawless: 3);
@@ -302,7 +302,7 @@ namespace PKHeX.Core.AutoMod
         /// <summary>
         /// Set held items after sanity checking for forms and invalid items
         /// </summary>
-        /// <param name="pk">Pokémon to modify</param>
+        /// <param name="pk">PokÃ©mon to modify</param>
         /// <param name="set">IBattleset to grab the item</param>
         public static void SetHeldItem(this PKM pk, IBattleTemplate set)
         {
@@ -315,7 +315,7 @@ namespace PKHeX.Core.AutoMod
         /// <summary>
         /// Fix invalid form items
         /// </summary>
-        /// <param name="pk">Pokémon to modify</param>
+        /// <param name="pk">PokÃ©mon to modify</param>
         private static void FixInvalidFormItems(this PKM pk)
         {
             // Ignore games where items don't exist in the first place. They would still allow forms
@@ -351,7 +351,26 @@ namespace PKHeX.Core.AutoMod
                 case Species.Palkia when pk.Form == 1 && pk.HeldItem != 1778:
                     pk.HeldItem = 1778;
                     break;
+                case Species.Ogerpon when pk.Form == 1 && pk.HeldItem != 2407:
+                    pk.HeldItem = 2407;
+                    break;
+                case Species.Ogerpon when pk.Form == 2 && pk.HeldItem != 2408:
+                    pk.HeldItem = 2408;
+                    break;
+                case Species.Ogerpon when pk.Form == 3 && pk.HeldItem != 2406:
+                    pk.HeldItem = 2406;
+                    break;
+
             }
+
         }
+        public static MoveType GetValidOpergonTeraType(byte form) => (form & 3) switch
+        {
+            0 => MoveType.Grass,
+            1 => MoveType.Water,
+            2 => MoveType.Fire,
+            3 => MoveType.Rock,
+            _ => (MoveType)TeraTypeUtil.OverrideNone,
+        };
     }
 }

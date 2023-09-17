@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using static PKHeX.Core.AutoMod.Aesthetics.PersonalColor;
@@ -1021,6 +1021,13 @@ namespace PKHeX.Core.AutoMod
             { Kingambit,       Blue },
             { Clodsire,        Purple },
             { Annihilape,      Gray },
+            { Dipplin,         Yellow },
+            { Poltchageist,    Black },
+            { Sinistcha,       Black },
+            { Okidogi,         Black },
+            { Munkidori,       Black },
+            { Fezandipiti,     Black },
+            { Ogerpon,         Green },
         };
 
         public static Ball GetBallFromString(string ballstr)

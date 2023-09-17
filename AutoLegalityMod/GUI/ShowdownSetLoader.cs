@@ -1,4 +1,4 @@
-﻿using PKHeX.Core;
+using PKHeX.Core;
 using PKHeX.Core.AutoMod;
 using PKHeX.Core.Enhancements;
 using System;
@@ -203,7 +203,6 @@ namespace AutoModPlugins
             APILegality.UseCompetitiveMarkings = settings.UseCompetitiveMarkings;
             APILegality.UseMarkings = settings.UseMarkings;
             APILegality.EnableDevMode = settings.EnableDevMode;
-            APILegality.UseXOROSHIRO = settings.UseXOROSHIRO;
             APILegality.PrioritizeGame = settings.PrioritizeGame;
             APILegality.PrioritizeGameVersion = settings.PriorityGameVersion;
             APILegality.SetBattleVersion = settings.SetBattleVersion;
