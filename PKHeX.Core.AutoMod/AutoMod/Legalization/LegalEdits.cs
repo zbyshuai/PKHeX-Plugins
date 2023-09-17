@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 
 namespace PKHeX.Core.AutoMod
 {
@@ -84,7 +84,6 @@ namespace PKHeX.Core.AutoMod
                 if (pk is PK8 pk8 && pk8.Species != (int)Species.Shedinja && pk8.GetRandomValidMark(set, enc, out var mark))
                     pk8.SetRibbonIndex(mark);
             }
-            else RibbonApplicator.RemoveAllValidRibbons(pk);
         }
     }
 }
