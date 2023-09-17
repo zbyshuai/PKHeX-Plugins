@@ -84,10 +84,6 @@ namespace PKHeX.Core.AutoMod
                 if (pk is PK8 pk8 && pk8.Species != (int)Species.Shedinja && pk8.GetRandomValidMark(set, enc, out var mark))
                     pk8.SetRibbonIndex(mark);
             }
-            else if (enc is EncounterStatic9 { RibbonMarkCrafty: true } || enc is DataMysteryGift)
-                return;
-            else
-                RibbonApplicator.RemoveAllValidRibbons(pk);
         }
     }
 }
