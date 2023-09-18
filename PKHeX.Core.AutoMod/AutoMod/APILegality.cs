@@ -64,7 +64,7 @@ namespace PKHeX.Core.AutoMod
 
             var abilityreq = GetRequestedAbility(template, set);
             var batchedit = AllowBatchCommands && regen.HasBatchSettings;
-            var native = ModLogic.NativeOnly && nativeOnly;
+            var native = ModLogic.cfg.NativeOnly && nativeOnly;
             var destType = template.GetType();
             var destVer = (GameVersion)dest.Game;
             if (destVer <= 0 && dest is SaveFile s)
@@ -178,7 +178,7 @@ namespace PKHeX.Core.AutoMod
 
                 // Verify the Legality of what we generated, and exit if it is valid.
                 var la = new LegalityAnalysis(pk);
-                if (la.Valid)
+                if (la.Valid && pk.Species == set.Species) // Encounter Trades that evolve may cause higher tahn expected species
                 {
                     satisfied = LegalizationResult.Regenerated;
                     return pk;
