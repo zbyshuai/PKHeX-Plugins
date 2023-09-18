@@ -21,7 +21,7 @@ namespace PKHeX.Core.Injection
         public static readonly BlockData[] Blocks_SV_v201 =
         {
             new() { Name = "MyStatus", Display = "Trainer Data", SCBKey = 0xE3E89BD1, Pointer = "[[[[[main+4616648]+D8]+8]+B8]+0]+40 " },
-            new() { Name = "KItem", Display = "Items", SCBKey = 0x21C9BD44, Pointer = "[[main+44C1C18]+1B0]+40" },
+            new() { Name = "KItem", Display = "Items", SCBKey = 0x21C9BD44, Pointer = "[[[main+4616648]+1C0]+C8]+40" },
             new() { Name = "KTeraRaids", Display = "Raid", SCBKey = 0xCAAC8800, Pointer = "[[[main+4616648]+1C0]+88]+40" },
         };
 
