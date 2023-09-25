@@ -4,6 +4,8 @@ using System;
 using System.Linq;
 using System.Timers;
 using System.Windows.Forms;
+using PKHeX.Core;
+using PKHeX.Core.Injection;
 
 namespace AutoModPlugins.GUI
 {
@@ -18,7 +20,15 @@ namespace AutoModPlugins.GUI
         private readonly RWMethod method;
         private readonly PokeSysBotMini? psb;
 
-        public SimpleHexEditor(byte[] originalBytes, PokeSysBotMini? bot = null, ulong addr = 0, RWMethod rwm = RWMethod.Heap, bool decrypt_blk = false, uint decrypt_key = 0, int header = 0)
+        public SimpleHexEditor(
+            byte[] originalBytes,
+            PokeSysBotMini? bot = null,
+            ulong addr = 0,
+            RWMethod rwm = RWMethod.Heap,
+            bool decrypt_blk = false,
+            uint decrypt_key = 0,
+            int header = 0
+        )
         {
             InitializeComponent();
             this.TranslateInterface(WinFormsTranslator.CurrentLanguage);
@@ -37,6 +47,7 @@ namespace AutoModPlugins.GUI
                 B_Update.Enabled = false;
                 RTB_RAM.ReadOnly = true;
             }
+
             block_key = decrypt_key;
             headersize = header;
             psb = bot;
@@ -54,6 +65,7 @@ namespace AutoModPlugins.GUI
                 refresh.Stop();
                 return;
             }
+
             try
             {
                 var length = Bytes.Length;
@@ -73,17 +85,27 @@ namespace AutoModPlugins.GUI
                     if (decrypt)
                         result = DecryptBlock(block_key, result)[headersize..];
                 }
+
                 var r_text = string.Join(" ", result.Select(z => $"{z:X2}"));
-                RTB_RAM.Invoke((MethodInvoker)delegate
-                {
-                    if (RTB_RAM.Text != r_text) // Prevent text updates if there is no update since they hinder copying
-                        RTB_RAM.Text = r_text;
-                });
+                RTB_RAM.Invoke(
+                    (MethodInvoker)
+                        delegate
+                        {
+                            if (RTB_RAM.Text != r_text) // Prevent text updates if there is no update since they hinder copying
+                                RTB_RAM.Text = r_text;
+                        }
+                );
                 if (RT_Timer.Enabled)
-                    RT_Timer.Invoke((MethodInvoker)delegate { refresh.Interval = (double)RT_Timer.Value; });
+                    RT_Timer.Invoke(
+                        (MethodInvoker)
+                            delegate
+                            {
+                                refresh.Interval = (double)RT_Timer.Value;
+                            }
+                    );
                 refresh.Start();
             }
-            catch // Execution stopped mid thread
+            catch
             {
                 refresh.Start();
             }
@@ -125,6 +147,7 @@ namespace AutoModPlugins.GUI
                     B_Update.Enabled = true;
                     RTB_RAM.ReadOnly = false;
                 }
+
                 // RTB_RAM.Text = string.Join(" ", Bytes.Select(z => $"{z:X2}")); // set back to the original value
                 refresh.Stop();
             }
@@ -140,9 +163,7 @@ namespace AutoModPlugins.GUI
                 {
                     refresh.Stop();
                 }
-                catch (Exception)
-                {
-                }
+                catch (Exception) { }
             }
         }
     }
@@ -168,6 +189,7 @@ namespace AutoModPlugins.GUI
                     Clipboard.SetText(string.Join(" ", split));
                 }
             }
+
             var handled = base.ProcessCmdKey(ref msg, e);
             if (method == CopyMethod.Integers)
             {
@@ -179,6 +201,7 @@ namespace AutoModPlugins.GUI
                     return true;
                 }
             }
+
             return handled;
         }
     }

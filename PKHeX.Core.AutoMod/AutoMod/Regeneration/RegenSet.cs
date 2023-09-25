@@ -12,17 +12,23 @@ namespace PKHeX.Core.AutoMod
         public RegenSetting Extra { get; }
         public ITrainerInfo? Trainer { get; }
         public StringInstructionSet Batch { get; }
-        public IReadOnlyList<StringInstruction> EncounterFilters { get; }
+        public IEnumerable<StringInstruction> EncounterFilters { get; }
         public IReadOnlyList<StringInstruction> VersionFilters { get; }
 
         public readonly bool HasExtraSettings;
         public readonly bool HasTrainerSettings;
         public bool HasBatchSettings => Batch.Filters.Count != 0 || Batch.Instructions.Count != 0;
 
-        public RegenSet(PKM pk) : this(Array.Empty<string>(), pk.Format)
+        public RegenSet(PKM pk)
+            : this(Array.Empty<string>(), pk.Format)
         {
             Extra.Ball = (Ball)pk.Ball;
-            Extra.ShinyType = pk.ShinyXor == 0 ? Shiny.AlwaysSquare : pk.IsShiny ? Shiny.AlwaysStar : Shiny.Never;
+            Extra.ShinyType =
+                pk.ShinyXor == 0
+                    ? Shiny.AlwaysSquare
+                    : pk.IsShiny
+                        ? Shiny.AlwaysStar
+                        : Shiny.Never;
             if (pk is IAlphaReadOnly { IsAlpha: true })
                 Extra.Alpha = true;
         }
@@ -48,8 +54,10 @@ namespace PKHeX.Core.AutoMod
                 sb.AppendLine(RegenUtil.GetSummary(Trainer));
             if (HasBatchSettings)
                 sb.AppendLine(RegenUtil.GetSummary(Batch));
-            if (EncounterFilters != null)
+            if (EncounterFilters.Count() > 0)
                 sb.AppendLine(RegenUtil.GetSummary(EncounterFilters));
+            if (VersionFilters.Count() > 0)
+                sb.AppendLine(RegenUtil.GetSummary(VersionFilters));
             return sb.ToString();
         }
     }

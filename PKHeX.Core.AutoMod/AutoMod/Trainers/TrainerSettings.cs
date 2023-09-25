@@ -40,7 +40,11 @@ namespace PKHeX.Core.AutoMod
         {
             if (!ver.IsValidSavedVersion())
                 ver = GameUtil.GameVersions.First(z => ver.Contains(z));
-            var fallback = lang == null ? new SimpleTrainerInfo(ver) : new SimpleTrainerInfo(ver) { Language = (int)lang };
+            var ctx = ver.GetContext();
+            var fallback =
+                lang == null
+                    ? new SimpleTrainerInfo(ver) { Context = ctx }
+                    : new SimpleTrainerInfo(ver) { Language = (int)lang, Context = ctx };
             fallback.OT = DefaultOT;
             fallback.TID16 = DefaultTID16;
             fallback.SID16 = DefaultSID16;
@@ -78,7 +82,12 @@ namespace PKHeX.Core.AutoMod
         /// <param name="fallback">Fallback trainer data if no new parent is found.</param>
         /// <param name="lang">Language to request for</param>
         /// <returns>Parent trainer data that originates from the <see cref="PKM.Version"/>. If none found, will return the <see cref="fallback"/>.</returns>
-        public static ITrainerInfo GetSavedTrainerData(int generation, GameVersion ver = GameVersion.Any, ITrainerInfo? fallback = null, LanguageID? lang = null)
+        public static ITrainerInfo GetSavedTrainerData(
+            int generation,
+            GameVersion ver = GameVersion.Any,
+            ITrainerInfo? fallback = null,
+            LanguageID? lang = null
+        )
         {
             ITrainerInfo? trainer = null;
             var special_version = FringeVersions.Any(z => z.Contains(ver));
@@ -88,7 +97,9 @@ namespace PKHeX.Core.AutoMod
                 return trainer;
 
             if (fallback == null)
-                return special_version ? DefaultFallback(ver, lang) : DefaultFallback(generation, lang);
+                return special_version
+                    ? DefaultFallback(ver, lang)
+                    : DefaultFallback(generation, lang);
             if (lang == null)
                 return fallback;
             if (lang == (LanguageID)fallback.Language)
@@ -104,7 +115,12 @@ namespace PKHeX.Core.AutoMod
         /// <param name="fallback">Fallback trainer data if no new parent is found.</param>
         /// <param name="lang">Language to request for</param>
         /// <returns>Parent trainer data that originates from the <see cref="PKM.Version"/>. If none found, will return the <see cref="fallback"/>.</returns>
-        public static ITrainerInfo GetSavedTrainerData(GameVersion version, int gen, ITrainerInfo? fallback = null, LanguageID? lang = null)
+        public static ITrainerInfo GetSavedTrainerData(
+            GameVersion version,
+            int gen,
+            ITrainerInfo? fallback = null,
+            LanguageID? lang = null
+        )
         {
             var byVer = Database.GetTrainer(version, lang);
             if (byVer is not null)
@@ -115,11 +131,15 @@ namespace PKHeX.Core.AutoMod
         /// <summary>
         /// Gets a possible Trainer Data for the provided <see cref="pk"/>.
         /// </summary>
-        /// <param name="pk">Pokémon that will receive the trainer details.</param>
+        /// <param name="pk">Pokï¿½mon that will receive the trainer details.</param>
         /// <param name="template_save">Fallback trainer data if no new parent is found.</param>
         /// <param name="lang">Language to request for</param>
         /// <returns>Parent trainer data that originates from the <see cref="PKM.Version"/>. If none found, will return the <see cref="fallback"/>.</returns>
-        public static ITrainerInfo GetSavedTrainerData(PKM pk, ITrainerInfo template_save, LanguageID? lang = null)
+        public static ITrainerInfo GetSavedTrainerData(
+            PKM pk,
+            ITrainerInfo template_save,
+            LanguageID? lang = null
+        )
         {
             int origin = pk.Generation;
             int format = pk.Format;

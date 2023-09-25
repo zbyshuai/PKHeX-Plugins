@@ -27,12 +27,10 @@ namespace AutoModTests
             RecentTrainerCache.SetRecentTrainer(trainer);
 
             var set = new ShowdownSet(txt);
-            var pkm = sav.GetLegalFromSet(set, out _);
+            var almres = sav.GetLegalFromSet(set);
             APILegality.EnableDevMode = dev;
 
-            var la = new LegalityAnalysis(pkm);
-            if (!la.Valid)
-                Debug.WriteLine(la.Report() + "\n");
+            var la = new LegalityAnalysis(almres.Created);
             la.Valid.Should().BeTrue();
         }
         private const string problemsolving =
@@ -40,7 +38,7 @@ namespace AutoModTests
 IVs: 17 Def / 0 Spe
 Lonely Nature";
         private const string Darkrai =
-@"Darkrai
+            @"Darkrai
 IVs: 7 Atk
 Ability: Bad Dreams
 Shiny: Yes
@@ -51,7 +49,7 @@ Timid Nature
 - Double Team";
 
         private const string Genesect =
-@"Genesect
+            @"Genesect
 Ability: Download
 Shiny: Yes
 Hasty Nature
@@ -61,7 +59,7 @@ Hasty Nature
 - Shift Gear";
 
         private const string Meowstic =
-@"Meowstic-F @ Life Orb
+            @"Meowstic-F @ Life Orb
 Ability: Competitive
 EVs: 4 Def / 252 SpA / 252 Spe
 Timid Nature
