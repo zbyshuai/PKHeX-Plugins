@@ -248,9 +248,6 @@ namespace PKHeX.Core.AutoMod
                     return;
 
                 var nick = et.GetNickname(pk.Language);
-                //Meister Magikarp's nickname is based on the save language instead of the pk language
-                if (enc is EncounterTrade8b { Species: (int)Species.Magikarp })
-                    nick = et.GetNickname(handler.Language);
                 if (nick != null)
                 {
                     tb.Add(
@@ -552,13 +549,6 @@ namespace PKHeX.Core.AutoMod
             pk.IV_SPA = ivs[4];
             pk.IV_SPD = ivs[5];
         }
-        public static MoveType GetValidOpergonTeraType(byte form) => (form & 3) switch
-        {
-            0 => MoveType.Grass,
-            1 => MoveType.Water,
-            2 => MoveType.Fire,
-            3 => MoveType.Rock,
-            _ => (MoveType)TeraTypeUtil.OverrideNone,
-        };
+     
     }
 }

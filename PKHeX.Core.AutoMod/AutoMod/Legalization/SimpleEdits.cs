@@ -639,13 +639,11 @@ namespace PKHeX.Core.AutoMod
             }
         }
 
-                if (pk.Version < 50)
-                    t.TeraTypeOverride = t.TeraTypeOriginal;
-            }
+           
            
 
 
-        }
+        
 
         public static void RestoreIVs(this PKM pk, int[] IVs)
         {
@@ -965,8 +963,6 @@ namespace PKHeX.Core.AutoMod
                     );
 
             }
-        }
-                master.SetMoveShopFlags(pk);
         }
 
         public static void SetSuggestedContestStats(this PKM pk, IEncounterable enc)
