@@ -41,5 +41,6 @@ namespace PKHeX.Core.Injection
         SV_v131 = 28,
         SV_v132 = 29,
         SV_v201 = 30,
+        SV_v202 = 31,
     }
 }
