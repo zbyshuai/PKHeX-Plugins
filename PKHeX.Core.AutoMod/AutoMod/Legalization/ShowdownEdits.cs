@@ -15,7 +15,7 @@ namespace PKHeX.Core.AutoMod
         /// </summary>
         /// <param name="pk">PKM whose gender needs to be toggled</param>
         /// <param name="set">Showdown Set for Gender reference</param>
-        public static void FixGender(this PKM pk, IEncounterable enc, IBattleTemplate set, List<ALMTraceback> tb)
+        public static void FixGender(this PKM pk, IEncounterable enc, IBattleTemplate set, ITracebackHandler tb)
         {
             pk.ApplySetGender(set);
             var la = new LegalityAnalysis(pk);
