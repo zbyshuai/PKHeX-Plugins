@@ -88,13 +88,8 @@ namespace PKHeX.Core.AutoMod
         {
             if (pk.Ability != set.Ability)
                 pk.RefreshAbility(pk is PK5 { HiddenAbility: true } ? 2 : pk.AbilityNumber >> 1);
-            if (pk.Ability != set.Ability && pk.Context >= EntityContext.Gen8 && set.Ability != -1)
-                pk.RefreshAbility(
-                    pk is PK5 { HiddenAbility: true }
-                        ? 2
-                        : pk.PersonalInfo.GetIndexOfAbility(set.Ability)
-                );
-
+            if (pk.Ability != set.Ability && pk.Context >= EntityContext.Gen6 && set.Ability != -1)
+                pk.RefreshAbility(pk is PK5 { HiddenAbility: true } ? 2 : pk.PersonalInfo.GetIndexOfAbility(set.Ability));
             if (preference <= 0)
                 return;
 
@@ -181,8 +176,7 @@ namespace PKHeX.Core.AutoMod
             pk.SetSuggestedFormArgument(enc.Species);
             if (evolutionRequired || formchange || (pk.Ability != set.Ability && set.Ability != -1))
             {
-                tb.Handle(TracebackType.Ability, $"Set Ability after evolution to {set.Ability}");
-                var abilitypref = enc.Ability;
+                var abilitypref = (AbilityPermission)pk.PersonalInfo.GetIndexOfAbility(set.Ability);
                 SetAbility(pk, set, abilitypref);
             }
             if (pk.CurrentLevel != set.Level)
@@ -407,18 +401,19 @@ namespace PKHeX.Core.AutoMod
             switch ((Species)pk.Species)
             {
                 case Species.Arceus:
+                    byte forma = FormItem.GetFormArceus(pk.HeldItem, pk.Format);
+                    pk.HeldItem = pk.Form != forma ? 0 : pk.HeldItem;
+                    pk.Form = pk.Form != forma ? (byte)0 : forma;
+                    break;
                 case Species.Silvally:
+                    byte forms = FormItem.GetFormSilvally(pk.HeldItem);
+                    pk.HeldItem = pk.Form != forms ? 0 : pk.HeldItem;
+                    pk.Form = pk.Form != forms ? (byte)0 : forms;
+                    break;
                 case Species.Genesect:
-                    bool valid = FormItem.TryGetForm(
-                        pk.Species,
-                        pk.HeldItem,
-                        pk.Format,
-                        out byte pkform
-                    );
-                    if (!valid)
-                        break;
-                    pk.HeldItem = pk.Form != pkform ? 0 : pk.HeldItem;
-                    pk.Form = pk.Form != pkform ? (byte)0 : pkform;
+                    byte formg = FormItem.GetFormGenesect(pk.HeldItem);
+                    pk.HeldItem = pk.Form != formg ? 0 : pk.HeldItem;
+                    pk.Form = pk.Form != formg ? (byte)0 : formg;
                     break;
                 case Species.Giratina
                     when pk.Form == 1 && pk.HeldItem != 112 && pk.HeldItem != 1779:
