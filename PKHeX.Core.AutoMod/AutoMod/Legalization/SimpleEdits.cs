@@ -548,8 +548,8 @@ namespace PKHeX.Core.AutoMod
 
             if (Gigantamax.CanToggle(pk.Species, pk.Form, enc.Species, enc.Form))
                 gmax.CanGigantamax = set.CanGigantamax; // soup hax
-                tb.Handle(TracebackType.Misc, "Add gigantamax factor through GMax soup");
-            }
+                
+            
         }
 
         public static void SetGimmicks(this PKM pk, IBattleTemplate set, ITracebackHandler tb)
