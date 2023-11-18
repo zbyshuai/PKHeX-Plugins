@@ -159,15 +159,6 @@ namespace AutoModPlugins
 
             Debug.WriteLine("Single Set Genning Complete. Loading final data to tabs.");
             PKMEditor.PopulateFields(legal);
-            var tracebackout = almres.Traceback != null ? almres.Traceback.Output() : null;
-            if (tracebackout != null)
-                WinFormsUtil.Prompt(
-                    MessageBoxButtons.OK,
-                    string.Join(
-                        Environment.NewLine,
-                        tracebackout.Select(z => $"{z.Identifier}: {z.Comment}")
-                    )
-                );
 
             var timespan = timer.Elapsed;
             Debug.WriteLine(
@@ -281,7 +272,6 @@ namespace AutoModPlugins
             APILegality.Timeout = settings.Timeout;
             APILegality.ForceLevel100for50 = settings.ForceLevel100for50;
             APILegality.AllowHOMETransferGeneration = settings.AllowHOMETransferGeneration;
-            APILegality.TracebackHandlerType = settings.TracebackHandlerType;
             Legalizer.EnableEasterEggs = settings.EnableEasterEggs;
             SmogonGenner.PromptForImport = settings.PromptForSmogonImport;
             ModLogic.cfg = new LivingDexConfig
