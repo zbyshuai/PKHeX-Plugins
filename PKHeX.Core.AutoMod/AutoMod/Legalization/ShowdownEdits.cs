@@ -144,7 +144,7 @@ namespace PKHeX.Core.AutoMod
             pk.SetSuggestedFormArgument(enc.Species);
             if (evolutionRequired || formchange || pk.Ability != set.Ability)
             {
-                var abilitypref = enc.Ability;
+                var abilitypref = (AbilityPermission)pk.PersonalInfo.GetIndexOfAbility(set.Ability);
                 SetAbility(pk, set, abilitypref);
             }
             if (pk.CurrentLevel != set.Level)
