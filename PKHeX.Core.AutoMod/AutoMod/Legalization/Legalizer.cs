@@ -162,7 +162,7 @@ namespace PKHeX.Core.AutoMod
             if (EnableEasterEggs)
             {
                 var easteregg = tr.GetEasterEggFromSet(set, template);
-                return new AsyncLegalizationResult(easteregg, almres.Status, almres.Traceback);
+                return new AsyncLegalizationResult(easteregg, almres.Status);
             }
 
             return almres;
@@ -249,7 +249,7 @@ namespace PKHeX.Core.AutoMod
             var pkm = almres.Created;
             var trainer = TrainerSettings.GetSavedTrainerData(pkm, tr);
             pkm.SetAllTrainerData(trainer);
-            return new AsyncLegalizationResult(pkm, almres.Status, almres.Traceback);
+            return new AsyncLegalizationResult(pkm, almres.Status);
         }
 
         /// <summary>

@@ -15,7 +15,7 @@ namespace PKHeX.Core.AutoMod
         /// </summary>
         /// <param name="pk">PKM whose gender needs to be toggled</param>
         /// <param name="set">Showdown Set for Gender reference</param>
-        public static void FixGender(this PKM pk, IEncounterable enc, IBattleTemplate set, ITracebackHandler tb)
+        public static void FixGender(this PKM pk, IBattleTemplate set)
         {
             pk.ApplySetGender(set);
             var la = new LegalityAnalysis(pk);
@@ -29,7 +29,6 @@ namespace PKHeX.Core.AutoMod
                 pk.Gender = fg.Gender;
             if (pk.Gender is not 0 and not 1)
                 pk.Gender = pk.GetSaneGender();
-            tb.Handle(TracebackType.Gender, $"Set Sane Gender as {(Gender)pk.Gender}");
         }
 
         public static void SetNature(PKM pk, IBattleTemplate set, IEncounterable enc)
@@ -41,12 +40,7 @@ namespace PKHeX.Core.AutoMod
             {
                 if (pk.Form == ToxtricityUtil.GetAmpLowKeyResult(val))
                     pk.Nature = val; // StatNature already set
-                if (
-                    pk.Format >= 8
-                    && pk.StatNature != pk.Nature
-                    && pk.StatNature != 12
-                    && (pk.StatNature > 24 || pk.StatNature % 6 == 0)
-                ) // Only Serious Mint for Neutral Natures
+                if (pk.Format >= 8 && pk.StatNature != pk.Nature && pk.StatNature != 12 && (pk.StatNature > 24 || pk.StatNature % 6 == 0)) // Only Serious Mint for Neutral Natures
                     pk.StatNature = 12;
                 return;
             }
@@ -63,24 +57,9 @@ namespace PKHeX.Core.AutoMod
             var la2 = new LegalityAnalysis(pk);
             var enc1 = la.EncounterMatch;
             var enc2 = la2.EncounterMatch;
-            if (
-                (
-                    (!ReferenceEquals(enc1, enc2) && enc1 is not EncounterEgg)
-                    || la2.Results.Any(
-                        z =>
-                            (
-                                z.Identifier == CheckIdentifier.Nature
-                                || z.Identifier == CheckIdentifier.Encounter
-                            ) && !z.Valid
-                    )
-                ) && enc is not EncounterEgg
-            )
+            if (((!ReferenceEquals(enc1, enc2) && enc1 is not EncounterEgg) || la2.Results.Any(z =>(z.Identifier == CheckIdentifier.Nature || z.Identifier == CheckIdentifier.Encounter) && !z.Valid)) && enc is not EncounterEgg)
                 pk.Nature = orig;
-            if (
-                pk.Format >= 8
-                && pk.StatNature != pk.Nature
-                && pk.StatNature is 0 or 6 or 18 or >= 24
-            ) // Only Serious Mint for Neutral Natures
+            if (pk.Format >= 8 && pk.StatNature != pk.Nature && pk.StatNature is 0 or 6 or 18 or >= 24) // Only Serious Mint for Neutral Natures
                 pk.StatNature = (int)Nature.Serious;
         }
 
@@ -106,13 +85,7 @@ namespace PKHeX.Core.AutoMod
             if (pref == 2 && pi is IPersonalAbility12H h && h.AbilityH == set.Ability)
                 pk.AbilityNumber = (int)preference;
             // 3/4/5 transferred to 6+ will have ability 1 if both abilitynum 1 and 2 are the same. Capsule cant convert 1 -> 2 if the abilities arnt unique
-            if (
-                pk.Format >= 6
-                && pk.Generation is 3 or 4 or 5
-                && pk.AbilityNumber != 4
-                && pi is IPersonalAbility12 a
-                && a.Ability1 == a.Ability2
-            )
+            if (pk.Format >= 6 && pk.Generation is 3 or 4 or 5 && pk.AbilityNumber != 4 && pi is IPersonalAbility12 a && a.Ability1 == a.Ability2)
                 pk.AbilityNumber = 1;
             if (pk is G3PKM && pi is IPersonalAbility12 b && b.Ability1 == b.Ability2)
                 pk.AbilityNumber = 1;
@@ -131,29 +104,24 @@ namespace PKHeX.Core.AutoMod
             IBattleTemplate set,
             byte Form,
             IEncounterable enc,
-            LanguageID? lang,
-            ITracebackHandler tb
-        )
+            LanguageID? lang)
         {
             pk.ApplySetGender(set);
-            pk.SetRecordFlags(set.Moves, tb); // Set record flags before evolution (TODO: what if middle evolution has exclusive record moves??)
+            pk.SetRecordFlags(set.Moves); // Set record flags before evolution (TODO: what if middle evolution has exclusive record moves??)
 
             var evolutionRequired = enc.Species != set.Species;
             var formchange = Form != pk.Form;
             if (evolutionRequired)
             {
-                tb.Handle(TracebackType.Species, $"Evolve Pre-Evolution to {set.Species}");
                 pk.Species = set.Species;
             }
             if (formchange)
             {
-                tb.Handle(TracebackType.Form, $"Fix Form to {Form}");
                 pk.Form = Form;
             }
 
             if ((evolutionRequired || formchange) && pk is IScaledSizeValue sv)
             {
-                tb.Handle(TracebackType.Size, "Fix Evolution Height/Weight");
                 sv.HeightAbsolute = sv.CalcHeightAbsolute;
                 sv.WeightAbsolute = sv.CalcWeightAbsolute;
             }
@@ -166,7 +134,6 @@ namespace PKHeX.Core.AutoMod
                     var result = ToxtricityUtil.GetAmpLowKeyResult(pk.Nature);
                     if (result == pk.Form)
                     {
-                        tb.Handle(TracebackType.Nature, "Toxtricity Nature Reroll");
                         break;
                     }
                     pk.Nature = Util.Rand.Next(25);
@@ -214,7 +181,6 @@ namespace PKHeX.Core.AutoMod
                 var nick = et.GetNickname(pk.Language);
                 if (nick != null)
                 {
-                    tb.Handle(TracebackType.Encounter, $"Encounter Fixed Nickname set to {nick}");
                     pk.Nickname = nick;
                     return;
                 }
@@ -307,14 +273,11 @@ namespace PKHeX.Core.AutoMod
         public static void SetMovesEVs(
             this PKM pk,
             IBattleTemplate set,
-            IEncounterable enc,
-            ITracebackHandler tb
-        )
+            IEncounterable enc)
         {
             // If no moves are requested, just keep the encounter moves
             if (set.Moves[0] != 0)
             {
-                tb.Handle(TracebackType.Moves, $"Set Requested Moves: {set.Moves}");
                 pk.SetMoves(set.Moves, pk is not PA8);
             }
 
@@ -326,7 +289,6 @@ namespace PKHeX.Core.AutoMod
                 la.GetSuggestedCurrentMoves(moves);
                 pk.SetMoves(moves, pk is not PA8);
                 pk.FixMoves();
-                tb.Handle(TracebackType.Moves, "Fix Invalid Moves based on suggested moves");
             }
 
             if (la.Parsed && !pk.FatefulEncounter)
@@ -336,19 +298,16 @@ namespace PKHeX.Core.AutoMod
                 la.GetSuggestedRelearnMoves(moves, enc);
                 pk.ClearRelearnMoves();
                 pk.SetRelearnMoves(moves);
-                tb.Handle(TracebackType.Moves, "Set Relearn Moves for encounter");
             }
             la = new LegalityAnalysis(pk);
             if (la.Info.Relearn.Any(z => z.Judgement == Severity.Invalid))
             {
                 pk.ClearRelearnMoves();
-                tb.Handle(TracebackType.Moves, "Clear Invalid Relean Moves");
             }
 
             if (pk is PB7)
             {
                 pk.SetAwakenedValues(set);
-                tb.Handle(TracebackType.AVs, "Set Awakened Values");
                 return;
             }
             // In Generation 1/2 Format sets, when EVs are not specified at all, it implies maximum EVs instead!
@@ -356,12 +315,10 @@ namespace PKHeX.Core.AutoMod
             if (pk is GBPKM gb && set.EVs.All(z => z == 0))
             {
                 gb.EV_HP = gb.EV_ATK = gb.EV_DEF = gb.EV_SPC = gb.EV_SPE = gb.MaxEV;
-                tb.Handle(TracebackType.EVs, "Set EVs for GBPKM");
                 return;
             }
 
             pk.SetEVs(set.EVs);
-            tb.Handle(TracebackType.EVs, "Set Requested EVs");
         }
 
         /// <summary>
@@ -378,14 +335,12 @@ namespace PKHeX.Core.AutoMod
         /// </summary>
         /// <param name="pk">Pok�mon to modify</param>
         /// <param name="set">IBattleset to grab the item</param>
-        public static void SetHeldItem(this PKM pk, IBattleTemplate set, ITracebackHandler tb)
+        public static void SetHeldItem(this PKM pk, IBattleTemplate set)
         {
             pk.ApplyHeldItem(set.HeldItem, set.Context);
             pk.FixInvalidFormItems(); // arceus, silvally, giratina, genesect fix
             if (!ItemRestrictions.IsHeldItemAllowed(pk) || pk is PB7)
                 pk.HeldItem = 0; // Remove the item if the item is illegal in its generation
-            if (set.HeldItem != pk.HeldItem)
-                tb.Handle(TracebackType.Item, $"Modified item to {pk.HeldItem}");
         }
 
         /// <summary>
@@ -411,9 +366,11 @@ namespace PKHeX.Core.AutoMod
                     pk.Form = pk.Form != forms ? (byte)0 : forms;
                     break;
                 case Species.Genesect:
-                    byte formg = FormItem.GetFormGenesect(pk.HeldItem);
-                    pk.HeldItem = pk.Form != formg ? 0 : pk.HeldItem;
-                    pk.Form = pk.Form != formg ? (byte)0 : formg;
+                    bool valid = FormItem.TryGetForm(pk.Species, pk.HeldItem, pk.Format, out byte pkform);
+                    if (!valid)
+                        break;
+                    pk.HeldItem = pk.Form != pkform ? 0 : pk.HeldItem;
+                    pk.Form = pk.Form != pkform ? (byte)0 : pkform;
                     break;
                 case Species.Giratina
                     when pk.Form == 1 && pk.HeldItem != 112 && pk.HeldItem != 1779:
@@ -453,8 +410,7 @@ namespace PKHeX.Core.AutoMod
         private static void SetRandomIVsTemplate(
             this PKM pk,
             IndividualValueSet template,
-            int minFlawless = 0
-        )
+            int minFlawless = 0)
         {
             Span<int> ivs = stackalloc int[6];
             var rnd = Util.Rand;

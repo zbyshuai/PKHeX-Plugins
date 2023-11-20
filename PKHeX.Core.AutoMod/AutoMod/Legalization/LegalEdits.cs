@@ -92,22 +92,14 @@ namespace PKHeX.Core.AutoMod
             this PKM pk,
             IBattleTemplate set,
             IEncounterable enc,
-            bool allValid,
-            ITracebackHandler tb
-        )
+            bool allValid)
         {
             if (!allValid)
                 return;
             RibbonApplicator.SetAllValidRibbons(pk);
-            tb.Handle(TracebackType.Misc, "Set all valid ribbons");
-            if (
-                pk is PK8 pk8
-                && pk8.Species != (int)Species.Shedinja
-                && pk8.GetRandomValidMark(set, enc, out var mark)
-            )
+            if (pk is PK8 pk8 && pk8.Species != (int)Species.Shedinja && pk8.GetRandomValidMark(set, enc, out var mark))
             {
                 pk8.SetRibbonIndex(mark);
-                tb.Handle(TracebackType.Misc, $"Set random valid mark {mark}");
             }
         }
     }
