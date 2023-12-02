@@ -83,16 +83,7 @@ namespace PKHeX.Core.AutoMod
                 var num_forms = pt[s].FormCount;
                 var str = GameInfo.Strings;
                 if (num_forms == 1 && cfg.IncludeForms) // Validate through form lists
-                    num_forms = (byte)
-                        FormConverter
-                            .GetFormList(
-                                s,
-                                str.types,
-                                str.forms,
-                                GameInfo.GenderSymbolUnicode,
-                                sav.Context
-                            )
-                            .Length;
+                    num_forms = (byte)FormConverter.GetFormList(s, str.types, str.forms, GameInfo.GenderSymbolUnicode, sav.Context).Length;
                 for (byte f = 0; f < num_forms; f++)
                 {
                     if (
@@ -105,11 +96,7 @@ namespace PKHeX.Core.AutoMod
                         continue;
 
                     var pk = AddPKM(sav, tr, s, f, cfg.SetShiny, cfg.SetAlpha, cfg.NativeOnly);
-                    if (
-                        pk is not null
-                        && pklist.FirstOrDefault(x => x.Species == pk.Species && x.Form == pk.Form)
-                            is null
-                    )
+                    if (pk is not null && pklist.FirstOrDefault(x => x.Species == pk.Species && x.Form == pk.Form) is null)
                     {
                         pklist.Add(pk);
                         if (!cfg.IncludeForms)
