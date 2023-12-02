@@ -248,6 +248,10 @@ namespace PKHeX.Core.AutoMod
 
             var sset = new ShowdownSet(setText);
             var set = new RegenTemplate(sset) { Nickname = string.Empty };
+            if (set.Species == 664 || set.Species == 665)
+            {
+                set.Form = 0;
+            }
             template.ApplySetDetails(set);
 
             var t = template.Clone();
