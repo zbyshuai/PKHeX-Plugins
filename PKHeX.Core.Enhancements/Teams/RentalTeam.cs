@@ -15,7 +15,7 @@ namespace PKHeX.Core.Enhancements
         public IReadOnlyList<byte> UnknownData { get; }
         private static readonly SaveFile Dummy = new SAV7USUM();
 
-        public RentalTeam(ReadOnlySpan<byte> data)
+        public RentalTeam(byte[] data)
         {
             Debug.WriteLine(data.Length);
             Team = new[]

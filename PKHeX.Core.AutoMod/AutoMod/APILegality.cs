@@ -41,12 +41,7 @@ namespace PKHeX.Core.AutoMod
         /// <param name="template">rough pkm that has all the <see cref="set"/> values entered</param>
         /// <param name="set">Showdown set object</param>
         /// <param name="satisfied">If the final result is legal or not</param>
-        public static PKM GetLegalFromTemplate(
-            this ITrainerInfo dest,
-            PKM template,
-            IBattleTemplate set,
-            out LegalizationResult satisfied,
-            bool nativeOnly = false)
+        public static PKM GetLegalFromTemplate(this ITrainerInfo dest, PKM template, IBattleTemplate set, out LegalizationResult satisfied, bool nativeOnly = false)
         {
             RegenSet regen;
             if (set is RegenTemplate t)
@@ -173,7 +168,7 @@ namespace PKHeX.Core.AutoMod
                 {
                     if (!Gigantamax.CanToggle(pk.Species, pk.Form, enc.Species, enc.Form))
                         continue;
-                    }
+
 
                     gmax.CanGigantamax = set.CanGigantamax; // soup hax
                 }
@@ -206,12 +201,17 @@ namespace PKHeX.Core.AutoMod
                     satisfied = LegalizationResult.Regenerated;
                     return pk;
                 }
+
                 last = pk;
                 Debug.WriteLine($"{la.Report()}\n");
             }
             satisfied = LegalizationResult.Failed;
             return last ?? template;
+
         }
+
+
+
 
         private static PKM GetPokemonFromEncounter(
             this IEncounterable enc,
@@ -2088,3 +2088,4 @@ namespace PKHeX.Core.AutoMod
         }
     }
 }
+

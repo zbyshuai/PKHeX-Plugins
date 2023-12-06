@@ -122,7 +122,7 @@ namespace PKHeX.Core.Injection
             var nx = (ICommunicatorNX)psb.com;
 
             var ptrSway = psb.GetCachedPointer(nx, ptr.ExtendPointer(0x0), false);
-            var sway_grass = psb.com.ReadBytes(ptrSway, 0x40).AsSpan();
+            var sway_grass = psb.com.ReadBytes(ptrSway, 0x40);
 
             var ptrOne = psb.GetCachedPointer(nx, ptr.ExtendPointer(0x8, 0x20, 0x10), false);
             var grass_one = psb.com.ReadBytes(ptrOne, 0x28);
@@ -148,7 +148,7 @@ namespace PKHeX.Core.Injection
             return block;
         }
 
-        public void Setter(PokeSysBotMini psb, Span<byte> data)
+        public void Setter(PokeSysBotMini psb, byte[] data)
         {
             var ptr = GetSwayGrassPointers(psb.Version);
             if (ptr == null)
