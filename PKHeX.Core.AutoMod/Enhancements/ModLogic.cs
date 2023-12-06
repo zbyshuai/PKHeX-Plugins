@@ -47,7 +47,6 @@ namespace PKHeX.Core.AutoMod
         /// Gets a living dex (one per species, not every form)
         /// </summary>
         /// <param name="sav">Save File to receive the generated <see cref="PKM"/>.</param>
-        /// <param name="speciesIDs">Species IDs to generate</param>
         /// <returns>Consumable list of newly generated <see cref="PKM"/> data.</returns>
         public static IEnumerable<PKM> GenerateLivingDex(this SaveFile sav) =>
             sav.GenerateLivingDex(cfg);
@@ -56,15 +55,10 @@ namespace PKHeX.Core.AutoMod
         /// Gets a living dex (one per species, not every form)
         /// </summary>
         /// <param name="sav">Save File to receive the generated <see cref="PKM"/>.</param>
-        /// <param name="speciesIDs">Species IDs to generate</param>
-        /// <param name="includeforms">Include all forms in the resulting list of data</param>
-        /// <param name="shiny"></param>
-        /// <param name="alpha"></param>
-        /// <param name="attempts"></param>
         /// <returns>Consumable list of newly generated <see cref="PKM"/> data.</returns>
         public static IEnumerable<PKM> GenerateLivingDex(this SaveFile sav, LivingDexConfig cfg)
         {
-            List<PKM> pklist = new();
+            List<PKM> pklist = [];
             var tr = APILegality.UseTrainerData
                 ? TrainerSettings.GetSavedTrainerData(
                     sav.Version,
@@ -117,35 +111,14 @@ namespace PKHeX.Core.AutoMod
             bool nativeOnly
         )
         {
-            if (
-                tr.GetRandomEncounter(species, form, shiny, alpha, nativeOnly, out var pk)
-                && pk != null
-                && pk.Species > 0
-            )
+            if (tr.GetRandomEncounter(species, form, shiny, alpha, nativeOnly, out var pk) && pk?.Species > 0)
             {
                 pk.Heal();
                 return pk;
             }
-            if (
-                sav is SAV2
-                && GetRandomEncounter(
-                    new SAV1(GameVersion.Y)
-                    {
-                        Language = tr.Language,
-                        OT = tr.OT,
-                        TID16 = tr.TID16
-                    },
-                    species,
-                    form,
-                    shiny,
-                    false,
-                    nativeOnly,
-                    out var pkm
-                )
-                && pkm is PK1 pk1
-            )
-                return pk1.ConvertToPK2();
-            return null;
+            return sav is SAV2 && GetRandomEncounter(new SAV1(GameVersion.Y) { Language = tr.Language, OT = tr.OT, TID16 = tr.TID16 }, species, form, shiny, false, nativeOnly, out var pkm) && pkm is PK1 pk1
+                ? pk1.ConvertToPK2()
+                : (PKM?)null;
         }
 
         /// <summary>
@@ -156,7 +129,6 @@ namespace PKHeX.Core.AutoMod
         /// <param name="form">Form to generate; if left null, picks first encounter</param>
         /// <param name="shiny"></param>
         /// <param name="alpha"></param>
-        /// <param name="attempt"></param>
         /// <param name="pk">Result legal pkm</param>
         /// <returns>True if a valid result was generated, false if the result should be ignored.</returns>
         public static bool GetRandomEncounter(
@@ -178,7 +150,6 @@ namespace PKHeX.Core.AutoMod
         /// <param name="form">Form to generate; if left null, picks first encounter</param>
         /// <param name="shiny"></param>
         /// <param name="alpha"></param>
-        /// <param name="attempt"></param>
         /// <param name="pk">Result legal pkm</param>
         /// <returns>True if a valid result was generated, false if the result should be ignored.</returns>
         public static bool GetRandomEncounter(
@@ -209,7 +180,6 @@ namespace PKHeX.Core.AutoMod
         /// <param name="form">Form to generate; if left null, picks first encounter</param>
         /// <param name="shiny"></param>
         /// <param name="alpha"></param>
-        /// <param name="attempt"></param>
         /// <returns>Result legal pkm, null if data should be ignored.</returns>
         private static PKM? GetRandomEncounter(
             PKM blank,
@@ -279,9 +249,7 @@ namespace PKHeX.Core.AutoMod
                 success = LegalizationResult.Regenerated;
             }
 
-            if (success == LegalizationResult.Regenerated)
-                return pk;
-            return null;
+            return success == LegalizationResult.Regenerated ? pk : null;
         }
 
         private static bool GetIsFormInvalid(this PKM pk, ITrainerInfo tr, byte form)

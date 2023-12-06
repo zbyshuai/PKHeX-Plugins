@@ -14,7 +14,7 @@ namespace PKHeX.Core.AutoMod
         }
 
         internal static readonly int[] RoamingMetLocationBDSP =
-        {
+        [
             197,
             201,
             354,
@@ -48,11 +48,10 @@ namespace PKHeX.Core.AutoMod
             414,
             416,
             420,
-        };
+        ];
 
         internal static readonly HashSet<int> AlolanOriginForms =
-            new()
-            {
+            [
                 019, // Rattata
                 020, // Raticate
                 027, // Sandshrew
@@ -68,7 +67,7 @@ namespace PKHeX.Core.AutoMod
                 076, // Golem
                 088, // Grimer
                 089, // Muk
-            };
+            ];
 
         public static bool IsShinyLockedSpeciesForm(int species, int form)
         {
@@ -77,8 +76,7 @@ namespace PKHeX.Core.AutoMod
         }
 
         private static readonly HashSet<(Species, int)> ShinyLockedSpeciesForm =
-            new()
-            {
+            [
                 // Cap Pikachus
                 (Pikachu, 1),
                 (Pikachu, 2),
@@ -135,16 +133,14 @@ namespace PKHeX.Core.AutoMod
                 (Miraidon, 4),
                 (WalkingWake, 0),
                 (IronLeaves, 0),
-            };
+            ];
 
         public static readonly HashSet<int> Gen1TradeEvos =
-            new() { (int)Kadabra, (int)Machoke, (int)Graveler, (int)Haunter };
+            [(int)Kadabra, (int)Machoke, (int)Graveler, (int)Haunter];
 
         private static Func<int, int, int> FlagIVsAutoMod(PKM pk)
         {
-            if (pk.Format < 7)
-                return GetSimpleMarking;
-            return GetComplexMarking;
+            return pk.Format < 7 ? GetSimpleMarking : GetComplexMarking;
 
             // value, index
             static int GetSimpleMarking(int val, int _) => val == 31 ? 1 : 0;
@@ -327,9 +323,7 @@ namespace PKHeX.Core.AutoMod
                 var xor = pk.ShinyXor;
                 if (enc is EncounterStatic8U && xor != 1 && shiny != Shiny.AlwaysSquare)
                     continue;
-                if ((shiny == Shiny.AlwaysStar && xor == 1)
-                    || (shiny == Shiny.AlwaysSquare && xor == 0)
-                    || ((shiny is Shiny.Always or Shiny.Random) && xor < 2)) // allow xor1 and xor0 for den shinies
+                if ((shiny == Shiny.AlwaysStar && xor == 1) || (shiny == Shiny.AlwaysSquare && xor == 0) || ((shiny is Shiny.Always or Shiny.Random) && xor < 2)) // allow xor1 and xor0 for den shinies
                     return;
             }
         }
@@ -443,13 +437,17 @@ namespace PKHeX.Core.AutoMod
         {
             bool neverOT = !HistoryVerifier.GetCanOTHandle(enc, pk, enc.Generation);
             if (enc.Generation <= 2)
+            {
                 pk.OT_Friendship = GetBaseFriendship(EntityContext.Gen7, pk.Species, pk.Form); // VC transfers use SM personal info
+            }
             else if (neverOT)
             {
                 pk.OT_Friendship = GetBaseFriendship(enc);
             }
             else
+            {
                 pk.CurrentFriendship = pk.HasMove(218) ? 0 : 255;
+            }
         }
 
         public static void SetBelugaValues(this PKM pk)
@@ -704,15 +702,12 @@ namespace PKHeX.Core.AutoMod
             if (flawless == -1)
                 return false;
             APILegality.FindWildPIDIV8(pk, requestedShiny, flawless, seed);
-            if (!eo.IsOverworldCorrelationCorrect(pk))
-                return false;
-
-            return requestedShiny switch
-            {
-                Shiny.AlwaysStar when pk.ShinyXor is 0 or > 15 => false,
-                Shiny.Never when pk.ShinyXor < 16 => false,
-                _ => true,
-            };
+            return eo.IsOverworldCorrelationCorrect(pk) && requestedShiny switch
+                {
+                    Shiny.AlwaysStar when pk.ShinyXor is 0 or > 15 => false,
+                    Shiny.Never when pk.ShinyXor < 16 => false,
+                    _ => true,
+                };
         }
 
         public static bool ExistsInGame(this GameVersion destVer, ushort species, byte form)
@@ -725,9 +720,9 @@ namespace PKHeX.Core.AutoMod
                 return PersonalTable.SWSH.IsPresentInGame(species, form);
             if (GameVersion.PLA.Contains(destVer))
                 return PersonalTable.LA.IsPresentInGame(species, form);
-            if (GameVersion.SV.Contains(destVer))
-                return PersonalTable.SV.IsPresentInGame(species, form);
-            return (uint)species <= destVer.GetMaxSpeciesID();
+            return GameVersion.SV.Contains(destVer)
+                ? PersonalTable.SV.IsPresentInGame(species, form)
+                : (uint)species <= destVer.GetMaxSpeciesID();
         }
 
         public static GameVersion GetIsland(this GameVersion ver)
@@ -778,7 +773,9 @@ namespace PKHeX.Core.AutoMod
             if (pk is ITechRecord tr and not PA8)
             {
                 if (moves.Length != 0)
+                {
                     tr.SetRecordFlags(moves);
+                }
                 else
                 {
                     var permit = tr.Permit;
@@ -793,7 +790,7 @@ namespace PKHeX.Core.AutoMod
 
             if (pk is IMoveShop8Mastery master)
             {
-                MoveShopRecordApplicator.SetMoveShopFlags(master, pk);
+                master.SetMoveShopFlags(pk);
             }
         }
 
@@ -804,7 +801,7 @@ namespace PKHeX.Core.AutoMod
         }
 
         private static readonly ushort[] Arceus_PlateIDs =
-        {
+        [
             303,
             306,
             304,
@@ -822,7 +819,7 @@ namespace PKHeX.Core.AutoMod
             311,
             312,
             644
-        };
+        ];
 
         public static int? GetArceusHeldItemFromForm(int form) =>
             form is >= 1 and <= 17 ? Arceus_PlateIDs[form - 1] : null;

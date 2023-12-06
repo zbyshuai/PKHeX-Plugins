@@ -1,4 +1,4 @@
-﻿﻿using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
@@ -63,7 +63,7 @@ namespace PKHeX.Core.AutoMod
                 template.Version = dest.Game;
 
             template.ApplySetDetails(set);
-            template.SetRecordFlags(Array.Empty<ushort>()); // Validate TR/MS moves for the encounter
+            template.SetRecordFlags([]); // Validate TR/MS moves for the encounter
 
             if (template.Species == (ushort)Species.Unown) // Force unown form on template
                 template.Form = set.Form;
@@ -88,11 +88,8 @@ namespace PKHeX.Core.AutoMod
             );
             var criteria = EncounterCriteria.GetCriteria(set, template.PersonalInfo);
             criteria.ForceMinLevelRange = true;
-            if (regen.EncounterFilters.Count() != 0)
-                encounters = encounters.Where(
-                    enc => BatchEditing.IsFilterMatch(regen.EncounterFilters, enc)
-                );
-
+            if (regen.EncounterFilters.Any())
+                encounters = encounters.Where(enc => BatchEditing.IsFilterMatch(regen.EncounterFilters, enc));
             PKM? last = null;
             foreach (var enc in encounters)
             {
@@ -286,8 +283,7 @@ namespace PKHeX.Core.AutoMod
             var gamelist =
                 (!nativeOnly && AllowHOMETransferGeneration) ? versionlist.OrderByDescending(c => c.GetGeneration()).ToArray() : GetPairedVersions(destVer, versionlist);
             if (PrioritizeGame && !nativeOnly)
-                gamelist =
-                    PrioritizeGameVersion == GameVersion.Any ? PrioritizeVersion(gamelist, SimpleEdits.GetIsland(destVer)) : PrioritizeVersion(gamelist, PrioritizeGameVersion);
+                gamelist = PrioritizeGameVersion == GameVersion.Any ? PrioritizeVersion(gamelist, destVer.GetIsland()) : PrioritizeVersion(gamelist, PrioritizeGameVersion);
             if (template.AbilityNumber == 4 && destVer.GetGeneration() < 8)
                 gamelist = gamelist.Where(z => z.GetGeneration() is not 3 and not 4).ToArray();
             return gamelist;
@@ -313,7 +309,7 @@ namespace PKHeX.Core.AutoMod
 
                 GameVersion[] result;
                 if (value.IsValidSavedVersion())
-                    result = new GameVersion[] { value };
+                    result = [value];
                 else
                     result = GameUtil.GameVersions.Where(z => value.Contains(z)).ToArray();
 
@@ -341,8 +337,6 @@ namespace PKHeX.Core.AutoMod
         /// Grab a trainer from trainer database with mutated language
         /// </summary>
         /// <param name="regen">Regenset</param>
-        /// <param name="ver">Gameversion for the saved trainerdata</param>
-        /// <param name="gen">Generation of the saved trainerdata</param>
         /// <returns>ITrainerInfo of the trainerdetails</returns>
         private static ITrainerInfo GetTrainer(
             RegenSet regen,
@@ -373,9 +367,9 @@ namespace PKHeX.Core.AutoMod
                 mutate = (LanguageID)idx;
             if (AllowTrainerOverride && regen.HasTrainerSettings && regen.Trainer != null)
                 return regen.Trainer.MutateLanguage(mutate, ver);
-            if (UseTrainerData)
-                return TrainerSettings.GetSavedTrainerData(ver, gen).MutateLanguage(mutate, ver);
-            return TrainerSettings.DefaultFallback(ver, regen.Extra.Language);
+            return UseTrainerData
+                ? TrainerSettings.GetSavedTrainerData(ver, gen).MutateLanguage(mutate, ver)
+                : TrainerSettings.DefaultFallback(ver, regen.Extra.Language);
         }
 
         /// <summary>
@@ -504,10 +498,7 @@ namespace PKHeX.Core.AutoMod
                 requested = rt.Regen.Extra.Alpha;
 
             // Requested alpha but encounter isn't an alpha
-            if (enc is not IAlphaReadOnly a)
-                return !requested;
-
-            return a.IsAlpha == requested;
+            return enc is not IAlphaReadOnly a ? !requested : a.IsAlpha == requested;
         }
 
         public static bool IsRequestedShinyValid(IBattleTemplate set, IEncounterable enc)
@@ -544,18 +535,13 @@ namespace PKHeX.Core.AutoMod
             // If PID and IV is handled in PreSetPIDIV, don't set it here again and return out
             if (enc is ITeraRaid9)
                 return true;
-            if (enc is EncounterStatic8N
-                    or EncounterStatic8NC
-                    or EncounterStatic8ND
-                    or EncounterStatic8U)
+            if (enc is EncounterStatic8N or EncounterStatic8NC or EncounterStatic8ND or EncounterStatic8U)
                 return true;
             if (enc is IOverworldCorrelation8 o && o.GetRequirement(pk) == OverworldCorrelation8Requirement.MustHave)
                 return true;
             if (enc is IStaticCorrelation8b s && s.GetRequirement(pk) == StaticCorrelation8bRequirement.MustHave)
                 return true;
-            if (enc is EncounterEgg && GameVersion.BDSP.Contains(enc.Version))
-                return true;
-            return false;
+            return enc is EncounterEgg && GameVersion.BDSP.Contains(enc.Version);
         }
 
         /// <summary>
@@ -658,7 +644,7 @@ namespace PKHeX.Core.AutoMod
                 // check for mixed->fixed gender incompatibility by checking the gender of the original species
                 if (SpeciesCategory.IsFixedGenderFromDual(pk.Species) && pk.Gender != 2) // shedinja
                 {
-                    pk.Gender = EntityGender.GetFromPID(new LegalInfo(pk, new List<CheckResult>()).EncounterMatch.Species,pk.EncryptionConstant);
+                    pk.Gender = EntityGender.GetFromPID(new LegalInfo(pk, []).EncounterMatch.Species, pk.EncryptionConstant);
                     // genderValid = true; already true if we reach here
                 }
             }
@@ -683,7 +669,6 @@ namespace PKHeX.Core.AutoMod
         /// </summary>
         /// <param name="pk"></param>
         /// <param name="apply">boolean to apply or not to apply markings</param>
-        /// <param name="competitive">boolean to apply competitive IVs instead of the default behaviour</param>
         private static void ApplyMarkings(this PKM pk, bool apply = true)
         {
             if (!apply || pk.Format <= 3) // No markings if pk.Format is less than or equal to 3
@@ -698,9 +683,7 @@ namespace PKHeX.Core.AutoMod
         /// <returns></returns>
         public static Func<int, int, int> CompetitiveMarking(PKM pk)
         {
-            if (pk.Format < 7)
-                return GetSimpleMarking;
-            return GetComplexMarking;
+            return pk.Format < 7 ? GetSimpleMarking : GetComplexMarking;
 
             static int GetSimpleMarking(int val, int _) => val == 31 ? 1 : 0;
             static int GetComplexMarking(int val, int _) =>
@@ -903,7 +886,7 @@ namespace PKHeX.Core.AutoMod
                 case EncounterTrade3:
                 case EncounterTrade4PID:
                 case EncounterTrade4RanchGift:
-                    ShowdownEdits.SetEncounterTradeIVs(pk);
+                    pk.SetEncounterTradeIVs();
                     return; // Fixed PID, no need to mutate
                 default:
                     FindPIDIV(pk, method, hpType, set.Shiny, enc, set);
@@ -1251,7 +1234,7 @@ namespace PKHeX.Core.AutoMod
                         continue;
                 }
 
-                if (ratio != PersonalInfo.RatioMagicMale && ratio != PersonalInfo.RatioMagicFemale  && ratio != PersonalInfo.RatioMagicGenderless)
+                if (ratio != PersonalInfo.RatioMagicMale && ratio != PersonalInfo.RatioMagicFemale && ratio != PersonalInfo.RatioMagicGenderless)
                 {
                     var gender_roll = rng.NextUInt(252) + 1;
                     var fin_gender = gender_roll < ratio ? 1 : 0;
@@ -1322,18 +1305,9 @@ namespace PKHeX.Core.AutoMod
                 return false;
             if ((uint)template.Gender < 2 && template.Gender != pk.Gender) // match gender
                 return false;
-            if (template.Form != pk.Form
-                && !FormInfo.IsFormChangeable(
-                    pk.Species,
-                    pk.Form,
-                    template.Form,
-                    EntityContext.Gen9,
-                    pk.Context)
-            ) // match form -- Toxtricity etc
+            if (template.Form != pk.Form && !FormInfo.IsFormChangeable(pk.Species, pk.Form, template.Form, EntityContext.Gen9, pk.Context)) // match form -- Toxtricity etc
                 return false;
-            if (template.Shiny != pk.IsShiny)
-                return false;
-            return true;
+            return template.Shiny == pk.IsShiny;
         }
 
         /// <summary>
@@ -1395,11 +1369,7 @@ namespace PKHeX.Core.AutoMod
                 if (PokeWalkerSeedFail(seed, Method, pk, iterPKM))
                     continue;
                 PIDGenerator.SetValuesFromSeed(pk, Method, seed);
-                if (
-                    pk.AbilityNumber != iterPKM.AbilityNumber
-                    && !compromise
-                    && pk.Nature != iterPKM.Nature
-                )
+                if (pk.AbilityNumber != iterPKM.AbilityNumber && !compromise && pk.Nature != iterPKM.Nature)
                     continue;
                 if (pk.PIDAbility != iterPKM.PIDAbility && !compromise)
                     continue;
@@ -1478,36 +1448,36 @@ namespace PKHeX.Core.AutoMod
                 pk.Egg_Location = Locations.LinkTrade4; // todo: really shouldn't be doing this, don't modify pkm
                 return PIDType.Method_1;
             }
-            var info = new LegalInfo(pk, new List<CheckResult>());
+            var info = new LegalInfo(pk, []);
             EncounterFinder.FindVerifiedEncounter(pk, info);
             return pk.Generation switch
             {
                 3 => info.EncounterMatch switch
+                {
+                    WC3 g => g.Method,
+                    EncounterStatic3 when pk.Version == (int)GameVersion.CXD => PIDType.CXD,
+                    EncounterStatic3Colo when pk.Version == (int)GameVersion.CXD => PIDType.CXD,
+                    EncounterStatic3XD when pk.Version == (int)GameVersion.CXD => PIDType.CXD,
+                    EncounterStatic3 => pk.Version switch
                     {
-                        WC3 g => g.Method,
-                        EncounterStatic3 when pk.Version == (int)GameVersion.CXD => PIDType.CXD,
-                        EncounterStatic3Colo when pk.Version == (int)GameVersion.CXD => PIDType.CXD,
-                        EncounterStatic3XD when pk.Version == (int)GameVersion.CXD => PIDType.CXD,
-                        EncounterStatic3 => pk.Version switch
-                            {
-                                (int)GameVersion.E => PIDType.Method_1,
-                                (int)GameVersion.FR or (int)GameVersion.LG => PIDType.Method_1, // roamer glitch
-                                _ => PIDType.Method_1,
-                            },
-
-                        EncounterSlot3 when pk.Version == (int)GameVersion.CXD => PIDType.PokeSpot,
-                        EncounterSlot3XD when pk.Version == (int)GameVersion.CXD => PIDType.PokeSpot,
-                        EncounterSlot3 => pk.Species == (int)Species.Unown ? PIDType.Method_1_Unown : PIDType.Method_1,
-                        _ => PIDType.None,
+                        (int)GameVersion.E => PIDType.Method_1,
+                        (int)GameVersion.FR or (int)GameVersion.LG => PIDType.Method_1, // roamer glitch
+                        _ => PIDType.Method_1,
                     },
+
+                    EncounterSlot3 when pk.Version == (int)GameVersion.CXD => PIDType.PokeSpot,
+                    EncounterSlot3XD when pk.Version == (int)GameVersion.CXD => PIDType.PokeSpot,
+                    EncounterSlot3 => pk.Species == (int)Species.Unown ? PIDType.Method_1_Unown : PIDType.Method_1,
+                    _ => PIDType.None,
+                },
 
                 4 => info.EncounterMatch switch
-                    {
-                        EncounterStatic4Pokewalker => PIDType.Pokewalker,
-                        EncounterStatic4 s => (s.Shiny == Shiny.Always ? PIDType.ChainShiny : PIDType.Method_1),
-                        PGT => PIDType.Method_1,
-                        _ => PIDType.None,
-                    },
+                {
+                    EncounterStatic4Pokewalker => PIDType.Pokewalker,
+                    EncounterStatic4 s => (s.Shiny == Shiny.Always ? PIDType.ChainShiny : PIDType.Method_1),
+                    PGT => PIDType.Method_1,
+                    _ => PIDType.None,
+                },
 
                 _ => PIDType.None,
             };
@@ -1522,11 +1492,7 @@ namespace PKHeX.Core.AutoMod
             var lvl = pk.CurrentLevel;
             if (pk.Met_Level > lvl)
                 pk.Met_Level = lvl;
-            if (pk.Met_Location is not (Locations.Transfer1
-                    or Locations.Transfer2
-                    or Locations.Transfer3
-                    or Locations.Transfer4
-                    or Locations.GO8))
+            if (pk.Met_Location is not (Locations.Transfer1 or Locations.Transfer2 or Locations.Transfer3 or Locations.Transfer4 or Locations.GO8))
                 return;
             var level = pk.Met_Level;
             if (lvl <= level)
@@ -1746,27 +1712,18 @@ namespace PKHeX.Core.AutoMod
 
             var task = Task.Run(GetLegal);
             var first = task.TimeoutAfter(new TimeSpan(0, 0, 0, Timeout))?.Result;
-            if (first == null)
-                return new AsyncLegalizationResult(template, LegalizationResult.Timeout);
-
-            return first;
+            return first ?? new AsyncLegalizationResult(template, LegalizationResult.Timeout);
         }
 
         /// <summary>
         /// Async Related actions for global timer.
         /// </summary>
-        public class AsyncLegalizationResult
+        public class AsyncLegalizationResult(
+            PKM pk,
+            LegalizationResult res)
         {
-            public readonly PKM Created;
-            public readonly LegalizationResult Status;
-
-            public AsyncLegalizationResult(
-                PKM pk,
-                LegalizationResult res)
-            {
-                Created = pk;
-                Status = res;
-            }
+            public readonly PKM Created = pk;
+            public readonly LegalizationResult Status = res;
         }
 
         private static async Task<AsyncLegalizationResult?>? TimeoutAfter(
@@ -1793,9 +1750,7 @@ namespace PKHeX.Core.AutoMod
             };
 
             var res = group.GetVersionsWithinRange(versionlist.ToArray());
-            if (res.Length > 0)
-                return res;
-            return new[] { version };
+            return res.Length > 0 ? res : ([version]);
         }
     }
 }

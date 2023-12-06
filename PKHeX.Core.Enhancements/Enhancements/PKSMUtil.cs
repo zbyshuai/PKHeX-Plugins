@@ -20,7 +20,7 @@ namespace PKHeX.Core.Enhancements
             var boxcount = (files.Length / 30) + 1;
             var bank = new byte[8 + 4 + 4 + (boxcount * pksmsize * 30)];
             var ctr = 0;
-            var magic = new byte[] { 0x50, 0x4B, 0x53, 0x4D, 0x42, 0x41, 0x4E, 0x4B }; // PKSMBANK
+            var magic = "PKSMBANK"u8.ToArray(); // PKSMBANK
             magic.CopyTo(bank, 0);
             version.CopyTo(bank, 8);
             BitConverter.GetBytes(boxcount).CopyTo(bank, 12); // Number of bank boxes.
@@ -69,7 +69,7 @@ namespace PKHeX.Core.Enhancements
             var ver = (PKSMBankVersion)(version & 0xFF);
             var pkmsize = GetBankSize(ver);
             var start = GetBankStartIndex(ver);
-            previews = new List<PKMPreview>();
+            previews = [];
             for (int i = start; i < bank.Length; i += pkmsize)
             {
                 var pk = GetPKSMStoredPKM(bank, i);
@@ -97,22 +97,21 @@ namespace PKHeX.Core.Enhancements
                 return null;
 
             // gen4+ presence check; won't work for prior gens
-            if (!IsPKMPresent(data, ofs + 4))
-                return null;
-
-            return format switch
-            {
-                PKSMStorageFormat.ONE => new PK1(Slice(data, ofs + 4, 33)),
-                PKSMStorageFormat.TWO => new PK2(Slice(data, ofs + 4, 32)),
-                PKSMStorageFormat.THREE => new PK3(Slice(data, ofs + 4, 80)),
-                PKSMStorageFormat.FOUR => new PK4(Slice(data, ofs + 4, 136)),
-                PKSMStorageFormat.FIVE => new PK5(Slice(data, ofs + 4, 136)),
-                PKSMStorageFormat.SIX => new PK6(Slice(data, ofs + 4, 232)),
-                PKSMStorageFormat.SEVEN => new PK7(Slice(data, ofs + 4, 232)),
-                PKSMStorageFormat.LGPE => new PB7(Slice(data, ofs + 4, 232)),
-                PKSMStorageFormat.EIGHT => new PK8(Slice(data, ofs + 4, 328)),
-                _ => null,
-            };
+            return !IsPKMPresent(data, ofs + 4)
+                ? null
+                : format switch
+                {
+                    PKSMStorageFormat.ONE => new PK1(Slice(data, ofs + 4, 33)),
+                    PKSMStorageFormat.TWO => new PK2(Slice(data, ofs + 4, 32)),
+                    PKSMStorageFormat.THREE => new PK3(Slice(data, ofs + 4, 80)),
+                    PKSMStorageFormat.FOUR => new PK4(Slice(data, ofs + 4, 136)),
+                    PKSMStorageFormat.FIVE => new PK5(Slice(data, ofs + 4, 136)),
+                    PKSMStorageFormat.SIX => new PK6(Slice(data, ofs + 4, 232)),
+                    PKSMStorageFormat.SEVEN => new PK7(Slice(data, ofs + 4, 232)),
+                    PKSMStorageFormat.LGPE => new PB7(Slice(data, ofs + 4, 232)),
+                    PKSMStorageFormat.EIGHT => new PK8(Slice(data, ofs + 4, 328)),
+                    _ => null,
+                };
         }
 
         private static byte[] Slice(byte[] data, int ofs, int len)
@@ -125,9 +124,7 @@ namespace PKHeX.Core.Enhancements
         // copied from PKHeX.Core
         private static bool IsPKMPresent(byte[] data, int offset)
         {
-            if (BitConverter.ToUInt32(data, offset) != 0) // PID
-                return true;
-            return BitConverter.ToUInt16(data, offset + 8) != 0;
+            return BitConverter.ToUInt32(data, offset) != 0 || BitConverter.ToUInt16(data, offset + 8) != 0;
         }
 
         private static int GetBankSize(PKSMBankVersion v)
