@@ -36,7 +36,9 @@ namespace PKHeX.Core.Injection
             ReadOnlySpan<byte> bytes = boxData;
             byte[][] pkmData = bytes.Split(SlotSize);
             for (int i = 0; i < SlotCount; i++)
+            {
                 SendSlot(pkmData[i], box, i);
+            }
 
             Injector.SendBox(this, boxData, box);
         }

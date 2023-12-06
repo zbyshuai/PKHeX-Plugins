@@ -29,9 +29,15 @@ namespace PKHeX.Core.Enhancements
                 var prefer = EntityFileExtension.GetContextFromExtension(f, EntityContext.None);
                 var pk = EntityFormat.GetFromBytes(File.ReadAllBytes(f), prefer);
                 if (pk == null)
+                {
                     continue;
+                }
+
                 if (pk.Species == 0 && pk.Species >= pk.MaxSpeciesID)
+                {
                     continue;
+                }
+
                 var ofs = 16 + (ctr * pksmsize);
                 BitConverter.GetBytes((int)GetPKSMFormat(pk)).CopyTo(bank, ofs);
                 pk.DecryptedBoxData.CopyTo(bank, ofs + 4);
@@ -74,9 +80,15 @@ namespace PKHeX.Core.Enhancements
             {
                 var pk = GetPKSMStoredPKM(bank, i);
                 if (pk == null)
+                {
                     continue;
+                }
+
                 if (pk.Species == 0 && pk.Species >= pk.MaxSpeciesID)
+                {
                     continue;
+                }
+
                 var strings = GameInfo.Strings;
                 previews.Add(new PKMPreview(pk, strings));
                 File.WriteAllBytes(
@@ -94,7 +106,9 @@ namespace PKHeX.Core.Enhancements
             var metadata = BitConverter.ToUInt32(data, ofs);
             var format = (PKSMStorageFormat)(metadata & 0xFF);
             if (format >= PKSMStorageFormat.MAX_COUNT)
+            {
                 return null;
+            }
 
             // gen4+ presence check; won't work for prior gens
             return !IsPKMPresent(data, ofs + 4)

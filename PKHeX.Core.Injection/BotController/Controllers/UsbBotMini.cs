@@ -56,30 +56,47 @@ namespace PKHeX.Core.Injection
                 foreach (UsbRegistry ur in UsbDevice.AllDevices.Cast<UsbRegistry>())
                 {
                     if (ur.Vid != 0x057E)
+                    {
                         continue;
+                    }
+
                     if (ur.Pid != 0x3000)
+                    {
                         continue;
+                    }
 
                     ur.DeviceProperties.TryGetValue("Address", out object? addr);
                     if (Port.ToString() != addr?.ToString())
+                    {
                         continue;
+                    }
 
                     SwDevice = ur.Device;
                 }
 
                 // If the device is open and ready
                 if (SwDevice == null)
+                {
                     throw new Exception("USB device not found.");
+                }
 
                 if (SwDevice is not IUsbDevice usb)
+                {
                     throw new Exception(
                         "Device is using a WinUSB driver. Use libusbK and create a filter."
                     );
+                }
+
                 if (!usb.UsbRegistryInfo.IsAlive)
+                {
                     usb.ResetDevice();
+                }
 
                 if (SwDevice.IsOpen)
+                {
                     SwDevice.Close();
+                }
+
                 SwDevice.Open();
 
                 if (SwDevice is IUsbDevice wholeUsbDevice)
@@ -121,7 +138,10 @@ namespace PKHeX.Core.Injection
                 if (SwDevice is { IsOpen: true })
                 {
                     if (SwDevice is IUsbDevice wholeUsbDevice)
+                    {
                         wholeUsbDevice.ReleaseInterface(0);
+                    }
+
                     SwDevice.Close();
                 }
 
@@ -196,9 +216,11 @@ namespace PKHeX.Core.Injection
 
             // read size, no error checking as of yet, should be the required 368 bytes
             if (reader == null)
+            {
                 throw new Exception(
                     "USB writer is null, you may have disconnected the device during previous function"
                 );
+            }
 
             reader.Read(sizeOfReturn, 5000, out _);
 
@@ -210,9 +232,11 @@ namespace PKHeX.Core.Injection
         private int SendInternal(byte[] buffer)
         {
             if (writer == null)
+            {
                 throw new Exception(
                     "USB writer is null, you may have disconnected the device during previous function"
                 );
+            }
 
             uint pack = (uint)buffer.Length + 2;
             var ec = writer.Write(BitConverter.GetBytes(pack), 2000, out _);
@@ -271,7 +295,9 @@ namespace PKHeX.Core.Injection
             Thread.Sleep(1);
 
             if (reader == null)
+            {
                 throw new Exception("USB device not found or not connected.");
+            }
 
             // Let usb-botbase tell us the response size.
             byte[] sizeOfReturn = new byte[4];
@@ -305,9 +331,13 @@ namespace PKHeX.Core.Injection
         public void WriteBytesUSB(byte[] data, ulong offset, RWMethod method)
         {
             if (data.Length > MaximumTransferSize)
+            {
                 WriteBytesLarge(data, offset, method);
+            }
             else
+            {
                 WriteSmall(data, offset, method);
+            }
         }
 
         public void WriteSmall(byte[] data, ulong offset, RWMethod method)
@@ -342,7 +372,9 @@ namespace PKHeX.Core.Injection
         {
             var delta = src.Length - offset;
             if (delta < length)
+            {
                 length = delta;
+            }
 
             byte[] data = new byte[length];
             Buffer.BlockCopy(src, offset, data, 0, data.Length);

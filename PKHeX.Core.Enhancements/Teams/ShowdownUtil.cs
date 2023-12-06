@@ -32,7 +32,7 @@ namespace PKHeX.Core.Enhancements
                 "Complete"
             };
 
-        private static readonly string[] separator = new[] { "\n" };
+        private static readonly string[] separator = ["\n"];
 
         public static bool IsInvalidForm(string form) =>
             form.Contains("Mega") || InvalidFormes.Contains(form);
@@ -46,7 +46,10 @@ namespace PKHeX.Core.Enhancements
         {
             paste = paste.Trim(); // Remove White Spaces
             if (IsTeamBackup(paste))
+            {
                 return ShowdownTeamSet.GetTeams(paste).SelectMany(z => z.Team).ToList();
+            }
+
             var lines = paste.Split(separator, StringSplitOptions.None);
             return ShowdownParsing.GetShowdownSets(lines).ToList();
         }
@@ -60,7 +63,10 @@ namespace PKHeX.Core.Enhancements
         {
             source = source.Trim();
             if (IsTeamBackup(source))
+            {
                 return true;
+            }
+
             string[] stringSeparators = ["\n\r"];
 
             var result = source.Split(stringSeparators, StringSplitOptions.None);

@@ -32,11 +32,16 @@ namespace AutoModPlugins
                     "Update MGDB?"
                 );
                 if (result != DialogResult.Yes)
+                {
                     return;
+                }
+
                 DeleteDirectory(MGDatabasePath); // Adding events will be handled by the next conditional
             }
             if (Directory.Exists(MGDatabasePath))
+            {
                 return;
+            }
 
             var prompt = WinFormsUtil.Prompt(
                 MessageBoxButtons.YesNoCancel,
@@ -46,7 +51,10 @@ namespace AutoModPlugins
             );
 
             if (prompt == DialogResult.Cancel)
+            {
                 return;
+            }
+
             var entire = prompt == DialogResult.Yes;
             EventsGallery.DownloadMGDBFromGitHub(MGDatabasePath, entire);
             WinFormsUtil.Alert("Download Finished");

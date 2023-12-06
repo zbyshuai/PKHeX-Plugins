@@ -14,16 +14,24 @@ namespace PKHeX.Core.Injection
             bool hasEntry = Cache.TryGetValue(Version, out var cache);
             bool hasPointer = cache is not null && cache.TryGetValue(ptr, out pointer);
             if (hasPointer && UseCache)
+            {
                 return pointer;
+            }
 
             pointer = com.GetPointerAddress(ptr, relative);
             if (!UseCache)
+            {
                 return pointer;
+            }
 
             if (!hasEntry)
+            {
                 Cache.Add(Version, new() { { ptr, pointer } });
+            }
             else
+            {
                 Cache[Version].Add(ptr, pointer);
+            }
 
             return pointer;
         }

@@ -45,7 +45,10 @@ namespace PKHeX.Core.AutoMod
 
             tr = sti;
             if (!any || (TID7 < 0 && SID7 < 0))
+            {
                 return any;
+            }
+
             TID7 = Math.Max(TID7, 0);
             SID7 = Math.Max(SID7, 0);
             const int mil = 1_000_000;
@@ -81,7 +84,10 @@ namespace PKHeX.Core.AutoMod
         private static StringInstruction[] CleanFilters(List<String> lines)
         {
             if (lines.Count == 0)
+            {
                 return [];
+            }
+
             var cleaned = lines.Select(z => z.TrimStart(EncounterFilterPrefix));
             var filters = StringInstruction.GetFilters(cleaned).ToArray();
             BatchEditing.ScreenStrings(filters);
@@ -94,7 +100,9 @@ namespace PKHeX.Core.AutoMod
             {
                 var index = line.IndexOf(Splitter);
                 if (index < 0)
+                {
                     continue;
+                }
 
                 var key = line[..index];
                 var value = line.Substring(index + 1, line.Length - key.Length - 1).Trim();
@@ -130,9 +138,15 @@ namespace PKHeX.Core.AutoMod
         {
             var result = new List<string>();
             foreach (var s in set.Filters)
+            {
                 result.Add($"{StringInstruction.Prefixes[(int)s.Comparer]}{s.PropertyName}={s.PropertyValue}");
+            }
+
             foreach (var s in set.Instructions)
+            {
                 result.Add($".{s.PropertyName}={s.PropertyValue}");
+            }
+
             return string.Join(Environment.NewLine, result);
         }
 
@@ -143,7 +157,10 @@ namespace PKHeX.Core.AutoMod
         {
             var result = new List<string>();
             foreach (var s in filters)
+            {
                 result.Add($"{prefix}{StringInstruction.Prefixes[(int)s.Comparer]}{s.PropertyName}={s.PropertyValue}");
+            }
+
             return string.Join(Environment.NewLine, result);
         }
 
@@ -160,7 +177,9 @@ namespace PKHeX.Core.AutoMod
         )
         {
             if (lang is LanguageID.UNUSED_6 or LanguageID.Hacked or null)
+            {
                 return tr;
+            }
 
             if (tr is PokeTrainerDetails p)
             {
@@ -195,11 +214,17 @@ namespace PKHeX.Core.AutoMod
         private static string MutateOT(string OT, LanguageID? lang, GameVersion game)
         {
             if (lang == null)
+            {
                 return OT;
+            }
+
             var max = Legal.GetMaxLengthOT(game.GetGeneration(), (LanguageID)lang);
             OT = OT[..Math.Min(OT.Length, max)];
             if (GameVersion.GG.Contains(game) || game.GetGeneration() >= 8) // switch keyboard only has latin characters, --don't mutate
+            {
                 return OT;
+            }
+
             var full =
                 lang
                     is LanguageID.Japanese
@@ -207,7 +232,10 @@ namespace PKHeX.Core.AutoMod
                         or LanguageID.ChineseS
                         or LanguageID.ChineseT;
             if (full && GlyphLegality.ContainsHalfWidth(OT))
+            {
                 return GlyphLegality.StringConvert(OT, StringConversionType.FullWidth);
+            }
+
             return !full && GlyphLegality.ContainsFullWidth(OT) ? GlyphLegality.StringConvert(OT, StringConversionType.HalfWidth) : OT;
         }
 
@@ -215,7 +243,10 @@ namespace PKHeX.Core.AutoMod
         {
             // Length checks are handled later in SetSpeciesLevel
             if (game.GetGeneration() >= 8 || lang == null)
+            {
                 return nick;
+            }
+
             var full =
                 lang
                     is LanguageID.Japanese

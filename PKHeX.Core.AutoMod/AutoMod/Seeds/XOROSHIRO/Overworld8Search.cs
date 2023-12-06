@@ -289,7 +289,9 @@ namespace PKHeX.Core.AutoMod
             foreach (int i in fixedivs)
             {
                 if (CheckValidSeed(i, iv32, out seed))
+                {
                     return i;
+                }
             }
             seed = 0;
             return -1;
@@ -333,7 +335,10 @@ namespace PKHeX.Core.AutoMod
         {
             int result = 0;
             for (int i = 0; i < arr.Length; i++)
+            {
                 result |= (arr[i] << (i * 5));
+            }
+
             return result;
         }
 

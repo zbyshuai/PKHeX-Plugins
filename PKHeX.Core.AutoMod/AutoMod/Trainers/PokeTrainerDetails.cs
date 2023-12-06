@@ -45,7 +45,9 @@ namespace PKHeX.Core.AutoMod
             set
             {
                 if (pkm is IGeoTrack gt)
+                {
                     gt.Country = value;
+                }
             }
         }
         public byte Region
@@ -54,7 +56,9 @@ namespace PKHeX.Core.AutoMod
             set
             {
                 if (pkm is IGeoTrack gt)
+                {
                     gt.Region = value;
+                }
             }
         }
         public byte ConsoleRegion
@@ -63,7 +67,9 @@ namespace PKHeX.Core.AutoMod
             set
             {
                 if (pkm is IGeoTrack gt)
+                {
                     gt.ConsoleRegion = value;
+                }
             }
         }
         public int Generation => pkm.Generation;

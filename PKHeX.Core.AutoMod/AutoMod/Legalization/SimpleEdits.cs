@@ -166,10 +166,15 @@ namespace PKHeX.Core.AutoMod
             IEncounterable enc)
         {
             if (pk.Format < 6)
+            {
                 return;
+            }
 
             if ((pk.Species == 658 && pk.Form == 1) || APILegality.IsPIDIVSet(pk, enc)) // Ash-Greninja or raids
+            {
                 return;
+            }
+
             int gen = pk.Generation;
             if (gen is 3 or 4 or 5)
             {
@@ -194,7 +199,9 @@ namespace PKHeX.Core.AutoMod
             }
 
             if (pk.EncryptionConstant != 0)
+            {
                 return;
+            }
 
             pk.EncryptionConstant = enc is WC8 { PIDType: ShinyType8.FixedValue, EncryptionConstant: 0 } ? 0 : Util.Rand32();
         }
@@ -213,7 +220,9 @@ namespace PKHeX.Core.AutoMod
             Shiny shiny)
         {
             if (pk.IsShiny == isShiny)
+            {
                 return; // don't mess with stuff if pk is already shiny. Also do not modify for specific shinies (Most likely event shinies)
+            }
 
             if (!isShiny)
             {
@@ -245,7 +254,9 @@ namespace PKHeX.Core.AutoMod
             if (pk.Generation > 5 || pk.VC)
             {
                 if (shiny is Shiny.FixedValue or Shiny.Never)
+                {
                     return;
+                }
 
                 while (true)
                 {
@@ -271,7 +282,9 @@ namespace PKHeX.Core.AutoMod
 
                 pk.SetShiny();
                 if (pk.Format < 6)
+                {
                     return;
+                }
 
                 do
                 {
@@ -285,7 +298,9 @@ namespace PKHeX.Core.AutoMod
             pk.SetShinySID(); // no mg = no lock
 
             if (pk.Generation != 5)
+            {
                 return;
+            }
 
             while (true)
             {
@@ -298,33 +313,51 @@ namespace PKHeX.Core.AutoMod
                     pk.Form,
                     pk.PID);
                 if (shiny == Shiny.AlwaysSquare && pk.ShinyXor != 0)
+                {
                     continue;
+                }
+
                 if (shiny == Shiny.AlwaysStar && pk.ShinyXor == 0)
+                {
                     continue;
+                }
+
                 var validg5sid = pk.SID16 & 1;
                 pk.SetShinySID();
                 pk.EncryptionConstant = pk.PID;
                 var result = (pk.PID & 1) ^ (pk.PID >> 31) ^ (pk.TID16 & 1) ^ (pk.SID16 & 1);
                 if ((validg5sid == (pk.SID16 & 1)) && result == 0)
+                {
                     break;
+                }
             }
         }
 
         public static void SetRaidShiny(this PKM pk, Shiny shiny, IEncounterable enc)
         {
             if (pk.IsShiny)
+            {
                 return;
+            }
 
             while (true)
             {
                 pk.SetShiny();
                 if (pk.Format <= 7)
+                {
                     return;
+                }
+
                 var xor = pk.ShinyXor;
                 if (enc is EncounterStatic8U && xor != 1 && shiny != Shiny.AlwaysSquare)
+                {
                     continue;
+                }
+
                 if ((shiny == Shiny.AlwaysStar && xor == 1) || (shiny == Shiny.AlwaysSquare && xor == 0) || ((shiny is Shiny.Always or Shiny.Random) && xor < 2)) // allow xor1 and xor0 for den shinies
+                {
                     return;
+                }
             }
         }
 
@@ -344,31 +377,49 @@ namespace PKHeX.Core.AutoMod
         public static void ApplyHeightWeight(this PKM pk, IEncounterable enc, bool signed = true)
         {
             if (pk.Generation < 8 && pk.Format >= 8 && !pk.GG) // height and weight don't apply prior to GG
+            {
                 return;
+            }
+
             if (pk is IScaledSizeValue obj) // Deal with this later -- restrictions on starters/statics/alphas, for now roll with whatever encounter DB provides
             {
                 obj.HeightAbsolute = obj.CalcHeightAbsolute;
                 obj.WeightAbsolute = obj.CalcWeightAbsolute;
                 if (pk is PB7 pb1)
+                {
                     pb1.ResetCP();
+                }
+
                 return;
             }
             if (pk is not IScaledSize size)
+            {
                 return;
+            }
 
             // fixed height and weight
             if (enc is EncounterStatic9 { Size: not 0 })
+            {
                 return;
+            }
+
             if (enc is EncounterTrade8b)
+            {
                 return;
+            }
+
             if (enc is EncounterStatic8a { HasFixedHeight: true } || enc is EncounterStatic8a { HasFixedWeight: true })
+            {
                 return;
+            }
 
             if (enc is WC8 w8)
             {
                 var isHOMEGift = w8.Location == 30018 || w8.GetOT(2) == "HOME";
                 if (isHOMEGift)
+                {
                     return;
+                }
             }
 
             if (enc is WC9 wc9)
@@ -379,10 +430,14 @@ namespace PKHeX.Core.AutoMod
             }
 
             if (APILegality.IsPIDIVSet(pk, enc) && !(enc is EncounterStatic8N or EncounterStatic8NC or EncounterStatic8ND) && !(enc is EncounterEgg && GameVersion.BDSP.Contains(enc.Version)))
+            {
                 return;
+            }
 
             if (enc is EncounterStatic8N or EncounterStatic8NC or EncounterStatic8ND)
+            {
                 return;
+            }
 
             var height = 0x12;
             var weight = 0x97;
@@ -415,19 +470,27 @@ namespace PKHeX.Core.AutoMod
         public static void ClearHyperTraining(this PKM pk)
         {
             if (pk is IHyperTrain h)
+            {
                 h.HyperTrainClear();
+            }
         }
 
         public static string? GetBatchValue(this IBattleTemplate set, string key)
         {
             var batchexists = set is RegenTemplate rt && rt.Regen.HasBatchSettings;
             if (!batchexists)
+            {
                 return null;
+            }
+
             rt = (RegenTemplate)set;
             foreach (var instruction in rt.Regen.Batch.Instructions)
             {
                 if (instruction.PropertyName != key)
+                {
                     continue;
+                }
+
                 return instruction.PropertyValue;
             }
             return null;
@@ -453,13 +516,18 @@ namespace PKHeX.Core.AutoMod
         public static void SetBelugaValues(this PKM pk)
         {
             if (pk is PB7 pb7)
+            {
                 pb7.ResetCalculatedValues();
+            }
         }
 
         public static void SetAwakenedValues(this PKM pk, IBattleTemplate set)
         {
             if (pk is not IAwakened pb7)
+            {
                 return;
+            }
+
             Span<byte> result = stackalloc byte[6];
             AwakeningUtil.SetExpectedMinimumAVs(result, (PB7)pb7);
             var EVs = set.EVs.Select(z => (byte)Math.Min(z, 200)).ToArray();
@@ -475,9 +543,14 @@ namespace PKHeX.Core.AutoMod
         {
             var pref_lang = (LanguageID)prefer;
             if (pref_lang == LanguageID.Hacked || pref_lang == LanguageID.UNUSED_6)
+            {
                 prefer = 2; // prefer english
+            }
+
             if (pk is IHandlerLanguage pkm)
+            {
                 pkm.HT_Language = prefer;
+            }
         }
 
         public static void SetGigantamaxFactor(
@@ -486,7 +559,9 @@ namespace PKHeX.Core.AutoMod
             IEncounterable enc)
         {
             if (pk is not IGigantamax gmax || gmax.CanGigantamax == set.CanGigantamax)
+            {
                 return;
+            }
 
             if (Gigantamax.CanToggle(pk.Species, pk.Form, enc.Species, enc.Form))
             {
@@ -517,7 +592,9 @@ namespace PKHeX.Core.AutoMod
         public static void HyperTrain(this PKM pk, int[]? IVs = null)
         {
             if (pk is not IHyperTrain t || pk.CurrentLevel != 100)
+            {
                 return;
+            }
 
             IVs ??= pk.IVs;
             t.HT_HP = pk.IV_HP != 31;
@@ -528,7 +605,9 @@ namespace PKHeX.Core.AutoMod
             t.HT_SPE = pk.IV_SPE != 31 && IVs[3] > 2;
 
             if (pk is PB7 pb)
+            {
                 pb.ResetCP();
+            }
         }
 
         public static void SetSuggestedMemories(this PKM pk)
@@ -605,11 +684,15 @@ namespace PKHeX.Core.AutoMod
             IEncounterable enc)
         {
             if (IsUntradeableEncounter(enc))
+            {
                 return;
+            }
 
             var expect = trainer.IsFromTrainer(pk) ? 0 : 1;
             if (pk.CurrentHandler == expect && expect == 0)
+            {
                 return;
+            }
 
             pk.CurrentHandler = 1;
             pk.HT_Name = trainer.OT;
@@ -629,7 +712,9 @@ namespace PKHeX.Core.AutoMod
             pk.SetBelugaValues(); // trainer details changed?
 
             if (pk is not IGeoTrack gt)
+            {
                 return;
+            }
 
             if (trainer is IRegionOrigin o)
             {
@@ -637,9 +722,15 @@ namespace PKHeX.Core.AutoMod
                 gt.Country = o.Country;
                 gt.Region = o.Region;
                 if (pk is PK7 pk7 && pk.Generation <= 2)
+                {
                     pk7.FixVCRegion();
+                }
+
                 if (pk.Species is (int)Vivillon or (int)Spewpa or (int)Scatterbug)
+                {
                     pk.FixVivillonRegion();
+                }
+
                 return;
             }
 
@@ -659,10 +750,14 @@ namespace PKHeX.Core.AutoMod
             pk.GetMoveSet(m, random);
             var moves = m.ToArray();
             if (moves.All(z => z == 0))
+            {
                 return;
+            }
 
             if (pk.Moves.SequenceEqual(moves))
+            {
                 return;
+            }
 
             pk.SetMoves(moves);
         }
@@ -675,14 +770,18 @@ namespace PKHeX.Core.AutoMod
         public static void SetDateLocks(this PKM pk, IEncounterable enc)
         {
             if (enc is WC8 { IsHOMEGift: true } wc8)
+            {
                 SetDateLocksWC8(pk, wc8);
+            }
         }
 
         private static void SetDateLocksWC8(PKM pk, WC8 w)
         {
             var locked = EncounterServerDate.WC8Gifts.TryGetValue(w.CardID, out var time);
             if (locked)
+            {
                 pk.MetDate = time.Start;
+            }
         }
 
         public static bool TryApplyHardcodedSeedWild8(
@@ -693,14 +792,19 @@ namespace PKHeX.Core.AutoMod
         {
             // Don't bother if there is no overworld correlation
             if (enc is not IOverworldCorrelation8 eo)
+            {
                 return false;
+            }
 
             // Check if a seed exists
             var flawless = Overworld8Search.GetFlawlessIVCount(enc, ivs, out var seed);
 
             // Ensure requested criteria matches
             if (flawless == -1)
+            {
                 return false;
+            }
+
             APILegality.FindWildPIDIV8(pk, requestedShiny, flawless, seed);
             return eo.IsOverworldCorrelationCorrect(pk) && requestedShiny switch
                 {
@@ -715,11 +819,20 @@ namespace PKHeX.Core.AutoMod
             // Don't process if Game is LGPE and requested PKM is not Kanto / Meltan / Melmetal
             // Don't process if Game is SWSH and requested PKM is not from the Galar Dex (Zukan8.DexLookup)
             if (GameVersion.GG.Contains(destVer))
+            {
                 return species is <= 151 or 808 or 809;
+            }
+
             if (GameVersion.SWSH.Contains(destVer))
+            {
                 return PersonalTable.SWSH.IsPresentInGame(species, form);
+            }
+
             if (GameVersion.PLA.Contains(destVer))
+            {
                 return PersonalTable.LA.IsPresentInGame(species, form);
+            }
+
             return GameVersion.SV.Contains(destVer)
                 ? PersonalTable.SV.IsPresentInGame(species, form)
                 : (uint)species <= destVer.GetMaxSpeciesID();
@@ -782,7 +895,9 @@ namespace PKHeX.Core.AutoMod
                     for (int i = 0; i < permit.RecordCountUsed; i++)
                     {
                         if (permit.IsRecordPermitted(i))
+                        {
                             tr.SetMoveRecordFlag(i);
+                        }
                     }
                 }
                 return;

@@ -26,8 +26,7 @@ namespace PKHeX.Core.Enhancements
                     region = gt.Region.ToString();
                     DSRegion = gt.ConsoleRegion.ToString();
                 }
-                sb.AppendLine(
-                    string.Join(
+                sb.AppendJoin(
                         ",",
                         p.Nickname,
                         p.Species,
@@ -78,7 +77,7 @@ namespace PKHeX.Core.Enhancements
                         p.Met_Month.ToString(),
                         p.Met_Day.ToString()
                     )
-                );
+.AppendLine();
             }
 
             File.WriteAllText(Path.Combine(path, "boxdump.csv"), sb.ToString(), Encoding.UTF8);

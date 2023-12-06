@@ -50,7 +50,9 @@ namespace AutoModPlugins
                 var content = await response.Content.ReadAsStringAsync();
                 var decoded = JsonSerializer.Deserialize<JsonNode>(content);
                 if (decoded == null)
+                {
                     return;
+                }
 #pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
                 var error = decoded["error"] == null ? null : (string)decoded["error"];
 #pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
@@ -150,7 +152,10 @@ namespace AutoModPlugins
         {
             var result = EntityConverter.ConvertToType(pk, SaveFileEditor.SAV.PKMType, out _);
             if (result == null)
+            {
                 return false;
+            }
+
             PKMEditor.PopulateFields(result);
             return true;
         }

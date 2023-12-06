@@ -31,9 +31,13 @@ namespace PKHeX.Core.Enhancements
         public static void DownloadMGDBFromGitHub(string dest, bool entire)
         {
             if (entire)
+            {
                 DownloadEntireRepo(dest);
+            }
             else
+            {
                 DownloadRelease(dest);
+            }
         }
 
         private static void DownloadRelease(string dest)
@@ -60,7 +64,9 @@ namespace PKHeX.Core.Enhancements
             const string temp = "temp.zip";
 #pragma warning disable SYSLIB0014 // Type or member is obsolete
             using (WebClient client = new())
+            {
                 client.DownloadFile(new Uri(url), temp);
+            }
 #pragma warning restore SYSLIB0014 // Type or member is obsolete
 
             ZipFile.ExtractToDirectory(temp, dest);

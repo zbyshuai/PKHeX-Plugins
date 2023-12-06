@@ -61,17 +61,21 @@ namespace PKHeX.Core.Injection
                 var result = new Grass[4];
                 for (int i = 0; i < result.Length; i++)
                 {
-                    var slice = Data.Slice(0x20 + (i * Grass.SIZE), Grass.SIZE);
-                    var c = slice.ToClass<Grass>();
+                    var slice = Data.AsSpan().Slice(0x20 + (i * Grass.SIZE), Grass.SIZE);
+                    var c = slice.ToArray().ToClass<Grass>();
                     if (c != null)
+                    {
                         result[i] = c;
+                    }
                 }
                 return result;
             }
             set
             {
                 for (int i = 0; i < value.Length; i++)
+                {
                     value[i].ToBytesClass().CopyTo(Data, 0x20 + (i * Grass.SIZE));
+                }
             }
         }
 
@@ -111,12 +115,14 @@ namespace PKHeX.Core.Injection
         {
             var ptr = GetSwayGrassPointers(psb.Version);
             if (ptr == null)
+            {
                 return null;
+            }
 
             var nx = (ICommunicatorNX)psb.com;
 
             var ptrSway = psb.GetCachedPointer(nx, ptr.ExtendPointer(0x0), false);
-            var sway_grass = psb.com.ReadBytes(ptrSway, 0x40);
+            var sway_grass = psb.com.ReadBytes(ptrSway, 0x40).AsSpan();
 
             var ptrOne = psb.GetCachedPointer(nx, ptr.ExtendPointer(0x8, 0x20, 0x10), false);
             var grass_one = psb.com.ReadBytes(ptrOne, 0x28);
@@ -131,9 +137,9 @@ namespace PKHeX.Core.Injection
             var grass_four = psb.com.ReadBytes(ptrFour, 0x28);
 
             var block = new byte[SWAYGRASS_BLOCK_SIZE];
-            sway_grass.Slice(0x0, 0x8).CopyTo(block, 0x0);
-            sway_grass.Slice(0x20, 0xD).CopyTo(block, 0x8);
-            sway_grass.Slice(0x38, 0x2).CopyTo(block, 0x15);
+            sway_grass[..0x8].ToArray().CopyTo(block, 0x0);
+            sway_grass.Slice(0x20, 0xD).ToArray().CopyTo(block, 0x8);
+            sway_grass.Slice(0x38, 0x2).ToArray().CopyTo(block, 0x15);
             grass_one.CopyTo(block, 0x20 + (0 * 0x28));
             grass_two.CopyTo(block, 0x20 + (1 * 0x28));
             grass_three.CopyTo(block, 0x20 + (2 * 0x28));
@@ -141,11 +147,13 @@ namespace PKHeX.Core.Injection
             return block;
         }
 
-        public void Setter(PokeSysBotMini psb, byte[] data)
+        public void Setter(PokeSysBotMini psb, Span<byte> data)
         {
             var ptr = GetSwayGrassPointers(psb.Version);
             if (ptr == null)
+            {
                 return;
+            }
 
             var nx = (ICommunicatorNX)psb.com;
             var sway_grass_addr = psb.GetCachedPointer(nx, ptr.ExtendPointer(0x0));
@@ -154,13 +162,13 @@ namespace PKHeX.Core.Injection
             var grass_three_addr = psb.GetCachedPointer(nx, ptr.ExtendPointer(0x8, 0x30, 0x10));
             var grass_four_addr = psb.GetCachedPointer(nx, ptr.ExtendPointer(0x8, 0x38, 0x10));
 
-            psb.com.WriteBytes(data.Slice(0x0, 0x8), sway_grass_addr);
-            psb.com.WriteBytes(data.Slice(0x8, 0xD), sway_grass_addr + 0x20);
-            psb.com.WriteBytes(data.Slice(0x15, 0x2), sway_grass_addr + 0x38);
-            psb.com.WriteBytes(data.Slice(0x20 + (0x28 * 0), 0x28), grass_one_addr);
-            psb.com.WriteBytes(data.Slice(0x20 + (0x28 * 1), 0x28), grass_two_addr);
-            psb.com.WriteBytes(data.Slice(0x20 + (0x28 * 2), 0x28), grass_three_addr);
-            psb.com.WriteBytes(data.Slice(0x20 + (0x28 * 3), 0x28), grass_four_addr);
+            psb.com.WriteBytes(data[..0x8].ToArray(), sway_grass_addr);
+            psb.com.WriteBytes(data.Slice(0x8, 0xD).ToArray(), sway_grass_addr + 0x20);
+            psb.com.WriteBytes(data.Slice(0x15, 0x2).ToArray(), sway_grass_addr + 0x38);
+            psb.com.WriteBytes(data.Slice(0x20 + (0x28 * 0), 0x28).ToArray(), grass_one_addr);
+            psb.com.WriteBytes(data.Slice(0x20 + (0x28 * 1), 0x28).ToArray(), grass_two_addr);
+            psb.com.WriteBytes(data.Slice(0x20 + (0x28 * 2), 0x28).ToArray(), grass_three_addr);
+            psb.com.WriteBytes(data.Slice(0x20 + (0x28 * 3), 0x28).ToArray(), grass_four_addr);
         }
     }
 }

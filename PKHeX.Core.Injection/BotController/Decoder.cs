@@ -25,7 +25,10 @@ namespace PKHeX.Core.Injection
             int NumberChars = hex.Length;
             byte[] bytes = new byte[NumberChars / 2];
             for (int i = 0; i < NumberChars; i += 2)
+            {
                 bytes[i / 2] = Convert.ToByte(hex.Substring(i, 2), 16);
+            }
+
             return bytes;
         }
 
@@ -33,18 +36,31 @@ namespace PKHeX.Core.Injection
         {
             byte result;
             if (IsNum(_0))
+            {
                 result = (byte)((_0 - '0') << 4);
+            }
             else if (IsHexUpper(_0))
+            {
                 result = (byte)((_0 - 'A' + 10) << 4);
+            }
             else
+            {
                 throw new ArgumentOutOfRangeException(nameof(_0));
+            }
 
             if (IsNum(_1))
+            {
                 result |= (byte)(_1 - '0');
+            }
             else if (IsHexUpper(_1))
+            {
                 result |= (byte)(_1 - 'A' + 10);
+            }
             else
+            {
                 throw new ArgumentOutOfRangeException(nameof(_1));
+            }
+
             return result;
         }
     }

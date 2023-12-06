@@ -69,7 +69,9 @@ namespace AutoModTests
             foreach (var ver in GetGameVersionsToTest)
             {
                 foreach (var cf in cfgs)
+                {
                     yield return new object[] { ver, cf };
+                }
             }
         }
 
@@ -101,17 +103,24 @@ namespace AutoModTests
             foreach (ushort s in species)
             {
                 if (!personal.IsSpeciesInGame(s))
+                {
                     continue;
+                }
 
                 List<byte> forms = [];
                 var formCount = personal[s].FormCount;
                 var str = GameInfo.Strings;
                 if (formCount == 1 && cfg.IncludeForms) // Validate through form lists
+                {
                     formCount = (byte)FormConverter.GetFormList(s, str.types, str.forms, GameInfo.GenderSymbolUnicode, sav.Context).Length;
+                }
+
                 for (byte f = 0; f < formCount; f++)
                 {
                     if (!personal.IsPresentInGame(s, f) || FormInfo.IsFusedForm(s, f, sav.Generation) || FormInfo.IsBattleOnlyForm(s, f, sav.Generation) || (FormInfo.IsTotemForm(s, f) && sav.Context is not EntityContext.Gen7) || FormInfo.IsLordForm(s, f, sav.Context))
+                    {
                         continue;
+                    }
 
                     var valid = sav.GetRandomEncounter(
                         s,
@@ -125,12 +134,16 @@ namespace AutoModTests
                     {
                         forms.Add(f);
                         if (!cfg.IncludeForms)
+                        {
                             break;
+                        }
                     }
                 }
 
                 if (forms.Count > 0)
+                {
                     speciesDict.TryAdd(s, forms);
+                }
             }
 
             return cfg.IncludeForms ? speciesDict.Values.Sum(x => x.Count) : speciesDict.Count;

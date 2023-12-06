@@ -66,7 +66,9 @@ namespace AutoModTests
                 {
                     var set = sets[i];
                     if (set.Species <= 0)
+                    {
                         continue;
+                    }
 
                     try
                     {
@@ -167,7 +169,10 @@ namespace AutoModTests
             {
                 var illegalcount = sets["illegal"].Length;
                 if (illegalcount == 0)
+                {
                     continue;
+                }
+
                 testfailed = true;
                 msg +=
                     $"GameVersion {gv} : Illegal: {illegalcount} | Legal: {sets["legal"].Length}\n";
@@ -177,7 +182,10 @@ namespace AutoModTests
             var fileName =
                 $"{Path.GetFileName(path).Replace('.', '_')}{DateTime.Now:_yyyy-MM-dd-HH-mm-ss}.log";
             if (error.Trim().Length > 0)
+            {
                 File.WriteAllText(Path.Combine(LogDirectory, fileName), error);
+            }
+
             testfailed.Should().BeFalse(msg);
         }
 

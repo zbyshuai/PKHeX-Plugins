@@ -36,7 +36,9 @@ namespace PKHeX.Core.AutoMod
         )
         {
             if (currentCore is null || currentALM is null || latestCore is null)
+            {
                 return false;
+            }
 
             var latestAllowed = new Version(APILegality.LatestAllowedVersion);
             return APILegality.EnableDevMode && (latestCore > latestAllowed) && (latestCore > currentCore)  || !APILegality.EnableDevMode && (currentCore > currentALM);
@@ -48,7 +50,7 @@ namespace PKHeX.Core.AutoMod
         /// <returns>A version representing the current version of the specified assembly, or null if the assembly cannot be found or has no version available.</returns>
         private static Version? GetCurrentVersion(string assemblyName)
         {
-            var assembly = assemblies.FirstOrDefault(x => x.GetName().Name == assemblyName);
+            var assembly = Array.Find(assemblies, x => x.GetName().Name == assemblyName);
             return assembly?.GetName().Version;
         }
 

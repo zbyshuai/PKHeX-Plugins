@@ -25,11 +25,15 @@ namespace PKHeX.Core.Injection
         public void ChangeBox(int box)
         {
             if (!Bot.Connected)
+            {
                 return;
+            }
 
             var sav = SAV.SAV;
             if ((uint)box >= sav.BoxCount)
+            {
                 return;
+            }
 
             ReadBox(box);
         }
@@ -75,7 +79,9 @@ namespace PKHeX.Core.Injection
 
             // Since data might not actually exist at the user-specified offset, double check that the pkm data is valid.
             if (!pkm.ChecksumValid)
+            {
                 return false;
+            }
 
             Editor.PopulateFields(pkm);
             return true;

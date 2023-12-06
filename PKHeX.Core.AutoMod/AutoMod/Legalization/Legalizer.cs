@@ -67,7 +67,9 @@ namespace PKHeX.Core.AutoMod
             timedoutSets = [];
 
             if (emptySlots.Count < sets.Count)
+            {
                 return AutoModErrorCode.NotEnoughSpace;
+            }
 
             var generated = 0;
             for (int i = 0; i < sets.Count; i++)
@@ -75,19 +77,29 @@ namespace PKHeX.Core.AutoMod
                 var set = sets[i];
                 var regen = new RegenTemplate(set, tr.Generation);
                 if (set.InvalidLines.Count > 0)
+                {
                     return AutoModErrorCode.InvalidLines;
+                }
 
                 Debug.WriteLine($"Generating Set: {GameInfo.Strings.Species[set.Species]}");
                 var almres = tr.GetLegalFromSet(regen);
                 if (almres.Status == LegalizationResult.VersionMismatch)
+                {
                     return AutoModErrorCode.VersionMismatch;
+                }
+
                 var pk = almres.Created;
                 pk.ResetPartyStats();
                 pk.SetBoxForm();
                 if (almres.Status == LegalizationResult.Failed)
+                {
                     invalidAPISets.Add(regen);
+                }
+
                 if (almres.Status == LegalizationResult.Timeout)
+                {
                     timedoutSets.Add(regen);
+                }
 
                 var index = emptySlots[i];
                 tr.SetBoxSlotAtIndex(pk, index);
@@ -95,14 +107,23 @@ namespace PKHeX.Core.AutoMod
             }
 
             foreach (var r in timedoutSets)
+            {
                 Dump(r);
+            }
+
             foreach (var r in invalidAPISets)
+            {
                 Dump(r, true);
+            }
+
             Debug.WriteLine(
                 $"API Generated Sets: {generated - invalidAPISets.Count - timedoutSets.Count}/{sets.Count}, {invalidAPISets.Count} were invalid and {timedoutSets.Count} timed out."
             );
             foreach (var set in invalidAPISets)
+            {
                 Debug.WriteLine(set.Text);
+            }
+
             return AutoModErrorCode.None;
         }
 
@@ -133,7 +154,10 @@ namespace PKHeX.Core.AutoMod
         {
             var template = EntityBlank.GetBlank(tr);
             if (template.Version == 0)
+            {
                 template.Version = tr.Game;
+            }
+
             EncounterMovesetGenerator.OptimizeCriteria(template, tr);
             template.ApplySetDetails(set);
             return tr.GetLegalFromSet(set, template);
@@ -153,11 +177,15 @@ namespace PKHeX.Core.AutoMod
         )
         {
             if (set is ShowdownSet s)
+            {
                 set = new RegenTemplate(s, tr.Generation);
+            }
 
             var almres = tr.TryAPIConvert(set, template);
             if (almres.Status == LegalizationResult.Regenerated)
+            {
                 return almres;
+            }
 
             if (EnableEasterEggs)
             {
@@ -180,7 +208,9 @@ namespace PKHeX.Core.AutoMod
             template.Species = species;
             var form = template.GetAvailableForm();
             if (form == -1)
+            {
                 return template;
+            }
 
             template.Form = (byte)form;
             var legalencs = tr.GetRandomEncounter(
@@ -192,7 +222,10 @@ namespace PKHeX.Core.AutoMod
                 out var legal
             );
             if (legalencs && legal != null)
+            {
                 template = legal;
+            }
+
             template.SetNickname(EasterEggs.GetMemeNickname(gen, template));
             return template;
         }
@@ -203,10 +236,14 @@ namespace PKHeX.Core.AutoMod
             var pi = pk.PersonalInfo;
             var formcount = pi.FormCount;
             if (formcount == 0)
+            {
                 return -1;
+            }
 
             if (!(pk.SWSH || pk.BDSP || pk.LA))
+            {
                 return pk.Form;
+            }
 
             static bool IsPresentInGameSWSH(ushort species, byte form) =>
                 PersonalTable.SWSH.IsPresentInGame(species, form);
@@ -217,13 +254,19 @@ namespace PKHeX.Core.AutoMod
             for (byte f = 0; f < formcount; f++)
             {
                 if (pk.LA && IsPresentInGameLA(species, f))
+                {
                     return f;
+                }
 
                 if (pk.BDSP && IsPresentInGameBDSP(species, f))
+                {
                     return f;
+                }
 
                 if (pk.SWSH && IsPresentInGameSWSH(species, f))
+                {
                     return f;
+                }
             }
             return -1;
         }
@@ -244,7 +287,9 @@ namespace PKHeX.Core.AutoMod
         {
             var almres = tr.GetLegalFromTemplateTimeout(template, set, nativeOnly);
             if (almres.Status != LegalizationResult.Regenerated)
+            {
                 return almres;
+            }
 
             var pkm = almres.Created;
             var trainer = TrainerSettings.GetSavedTrainerData(pkm, tr);
@@ -264,7 +309,9 @@ namespace PKHeX.Core.AutoMod
             for (int i = start; i < data.Count; i++)
             {
                 if (data[i].Species < 1)
+                {
                     emptySlots.Add(i);
+                }
             }
             return emptySlots;
         }

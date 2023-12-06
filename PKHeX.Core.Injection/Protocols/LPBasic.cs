@@ -121,14 +121,17 @@ namespace PKHeX.Core.Injection
 
         public override byte[] ReadBox(PokeSysBotMini psb, int box, int len, List<byte[]> allpkm)
         {
-            var bytes = psb.com.ReadBytes(psb.GetBoxOffset(box), len);
+            var bytes = psb.com.ReadBytes(psb.GetBoxOffset(box), len).AsSpan();
             if (psb.GapSize == 0)
-                return bytes;
+            {
+                return bytes.ToArray();
+            }
+
             var currofs = 0;
             for (int i = 0; i < psb.SlotCount; i++)
             {
                 var stored = bytes.Slice(currofs, psb.SlotSize);
-                allpkm.Add(stored);
+                allpkm.Add(stored.ToArray());
                 currofs += psb.SlotSize + psb.GapSize;
             }
 
@@ -146,7 +149,9 @@ namespace PKHeX.Core.Injection
             ReadOnlySpan<byte> bytes = boxData;
             byte[][] pkmData = bytes.Split(psb.SlotSize);
             for (int i = 0; i < psb.SlotCount; i++)
+            {
                 SendSlot(psb, pkmData[i], box, i);
+            }
         }
 
         public static readonly Func<PokeSysBotMini, byte[]?> GetTrainerData = psb =>
@@ -155,7 +160,10 @@ namespace PKHeX.Core.Injection
             var ofs = RamOffsets.GetTrainerBlockOffset(lv);
             var size = RamOffsets.GetTrainerBlockSize(lv);
             if (size <= 0 || ofs == 0)
+            {
                 return null;
+            }
+
             var data = psb.com.ReadBytes(ofs, size);
             return data;
         };
@@ -177,7 +185,10 @@ namespace PKHeX.Core.Injection
                     ?? throw new Exception("Blocks don't exist");
                 var allblocks = props.GetValue(sav);
                 if (allblocks is not SCBlockAccessor scba)
+                {
                     return false;
+                }
+
                 foreach (var sub in offsets)
                 {
                     var scbkey = sub.SCBKey;
@@ -210,7 +221,10 @@ namespace PKHeX.Core.Injection
                 sav.GetType().GetProperty("Blocks") ?? throw new Exception("Blocks don't exist");
             var allblocks = props.GetValue(sav);
             if (allblocks is not SCBlockAccessor scba)
+            {
                 return;
+            }
+
             var offsets = SCBlocks[psb.Version].Where(z => z.Display == block);
             foreach (var sub in offsets)
             {

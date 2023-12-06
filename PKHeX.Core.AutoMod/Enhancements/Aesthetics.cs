@@ -1035,9 +1035,15 @@ namespace PKHeX.Core.AutoMod
         {
             ballstr = ballstr.Split(' ')[0];
             if (ballstr == "Poké")
+            {
                 return Poke;
+            }
+
             if (ballstr is "Feather" or "Wing" or "Jet" or "Leaden" or "Gigaton" or "Origin")
+            {
                 ballstr = "LA" + ballstr;
+            }
+
             var valid = Enum.TryParse(ballstr, out Ball ball);
             return valid ? ball : Ball.None;
         }
@@ -1061,18 +1067,27 @@ namespace PKHeX.Core.AutoMod
                 var vals = BallColors[c];
                 var extra = allBalls.Except(vals).ToArray();
                 Util.Rand.Shuffle(extra.AsSpan());
-                BallColors[c] = vals.Concat(extra).Concat(end).ToArray();
+                BallColors[c] = [.. vals, .. extra, .. end];
             }
         }
 
         public static Shiny GetShinyType(string value)
         {
             if (value.Equals("Square", StringComparison.OrdinalIgnoreCase))
+            {
                 return Shiny.AlwaysSquare;
+            }
+
             if (value.Equals("Star", StringComparison.OrdinalIgnoreCase))
+            {
                 return Shiny.AlwaysStar;
+            }
+
             if (value.Equals("Yes", StringComparison.OrdinalIgnoreCase))
+            {
                 return Shiny.Always;
+            }
+
             return value.Equals("No", StringComparison.OrdinalIgnoreCase) ? Shiny.Never : Shiny.Random;
         }
 
@@ -1080,7 +1095,10 @@ namespace PKHeX.Core.AutoMod
         {
             var valid = Enum.TryParse(value, out LanguageID lang);
             if (!valid)
+            {
                 return null;
+            }
+
             return lang is LanguageID.Hacked or LanguageID.UNUSED_6 ? LanguageID.English : lang;
         }
 
@@ -1121,7 +1139,9 @@ namespace PKHeX.Core.AutoMod
             {
                 pkm.Ball = (int)b;
                 if (new LegalityAnalysis(pkm).Valid)
+                {
                     return pkm.Ball;
+                }
             }
             return orig_ball;
         }
@@ -1139,7 +1159,10 @@ namespace PKHeX.Core.AutoMod
                 && rt.Regen.HasBatchSettings
                 && rt.Regen.Batch.Instructions.Any(z => z.PropertyName.StartsWith("RibbonMark"));
             if (markinstruction)
+            {
                 return false;
+            }
+
             var invalid = new[]
             {
                 RibbonIndex.MarkCloudy,
@@ -1164,7 +1187,10 @@ namespace PKHeX.Core.AutoMod
 
             var count = valid.Length;
             if (count == 0)
+            {
                 return false;
+            }
+
             var randomindex = Util.Rand.Next(valid.Length);
             mark = (RibbonIndex)valid[randomindex];
             return true;

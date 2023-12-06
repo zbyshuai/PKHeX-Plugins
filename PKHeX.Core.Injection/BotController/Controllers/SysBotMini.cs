@@ -70,7 +70,10 @@ namespace PKHeX.Core.Injection
         {
             int br = Connection.Receive(buffer, 0, 1, SocketFlags.None);
             while (buffer[br - 1] != (byte)'\n')
+            {
                 br += Connection.Receive(buffer, br, 1, SocketFlags.None);
+            }
+
             return br;
         }
 
@@ -79,7 +82,9 @@ namespace PKHeX.Core.Injection
         public int Read(byte[] buffer)
         {
             lock (_sync)
+            {
                 return ReadInternal(buffer);
+            }
         }
 
         public byte[] ReadBytes(ulong offset, int length, RWMethod method)

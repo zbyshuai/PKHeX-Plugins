@@ -65,7 +65,9 @@ namespace AutoModPlugins
 
             // Match PKHeX Versioning and ALM Settings only on parent plugin
             if (Priority != 0)
+            {
                 return;
+            }
 
             Task.Run(
                 async () =>
@@ -75,9 +77,13 @@ namespace AutoModPlugins
                     if (hasError && error is not null)
                     {
                         if (error.InvokeRequired)
+                        {
                             error.Invoke(() => ShowAlmErrorDialog(error, menu));
+                        }
                         else
+                        {
                             ShowAlmErrorDialog(error, menu);
+                        }
                     }
                 },
                 Source.Token
@@ -89,6 +95,7 @@ namespace AutoModPlugins
             SystemSounds.Hand.Play();
             var res = error.ShowDialog(menu);
             if (res == DialogResult.Retry)
+            {
                 Process.Start(
                     new ProcessStartInfo
                     {
@@ -97,6 +104,7 @@ namespace AutoModPlugins
                         UseShellExecute = true
                     }
                 );
+            }
         }
 
         private async Task<(bool, ALMError?)> SetUpEnvironment(CancellationToken token)
@@ -111,16 +119,25 @@ namespace AutoModPlugins
             // ReSharper disable once SuspiciousTypeConversion.Global
             var form = ((ContainerControl)SaveFileEditor).ParentForm;
             if (form is null)
+            {
                 return;
+            }
 
             // wait for all plugins to be loaded
             while (!form.IsHandleCreated)
+            {
                 await Task.Delay(0_100, token).ConfigureAwait(false);
+            }
 
             if (form.InvokeRequired)
+            {
                 form.Invoke(() => form.TranslateInterface(WinFormsTranslator.CurrentLanguage));
+            }
             else
+            {
                 form.TranslateInterface(WinFormsTranslator.CurrentLanguage);
+            }
+
             Debug.WriteLine($"{LoggingPrefix} Translated form.");
         }
 
@@ -131,11 +148,15 @@ namespace AutoModPlugins
                 ALMVersion.Versions.CoreVersionCurrent
                 > new Version(_settings.LatestAllowedVersion);
             if (reset)
+            {
                 _settings.LatestAllowedVersion = "0.0.0.0";
+            }
 
             _settings.EnableDevMode = _settings.EnableDevMode && !mismatch;
             if (mismatch || reset)
+            {
                 _settings.Save();
+            }
 
             return (mismatch, mismatch ? WinFormsUtil.ALMErrorMismatch(ALMVersion.Versions) : null);
         }
@@ -144,7 +165,10 @@ namespace AutoModPlugins
         {
             var items = menuStrip.Items;
             if (items.Find(ParentMenuParent, false)[0] is not ToolStripDropDownItem tools)
+            {
                 return;
+            }
+
             var toolsitems = tools.DropDownItems;
             var modmenusearch = toolsitems.Find(ParentMenuName, false);
             var modmenu = GetModMenu(tools, modmenusearch);
@@ -157,7 +181,9 @@ namespace AutoModPlugins
         )
         {
             if (search.Count != 0)
+            {
                 return (ToolStripMenuItem)search[0];
+            }
 
             var modmenu = CreateBaseGroupItem();
             tools.DropDownItems.Insert(0, modmenu);
