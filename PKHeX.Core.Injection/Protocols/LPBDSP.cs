@@ -239,11 +239,11 @@ namespace PKHeX.Core.Injection
 
             var extra = psb.com.ReadBytes(ram_block, MYSTATUS_BLOCK_SIZE_RAM);
             // TID, SID, Money, Male
-            extra.AsSpan().Slice(0x8, 0x9).ToArray().CopyTo(retval, 0x1C);
+            extra.AsSpan(0x8, 0x9).CopyTo(retval.AsSpan(0x1C));
             // Region Code, Badge Count, TrainerView, ROMCode, GameClear
-            extra.AsSpan().Slice(0x11, 0x5).ToArray().CopyTo(retval, 0x28);
+            extra.AsSpan(0x11, 0x5).CopyTo(retval.AsSpan(0x28));
             // BodyType, Fashion ID
-            extra.AsSpan().Slice(0x16, 0x2).ToArray().CopyTo(retval, 0x30);
+            extra.AsSpan(0x16, 0x2).CopyTo(retval.AsSpan(0x30));
             // StarterType, DSPlayer, FollowIndex, X, Y, Height, Rotation
             extra.AsSpan(0x18).ToArray().CopyTo(retval, 0x34);
 
@@ -271,9 +271,11 @@ namespace PKHeX.Core.Injection
                 .Select(z =>
                 {
                     var retval = new byte[0x10];
-                    z.AsSpan()[..0x5].CopyTo(retval.AsSpan());
-                    z.AsSpan().Slice(0x5, 0x1).ToArray().CopyTo(retval, 0x8);
-                    z.AsSpan(0xA).ToArray().CopyTo(retval, 0xC);
+                    var zSpan = z.AsSpan();
+                    var rSpan = retval.AsSpan();
+                    zSpan[..0x5].CopyTo(rSpan);
+                    zSpan[0x5..0x6].CopyTo(rSpan[0x8..]);
+                    zSpan[0xA..].CopyTo(rSpan[0xC..]);
                     return retval;
                 })
                 .ToArray();
@@ -295,15 +297,17 @@ namespace PKHeX.Core.Injection
                 throw new Exception("Invalid Pointer string.");
             }
 
-            data = data.AsSpan()[..ITEM_BLOCK_SIZE].ToArray();
+            data = data.AsSpan(0, ITEM_BLOCK_SIZE).ToArray();
             var items = Core.ArrayUtil
                 .EnumerateSplit(data, 0x10)
                 .Select(z =>
                 {
                     var retval = new byte[0xC];
-                    z.AsSpan()[..0x5].CopyTo(retval.AsSpan());
-                    z.AsSpan().Slice(0x8, 0x1).ToArray().CopyTo(retval, 0x5);
-                    z.AsSpan().Slice(0xC, 0x2).ToArray().CopyTo(retval, 0xA);
+                    var zSpan = z.AsSpan();
+                    var rSpan = retval.AsSpan();
+                    zSpan[..0x5].CopyTo(rSpan);
+                    zSpan[0x8..0x9].CopyTo(rSpan[0x5..]);
+                    zSpan[0xC..0xE].CopyTo(rSpan[0xA..]);
                     return retval;
                 })
                 .ToArray();
@@ -350,10 +354,10 @@ namespace PKHeX.Core.Injection
                 throw new Exception("Invalid Pointer string.");
             }
 
-            data = data.AsSpan()[..UG_ITEM_BLOCK_SIZE].ToArray();
+            data = data.AsSpan(0, UG_ITEM_BLOCK_SIZE).ToArray();
             var items = Core.ArrayUtil
                 .EnumerateSplit(data, 0xC)
-                .Select(z => z.AsSpan()[..0x8].ToArray())
+                .Select(z => z.AsSpan(0, 0x8).ToArray())
                 .ToArray();
             var payload = ArrayUtil.ConcatAll(items);
             psb.com.WriteBytes(payload, addr);
@@ -370,7 +374,7 @@ namespace PKHeX.Core.Injection
                 return;
             }
 
-            data = data.AsSpan()[..MYSTATUS_BLOCK_SIZE].ToArray();
+            data = data.AsSpan(0, MYSTATUS_BLOCK_SIZE).ToArray();
             var trainer_name = ptr.ExtendPointer(0x14);
             var trainer_name_addr = psb.GetCachedPointer(sb, trainer_name);
             if (trainer_name_addr == InjectionUtil.INVALID_PTR)
@@ -380,15 +384,15 @@ namespace PKHeX.Core.Injection
 
             var retval = new byte[MYSTATUS_BLOCK_SIZE_RAM];
             // TID, SID, Money, Male
-            data.AsSpan().Slice(0x1C, 0x9).ToArray().CopyTo(retval, 0x8);
+            data.AsSpan(0x1C, 0x9).CopyTo(retval.AsSpan(0x8));
             // Region Code, Badge Count, TrainerView, ROMCode, GameClear
-            data.AsSpan().Slice(0x28, 0x5).ToArray().CopyTo(retval, 0x11);
+            data.AsSpan(0x28, 0x5).CopyTo(retval.AsSpan(0x11));
             // BodyType, Fashion ID
-            data.AsSpan().Slice(0x30, 0x2).ToArray().CopyTo(retval, 0x16);
+            data.AsSpan(0x30, 0x2).CopyTo(retval.AsSpan(0x16));
             // StarterType, DSPlayer, FollowIndex, X, Y, Height, Rotation
             data.AsSpan(0x34).ToArray().CopyTo(retval, 0x18);
 
-            psb.com.WriteBytes(data.AsSpan()[..0x1A].ToArray(), trainer_name_addr);
+            psb.com.WriteBytes(data.AsSpan(0, 0x1A), trainer_name_addr);
             psb.com.WriteBytes(retval.AsSpan(0x8).ToArray(), psb.GetCachedPointer(sb, ptr) + 0x8);
         }
 
@@ -412,9 +416,9 @@ namespace PKHeX.Core.Injection
 
             parent_one.CopyTo(block, 0);
             parent_two.CopyTo(block, 0x158);
-            extra_arr[0].AsSpan()[..4].ToArray().CopyTo(block, 0x158 * 2);
+            extra_arr[0].AsSpan(0, 4).CopyTo(block.AsSpan(0x158 * 2));
             extra_arr[1].CopyTo(block, (0x158 * 2) + 0x4);
-            extra_arr[2].AsSpan()[..4].ToArray().CopyTo(block, (0x158 * 2) + 0x4 + 0x8);
+            extra_arr[2].AsSpan(0, 4).CopyTo(block.AsSpan((0x158 * 2) + 0x4 + 0x8));
             return block;
         }
 
@@ -431,14 +435,14 @@ namespace PKHeX.Core.Injection
             var parent_one_addr = psb.GetCachedPointer(nx, ptr.ExtendPointer(0x20, 0x20));
             var parent_two_addr = psb.GetCachedPointer(nx, ptr.ExtendPointer(0x28, 0x20));
 
-            data = data.AsSpan()[..DAYCARE_BLOCK_SIZE].ToArray();
-            psb.com.WriteBytes(data.AsSpan()[..0x158].ToArray(), parent_one_addr);
-            psb.com.WriteBytes(data.AsSpan().Slice(0x158, 0x158).ToArray(), parent_two_addr);
+            data = data.AsSpan(0, DAYCARE_BLOCK_SIZE).ToArray();
+            psb.com.WriteBytes(data.AsSpan(0, 0x158), parent_one_addr);
+            psb.com.WriteBytes(data.AsSpan(0x158, 0x158), parent_two_addr);
 
             var payload = new byte[DAYCARE_BLOCK_SIZE_RAM - 0x8];
-            data.AsSpan().Slice(0x158 * 2, 4).CopyTo(payload.AsSpan());
-            data.AsSpan().Slice((0x158 * 2) + 0x4, 0x8).ToArray().CopyTo(payload, 0x8);
-            data.AsSpan().Slice((0x158 * 2) + 0x4 + 0x8, 0x4).ToArray().CopyTo(payload, 0x8 * 2);
+            data.AsSpan(0x158 * 2, 4).CopyTo(payload.AsSpan());
+            data.AsSpan((0x158 * 2) + 0x4, 0x8).CopyTo(payload.AsSpan( 0x8));
+            data.AsSpan((0x158 * 2) + 0x4 + 0x8, 0x4).CopyTo(payload.AsSpan(0x8 * 2));
             psb.com.WriteBytes(payload, addr + 0x8);
         }
 
