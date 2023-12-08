@@ -10,16 +10,19 @@ namespace PKHeX.Core.AutoMod
             if (gen is 9)
             {
                 // Scatterbug and Spewpa must be Fancy
-                if (
-                    set.Species == (ushort)Species.Scatterbug
-                    || set.Species == (ushort)Species.Spewpa
-                )
+                if (set.Species == (ushort)Species.Scatterbug || set.Species == (ushort)Species.Spewpa)
+                {
                     set.Form = 18;
+                }
+
                 return;
             }
 
             if (!FormInfo.IsBattleOnlyForm(set.Species, set.Form, gen))
+            {
                 return;
+            }
+
             set.Form = FormInfo.GetOutOfBattleForm(set.Species, set.Form, gen);
         }
 
@@ -33,18 +36,22 @@ namespace PKHeX.Core.AutoMod
             {
                 case (ushort)Species.Zacian:
                 case (ushort)Species.Zamazenta:
-                {
-                    // Behemoth Blade and Behemoth Bash -> Iron Head
-                    if (!set.Moves.Contains((ushort)781) && !set.Moves.Contains((ushort)782))
-                        return;
-
-                    for (int i = 0; i < set.Moves.Length; i++)
                     {
-                        if (set.Moves[i] is 781 or 782)
-                            set.Moves[i] = 442;
+                        // Behemoth Blade and Behemoth Bash -> Iron Head
+                        if (!set.Moves.Contains((ushort)781) && !set.Moves.Contains((ushort)782))
+                        {
+                            return;
+                        }
+
+                        for (int i = 0; i < set.Moves.Length; i++)
+                        {
+                            if (set.Moves[i] is 781 or 782)
+                            {
+                                set.Moves[i] = 442;
+                            }
+                        }
+                        break;
                     }
-                    break;
-                }
             }
         }
         /// <summary>
@@ -54,8 +61,11 @@ namespace PKHeX.Core.AutoMod
         public static void SanitizeTeraTypes(this RegenTemplate set)
         {
             if (set.Species == (int)Species.Ogerpon && !TeraTypeUtil.IsValidOgerpon((byte)set.TeraType, set.Form))
+            {
                 set.TeraType = ShowdownEdits.GetValidOpergonTeraType(set.Form);
+            }
         }
+
         /// <summary>
         /// General method to preprocess sets excluding invalid forms. (handled in a future method)
         /// </summary>
@@ -64,9 +74,13 @@ namespace PKHeX.Core.AutoMod
         public static void FixGender(this RegenTemplate set, PersonalInfo personal)
         {
             if (personal.OnlyFemale && set.Gender != 1)
+            {
                 set.Gender = 1;
+            }
             else if (personal.OnlyMale && set.Gender != 0)
+            {
                 set.Gender = 0;
+            }
         }
 
         public static string GetRegenText(this PKM pk) =>

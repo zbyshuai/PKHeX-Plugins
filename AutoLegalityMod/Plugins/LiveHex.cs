@@ -43,12 +43,16 @@ namespace AutoModPlugins
         public override void NotifySaveLoaded()
         {
             if (SaveFileEditor.SAV is SAV8SWSH)
+            {
                 return;
+            }
 
             // close any windows & connections to force disconnect
             var forms = WinFormsUtil.FormsOfType<LiveHeXUI>();
             foreach (var form in forms)
+            {
                 form.Close();
+            }
         }
     }
 }

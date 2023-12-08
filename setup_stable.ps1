@@ -3,7 +3,7 @@
 
 # Powershell script to download PKHeX and Plugins (stable)
 Write-Host "PKHeX and PKHeX-Plugins downloader (stable releases)"
-Write-Host "Please report any issues with this setup file via GitHub issues at https://github.com/architdate/PKHeX-Plugins/issues"
+Write-Host "Please report any issues with this setup file via GitHub issues at https://github.com/santacrab2/PKHeX-Plugins/issues"
 Write-Host ""
 Write-Host ""
 
@@ -42,7 +42,7 @@ $headers = @{
 if ((get-process "pkhex" -ea SilentlyContinue) -ne $Null) {Stop-Process -processname "pkhex"}
 
 # get latest stable plugins
-$pluginsrepo = "architdate/PKHeX-Plugins"
+$pluginsrepo = "santacrab2/PKHeX-Plugins"
 $baserepo = "kwsch/PKHeX"
 $file = "PKHeX-Plugins.zip"
 $releases = "https://api.github.com/repos/$pluginsrepo/releases"

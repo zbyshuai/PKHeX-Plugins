@@ -26,7 +26,10 @@ namespace PKHeX.Core.AutoMod
                     case nameof(Ball):
                         var ball = Aesthetics.GetBallFromString(value);
                         if (ball == Ball.Strange)
+                        {
                             continue;
+                        }
+
                         Ball = ball;
                         break;
                     case nameof(Shiny):
@@ -57,23 +60,38 @@ namespace PKHeX.Core.AutoMod
         {
             var result = new List<string>();
             if (Ball != Ball.None)
+            {
                 result.Add($"Ball: {Ball} Ball");
+            }
 
             if (ShinyType == Shiny.AlwaysStar)
+            {
                 result.Add("Shiny: Star");
+            }
             else if (ShinyType == Shiny.AlwaysSquare)
+            {
                 result.Add("Shiny: Square");
+            }
             else if (ShinyType == Shiny.Always)
+            {
                 result.Add("Shiny: Yes");
+            }
 
             if (Language != null)
+            {
                 result.Add($"Language: {Language}");
+            }
 
             if (Ability != AbilityRequest.Any)
+            {
                 result.Add($"Ability: {Ability}");
+            }
 
             if (Alpha)
+            {
                 result.Add("Alpha: Yes");
+            }
+
             return string.Join(Environment.NewLine, result);
         }
     }

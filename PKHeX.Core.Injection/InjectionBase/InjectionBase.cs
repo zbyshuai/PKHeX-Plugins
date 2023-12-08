@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace PKHeX.Core.Injection
 {
-    public abstract class InjectionBase : PointerCache
+    public abstract class InjectionBase(LiveHeXVersion lv, bool useCache) : PointerCache(lv, useCache)
     {
         public const decimal BotbaseVersion = 2.3m;
 
@@ -112,32 +112,38 @@ namespace PKHeX.Core.Injection
                 },
             };
 
-        public virtual Dictionary<string, string> SpecialBlocks { get; } = new();
-
-        public InjectionBase(LiveHeXVersion lv, bool useCache)
-            : base(lv, useCache) { }
+        public virtual Dictionary<string, string> SpecialBlocks { get; } = [];
 
         protected static InjectionBase GetInjector(LiveHeXVersion version, bool useCache)
         {
             if (LPLGPE.GetVersions().Contains(version))
+            {
                 return new LPLGPE(version, useCache);
+            }
+
             if (LPBDSP.GetVersions().Contains(version))
+            {
                 return new LPBDSP(version, useCache);
+            }
+
             if (LPPointer.GetVersions().Contains(version))
+            {
                 return new LPPointer(version, useCache);
-            if (LPBasic.GetVersions().Contains(version))
-                return new LPBasic(version, useCache);
-            throw new NotImplementedException("Unknown LiveHeXVersion.");
+            }
+
+            return LPBasic.GetVersions().Contains(version)
+                ? (InjectionBase)new LPBasic(version, useCache)
+                : throw new NotImplementedException("Unknown LiveHeXVersion.");
         }
 
         public virtual byte[] ReadBox(PokeSysBotMini psb, int box, int len, List<byte[]> allpkm)
         {
-            return Array.Empty<byte>();
+            return [];
         }
 
         public virtual byte[] ReadSlot(PokeSysBotMini psb, int box, int slot)
         {
-            return Array.Empty<byte>();
+            return [];
         }
 
         public virtual void SendBox(PokeSysBotMini psb, byte[] boxData, int box) { }
@@ -151,7 +157,8 @@ namespace PKHeX.Core.Injection
             string block,
             byte[] data,
             object sb
-        ) { }
+        )
+        { }
 
         public virtual bool ReadBlockFromString(
             PokeSysBotMini psb,
@@ -178,7 +185,9 @@ namespace PKHeX.Core.Injection
         public static LiveHeXVersion GetVersionFromTitle(string titleID, string gameVersion)
         {
             if (!SupportedTitleVersions.TryGetValue(titleID, out var versions))
+            {
                 return LiveHeXVersion.Unknown;
+            }
 
             versions = versions.Reverse().ToArray();
             var sanitized = gameVersion.Replace(".", "");
@@ -186,11 +195,15 @@ namespace PKHeX.Core.Injection
             {
                 var name = Enum.GetName(typeof(LiveHeXVersion), version);
                 if (name is null)
+                {
                     continue;
+                }
 
                 name = name.Split('v')[1];
                 if (name == sanitized)
+                {
                     return version;
+                }
             }
             return LiveHeXVersion.Unknown;
         }
@@ -199,13 +212,19 @@ namespace PKHeX.Core.Injection
         {
             msg = "";
             if (psb.com is not ICommunicatorNX nx)
+            {
                 return false;
+            }
 
             if (nx.IsProgramRunning(Ovlloader_ID))
+            {
                 msg += "Tesla overlay";
+            }
 
             if (nx.IsProgramRunning(Dmnt_ID))
+            {
                 msg += msg != "" ? " and dmnt (cheats?)" : "Dmnt (cheats?)";
+            }
 
             bool detected = msg != "";
             msg += detected

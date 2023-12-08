@@ -56,30 +56,47 @@ namespace PKHeX.Core.Injection
                 foreach (UsbRegistry ur in UsbDevice.AllDevices.Cast<UsbRegistry>())
                 {
                     if (ur.Vid != 0x057E)
+                    {
                         continue;
+                    }
+
                     if (ur.Pid != 0x3000)
+                    {
                         continue;
+                    }
 
                     ur.DeviceProperties.TryGetValue("Address", out object? addr);
                     if (Port.ToString() != addr?.ToString())
+                    {
                         continue;
+                    }
 
                     SwDevice = ur.Device;
                 }
 
                 // If the device is open and ready
                 if (SwDevice == null)
+                {
                     throw new Exception("USB device not found.");
+                }
 
                 if (SwDevice is not IUsbDevice usb)
+                {
                     throw new Exception(
                         "Device is using a WinUSB driver. Use libusbK and create a filter."
                     );
+                }
+
                 if (!usb.UsbRegistryInfo.IsAlive)
+                {
                     usb.ResetDevice();
+                }
 
                 if (SwDevice.IsOpen)
+                {
                     SwDevice.Close();
+                }
+
                 SwDevice.Open();
 
                 if (SwDevice is IUsbDevice wholeUsbDevice)
@@ -121,7 +138,10 @@ namespace PKHeX.Core.Injection
                 if (SwDevice is { IsOpen: true })
                 {
                     if (SwDevice is IUsbDevice wholeUsbDevice)
+                    {
                         wholeUsbDevice.ReleaseInterface(0);
+                    }
+
                     SwDevice.Close();
                 }
 
@@ -135,19 +155,19 @@ namespace PKHeX.Core.Injection
         public byte[] ReadBytes(ulong offset, int length) =>
             ReadBytesUSB(offset, length, RWMethod.Heap);
 
-        public void WriteBytes(byte[] data, ulong offset) =>
+        public void WriteBytes(ReadOnlySpan<byte> data, ulong offset) =>
             WriteBytesUSB(data, offset, RWMethod.Heap);
 
         public byte[] ReadBytesMain(ulong offset, int length) =>
             ReadBytesUSB(offset, length, RWMethod.Main);
 
-        public void WriteBytesMain(byte[] data, ulong offset) =>
+        public void WriteBytesMain(ReadOnlySpan<byte> data, ulong offset) =>
             WriteBytesUSB(data, offset, RWMethod.Main);
 
         public byte[] ReadBytesAbsolute(ulong offset, int length) =>
             ReadBytesUSB(offset, length, RWMethod.Absolute);
 
-        public void WriteBytesAbsolute(byte[] data, ulong offset) =>
+        public void WriteBytesAbsolute(ReadOnlySpan<byte> data, ulong offset) =>
             WriteBytesUSB(data, offset, RWMethod.Absolute);
 
         public byte[] ReadBytesAbsoluteMulti(Dictionary<ulong, int> offsets) =>
@@ -196,9 +216,11 @@ namespace PKHeX.Core.Injection
 
             // read size, no error checking as of yet, should be the required 368 bytes
             if (reader == null)
+            {
                 throw new Exception(
                     "USB writer is null, you may have disconnected the device during previous function"
                 );
+            }
 
             reader.Read(sizeOfReturn, 5000, out _);
 
@@ -210,9 +232,11 @@ namespace PKHeX.Core.Injection
         private int SendInternal(byte[] buffer)
         {
             if (writer == null)
+            {
                 throw new Exception(
                     "USB writer is null, you may have disconnected the device during previous function"
                 );
+            }
 
             uint pack = (uint)buffer.Length + 2;
             var ec = writer.Write(BitConverter.GetBytes(pack), 2000, out _);
@@ -271,7 +295,9 @@ namespace PKHeX.Core.Injection
             Thread.Sleep(1);
 
             if (reader == null)
+            {
                 throw new Exception("USB device not found or not connected.");
+            }
 
             // Let usb-botbase tell us the response size.
             byte[] sizeOfReturn = new byte[4];
@@ -302,15 +328,19 @@ namespace PKHeX.Core.Injection
             return buffer;
         }
 
-        public void WriteBytesUSB(byte[] data, ulong offset, RWMethod method)
+        public void WriteBytesUSB(ReadOnlySpan<byte> data, ulong offset, RWMethod method)
         {
             if (data.Length > MaximumTransferSize)
+            {
                 WriteBytesLarge(data, offset, method);
+            }
             else
+            {
                 WriteSmall(data, offset, method);
+            }
         }
 
-        public void WriteSmall(byte[] data, ulong offset, RWMethod method)
+        public void WriteSmall(ReadOnlySpan<byte> data, ulong offset, RWMethod method)
         {
             lock (_sync)
             {
@@ -327,7 +357,7 @@ namespace PKHeX.Core.Injection
             }
         }
 
-        private void WriteBytesLarge(byte[] data, ulong offset, RWMethod method)
+        private void WriteBytesLarge(ReadOnlySpan<byte> data, ulong offset, RWMethod method)
         {
             int byteCount = data.Length;
             for (int i = 0; i < byteCount; i += MaximumTransferSize)
@@ -338,15 +368,15 @@ namespace PKHeX.Core.Injection
         }
 
         // Taken from SysBot.
-        private static byte[] SliceSafe(byte[] src, int offset, int length)
+        private static ReadOnlySpan<byte> SliceSafe(ReadOnlySpan<byte> src, int offset, int length)
         {
             var delta = src.Length - offset;
             if (delta < length)
+            {
                 length = delta;
+            }
 
-            byte[] data = new byte[length];
-            Buffer.BlockCopy(src, offset, data, 0, data.Length);
-            return data;
+            return src.Slice(offset, length);
         }
     }
 }

@@ -12,7 +12,7 @@ namespace AutoModPlugins
     // Code borrowed from PKHeX.WinForms with permission from kwsch, with adaptations
     public static class WinFormsTranslator
     {
-        private static readonly Dictionary<string, TranslationContext> Context = new();
+        private static readonly Dictionary<string, TranslationContext> Context = [];
 
         internal static void TranslateInterface(this Control form, string lang) =>
             TranslateForm(form, GetContext(lang));
@@ -30,7 +30,9 @@ namespace AutoModPlugins
         internal static TranslationContext GetContext(string lang)
         {
             if (Context.TryGetValue(lang, out var context))
+            {
                 return context;
+            }
 
             var lines = GetTranslationFile(lang);
             Context.Add(lang, context = new TranslationContext(lines));
@@ -52,21 +54,25 @@ namespace AutoModPlugins
                     var current = r.Text;
                     var updated = context.GetTranslatedText($"{formname}.{r.Name}", current);
                     if (!ReferenceEquals(current, updated))
+                    {
                         r.Text = updated;
+                    }
                 }
                 else if (c is ToolStripItem t)
                 {
                     var current = t.Text;
                     var updated = context.GetTranslatedText($"{formname}.{t.Name}", current);
                     if (!ReferenceEquals(current, updated))
+                    {
                         t.Text = updated;
+                    }
                 }
             }
 
             form.ResumeLayout();
         }
 
-        private static IEnumerable<string> GetTranslationFile(string lang)
+        private static string[] GetTranslationFile(string lang)
         {
             var file = GetTranslationFileNameInternal(lang);
 
@@ -84,11 +90,12 @@ namespace AutoModPlugins
             }
 
             if (Util.IsStringListCached(file, out var result))
+            {
                 return result;
+            }
+
             var txt = Resources.ResourceManager.GetObject(file);
-            if (txt is not string s)
-                return Array.Empty<string>();
-            return Util.LoadStringList(file, s);
+            return txt is not string s ? [] : Util.LoadStringList(file, s);
         }
 
         private static IEnumerable<object> GetTranslatableControls(Control f)
@@ -99,31 +106,35 @@ namespace AutoModPlugins
                 {
                     case ToolStrip menu:
                         foreach (var obj in GetToolStripMenuItems(menu))
+                        {
                             yield return obj;
+                        }
 
                         break;
                     default:
                         if (string.IsNullOrWhiteSpace(z.Name))
+                        {
                             break;
+                        }
 
                         if (z.ContextMenuStrip != null)
                         {
                             foreach (var obj in GetToolStripMenuItems(z.ContextMenuStrip))
+                            {
                                 yield return obj;
+                            }
                         }
 
-                        if (
-                            z
-                            is ListControl
-                                or TextBoxBase
-                                or LinkLabel
-                                or NumericUpDown
-                                or ContainerControl
-                        )
+                        if (z is ListControl or TextBoxBase or LinkLabel  or NumericUpDown or ContainerControl)
+                        {
                             break; // undesirable to modify, ignore
+                        }
 
                         if (!string.IsNullOrWhiteSpace(z.Text))
+                        {
                             yield return z;
+                        }
+
                         break;
                 }
             }
@@ -135,12 +146,19 @@ namespace AutoModPlugins
             foreach (Control child in control.Controls)
             {
                 if (child is T childOfT)
+                {
                     yield return childOfT;
+                }
 
                 if (!child.HasChildren)
+                {
                     continue;
+                }
+
                 foreach (var descendant in GetChildrenOfType<T>(child))
+                {
                     yield return descendant;
+                }
             }
         }
 
@@ -149,12 +167,14 @@ namespace AutoModPlugins
             foreach (var i in menu.Items.OfType<ToolStripMenuItem>())
             {
                 if (!string.IsNullOrWhiteSpace(i.Text))
+                {
                     yield return i;
-                foreach (
-                    var sub in GetToolsStripDropDownItems(i)
-                        .Where(z => !string.IsNullOrWhiteSpace(z.Text))
-                )
+                }
+
+                foreach (var sub in GetToolsStripDropDownItems(i).Where(z => !string.IsNullOrWhiteSpace(z.Text)))
+                {
                     yield return sub;
+                }
             }
         }
 
@@ -166,9 +186,14 @@ namespace AutoModPlugins
             {
                 yield return dropDownItem;
                 if (!dropDownItem.HasDropDownItems)
+                {
                     continue;
+                }
+
                 foreach (ToolStripMenuItem subItem in GetToolsStripDropDownItems(dropDownItem))
+                {
                     yield return subItem;
+                }
             }
         }
 
@@ -260,25 +285,34 @@ namespace AutoModPlugins
         public bool AddNew { private get; set; }
         public bool RemoveUsedKeys { private get; set; }
         public const char Separator = '=';
-        private readonly Dictionary<string, string> translation = new();
+        private readonly Dictionary<string, string> translation = [];
 
         public TranslationContext(IEnumerable<string> content, char separator = Separator)
         {
             var entries = content.Select(z => z.Split(separator)).Where(z => z.Length == 2);
             foreach (var kvp in entries.Where(z => !translation.ContainsKey(z[0])))
+            {
                 translation.Add(kvp[0], kvp[1]);
+            }
         }
 
         public string? GetTranslatedText(string val, string? fallback)
         {
             if (RemoveUsedKeys)
+            {
                 translation.Remove(val);
+            }
 
             if (translation.TryGetValue(val, out var translated))
+            {
                 return translated;
+            }
 
             if (fallback != null && AddNew)
+            {
                 translation.Add(val, fallback);
+            }
+
             return fallback;
         }
 
@@ -295,14 +329,19 @@ namespace AutoModPlugins
             bool oldAdd = AddNew;
             AddNew = true;
             foreach (var kvp in other.translation)
+            {
                 GetTranslatedText(kvp.Key, kvp.Value);
+            }
+
             AddNew = oldAdd;
         }
 
         public void RemoveKeys(TranslationContext other)
         {
             foreach (var kvp in other.translation)
+            {
                 translation.Remove(kvp.Key);
+            }
         }
     }
 }

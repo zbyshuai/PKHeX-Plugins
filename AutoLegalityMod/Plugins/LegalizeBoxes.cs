@@ -33,9 +33,13 @@ namespace AutoModPlugins
 
                 var all = (Control.ModifierKeys & Keys.Shift) == Keys.Shift;
                 if (!all)
+                {
                     LegalizeCurrent();
+                }
                 else
+                {
                     LegalizeAllBoxes();
+                }
             }
             catch (MissingMethodException)
             {
@@ -49,6 +53,7 @@ namespace AutoModPlugins
 
                 var res = error.DialogResult;
                 if (res == DialogResult.Retry)
+                {
                     Process.Start(
                         new ProcessStartInfo
                         {
@@ -57,6 +62,7 @@ namespace AutoModPlugins
                             UseShellExecute = true
                         }
                     );
+                }
             }
         }
 
@@ -65,7 +71,10 @@ namespace AutoModPlugins
             var sav = SaveFileEditor.SAV;
             var count = sav.LegalizeBox(sav.CurrentBox);
             if (count <= 0) // failed to modify anything
+            {
                 return;
+            }
+
             SaveFileEditor.ReloadSlots();
             WinFormsUtil.Alert($"Legalized {count} Pokémon in Current Box!");
         }
@@ -75,7 +84,10 @@ namespace AutoModPlugins
             var sav = SaveFileEditor.SAV;
             var count = sav.LegalizeBoxes();
             if (count <= 0) // failed to modify anything
+            {
                 return;
+            }
+
             SaveFileEditor.ReloadSlots();
             WinFormsUtil.Alert($"Legalized {count} Pokémon across all boxes!");
         }
@@ -85,7 +97,9 @@ namespace AutoModPlugins
             var pk = PKMEditor.PreparePKM();
             var la = new LegalityAnalysis(pk);
             if (la.Valid)
+            {
                 return; // already valid, don't modify it
+            }
 
             var sav = SaveFileEditor.SAV;
             var result = sav.Legalize(pk);
@@ -95,7 +109,7 @@ namespace AutoModPlugins
             la = new LegalityAnalysis(result);
             if (!la.Valid)
             {
-                var errorstr =
+                const string errorstr =
                     "Unable to make the Active Pokemon legal!\n\n"
                     + "No legal Pokémon matches the provided traits.\n\n"
                     + "Visit the Wiki to learn how to import Showdown Sets.";
@@ -105,6 +119,7 @@ namespace AutoModPlugins
 
                 var res = error.DialogResult;
                 if (res == DialogResult.Retry)
+                {
                     Process.Start(
                         new ProcessStartInfo
                         {
@@ -113,6 +128,8 @@ namespace AutoModPlugins
                             UseShellExecute = true
                         }
                     );
+                }
+
                 return;
             }
 

@@ -37,12 +37,17 @@ namespace AutoModPlugins
         private static void Export()
         {
             if (!WinFormsUtil.OpenSAVPKMDialog(new[] { ".bnk" }, out var path))
+            {
                 return;
+            }
 
             var bank = File.ReadAllBytes(path!);
             using var fbd = new FolderBrowserDialog();
             if (fbd.ShowDialog() != DialogResult.OK)
+            {
                 return;
+            }
+
             var count = PKSMUtil.ExportBank(bank, fbd.SelectedPath, out var previews);
             PKMPreview.ExportCSV(previews, fbd.SelectedPath);
             WinFormsUtil.Alert("Bank Exported!", $"Dumped {count} Pokémon!");
@@ -52,7 +57,10 @@ namespace AutoModPlugins
         {
             using var fbd = new FolderBrowserDialog();
             if (fbd.ShowDialog() != DialogResult.OK)
+            {
                 return;
+            }
+
             var count = PKSMUtil.CreateBank(fbd.SelectedPath);
             WinFormsUtil.Alert("Bank Created!", $"Added {count} Pokémon to the bank!");
         }

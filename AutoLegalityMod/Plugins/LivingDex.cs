@@ -24,13 +24,18 @@ namespace AutoModPlugins
         {
             var prompt = WinFormsUtil.Prompt(MessageBoxButtons.YesNo, "Generate a Living Dex?");
             if (prompt != DialogResult.Yes)
+            {
                 return;
+            }
 
             var sav = SaveFileEditor.SAV;
             Span<PKM> pkms = sav.GenerateLivingDex().ToArray();
             Span<PKM> bd = sav.BoxData.ToArray();
             if (pkms.Length > bd.Length)
-                pkms = pkms.Slice(0, bd.Length);
+            {
+                pkms = pkms[..bd.Length];
+            }
+
             pkms.CopyTo(bd);
             sav.BoxData = bd.ToArray();
             SaveFileEditor.ReloadSlots();

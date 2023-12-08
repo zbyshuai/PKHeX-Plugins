@@ -37,7 +37,10 @@ namespace AutoModPlugins.GUI
             refresh.Elapsed += AutoRefresh;
             refresh.AutoReset = false;
             if (addr == 0 || bot == null)
+            {
                 CB_AutoRefresh.Enabled = RT_Timer.Enabled = RT_Label.Enabled = false;
+            }
+
             Bytes = originalBytes;
             address = addr;
             method = rwm;
@@ -83,7 +86,9 @@ namespace AutoModPlugins.GUI
                         _ => psb.com.ReadBytes(address, length + headersize),
                     };
                     if (decrypt)
+                    {
                         result = DecryptBlock(block_key, result)[headersize..];
+                    }
                 }
 
                 var r_text = string.Join(" ", result.Select(z => $"{z:X2}"));
@@ -92,10 +97,13 @@ namespace AutoModPlugins.GUI
                         delegate
                         {
                             if (RTB_RAM.Text != r_text) // Prevent text updates if there is no update since they hinder copying
+                            {
                                 RTB_RAM.Text = r_text;
+                            }
                         }
                 );
                 if (RT_Timer.Enabled)
+                {
                     RT_Timer.Invoke(
                         (MethodInvoker)
                             delegate
@@ -103,6 +111,8 @@ namespace AutoModPlugins.GUI
                                 refresh.Interval = (double)RT_Timer.Value;
                             }
                     );
+                }
+
                 refresh.Start();
             }
             catch
@@ -115,7 +125,10 @@ namespace AutoModPlugins.GUI
         {
             var rng = new SCXorShift32(key);
             for (int i = 0; i < block.Length; i++)
+            {
                 block[i] = (byte)(block[i] ^ rng.Next());
+            }
+
             return block;
         }
 
@@ -142,7 +155,7 @@ namespace AutoModPlugins.GUI
             }
             else
             {
-                if (decrypt == false)
+                if (!decrypt)
                 {
                     B_Update.Enabled = true;
                     RTB_RAM.ReadOnly = false;
@@ -185,7 +198,10 @@ namespace AutoModPlugins.GUI
                 {
                     var split = new string[(text.Length / 2) + (text.Length % 2 == 0 ? 0 : 1)];
                     for (int i = 0; i < split.Length; i++)
+                    {
                         split[i] = text.Substring(i * 2, (i * 2) + 2 > text.Length ? 1 : 2);
+                    }
+
                     Clipboard.SetText(string.Join(" ", split));
                 }
             }
@@ -196,7 +212,10 @@ namespace AutoModPlugins.GUI
                 if (ctrlC || ctrlX)
                 {
                     if (string.IsNullOrWhiteSpace(SelectedText))
+                    {
                         return false;
+                    }
+
                     Clipboard.SetText(string.Concat(SelectedText.Split(' ').Reverse()));
                     return true;
                 }

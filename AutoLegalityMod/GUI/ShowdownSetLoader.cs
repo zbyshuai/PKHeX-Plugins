@@ -19,13 +19,13 @@ namespace AutoModPlugins
         public static IPKMView PKMEditor { private get; set; } = null!;
 
         private static readonly EncounterTypeGroup[] EncounterPriority =
-        {
+        [
             EncounterTypeGroup.Egg,
             EncounterTypeGroup.Static,
             EncounterTypeGroup.Trade,
             EncounterTypeGroup.Slot,
             EncounterTypeGroup.Mystery,
-        };
+        ];
 
         /// <summary>
         /// Imports <see cref="ShowdownSet"/> list(s) originating from a concatenated list.
@@ -79,7 +79,9 @@ namespace AutoModPlugins
 
             var message = result.GetMessage();
             if (!string.IsNullOrEmpty(message))
+            {
                 WinFormsUtil.Alert(message);
+            }
         }
 
         private static AutoModErrorCode ImportSetToTabs(ShowdownSet set, bool skipDialog = false)
@@ -90,10 +92,14 @@ namespace AutoModPlugins
                 && DialogResult.Yes
                     != WinFormsUtil.Prompt(MessageBoxButtons.YesNo, "Import this set?", regen.Text)
             )
+            {
                 return AutoModErrorCode.NoSingleImport;
+            }
 
             if (set.InvalidLines.Count > 0)
+            {
                 return AutoModErrorCode.InvalidLines;
+            }
 
             Debug.WriteLine($"Commencing Import of {GameInfo.Strings.Species[set.Species]}");
             var timer = Stopwatch.StartNew();
@@ -108,7 +114,7 @@ namespace AutoModPlugins
             {
                 var errorstr =
                     "The PKHeX-Plugins version does not match the PKHeX version.\n\n"
-                    + $"Refer to the Wiki to fix this error.\n\n"
+                    + "Refer to the Wiki to fix this error.\n\n"
                     + $"The current ALM Version is {ALMVersion.Versions.AlmVersionCurrent}\n"
                     + $"The current PKHeX Version is {ALMVersion.Versions.CoreVersionCurrent}";
 
@@ -117,6 +123,7 @@ namespace AutoModPlugins
 
                 var res = error.DialogResult;
                 if (res == DialogResult.Retry)
+                {
                     Process.Start(
                         new ProcessStartInfo
                         {
@@ -125,6 +132,8 @@ namespace AutoModPlugins
                             UseShellExecute = true
                         }
                     );
+                }
+
                 return AutoModErrorCode.VersionMismatch;
             }
 
@@ -134,7 +143,9 @@ namespace AutoModPlugins
 
                 string? analysis = null;
                 if (msg is LegalizationResult.Failed)
+                {
                     analysis = regen.SetAnalysis(sav, legal);
+                }
 
                 var errorstr =
                     msg == LegalizationResult.Failed ? "failed to generate" : "timed out";
@@ -147,6 +158,7 @@ namespace AutoModPlugins
 
                 var res = error.DialogResult;
                 if (res == DialogResult.Retry)
+                {
                     Process.Start(
                         new ProcessStartInfo
                         {
@@ -155,6 +167,7 @@ namespace AutoModPlugins
                             UseShellExecute = true
                         }
                     );
+                }
             }
 
             Debug.WriteLine("Single Set Genning Complete. Loading final data to tabs.");
@@ -203,6 +216,7 @@ namespace AutoModPlugins
 
                 var res = error.DialogResult;
                 if (res == DialogResult.Retry)
+                {
                     Process.Start(
                         new ProcessStartInfo
                         {
@@ -211,6 +225,7 @@ namespace AutoModPlugins
                             UseShellExecute = true
                         }
                     );
+                }
             }
 
             if (result is AutoModErrorCode.VersionMismatch)
@@ -225,6 +240,7 @@ namespace AutoModPlugins
 
                 var res = error.DialogResult;
                 if (res == DialogResult.Retry)
+                {
                     Process.Start(
                         new ProcessStartInfo
                         {
@@ -233,11 +249,15 @@ namespace AutoModPlugins
                             UseShellExecute = true
                         }
                     );
+                }
+
                 return AutoModErrorCode.VersionMismatch;
             }
 
             if (result != AutoModErrorCode.None)
+            {
                 return result;
+            }
 
             Debug.WriteLine(
                 "Multi Set Genning Complete. Setting data to the save file and reloading view."
@@ -283,7 +303,9 @@ namespace AutoModPlugins
             };
 
             if (APILegality.UseCompetitiveMarkings)
+            {
                 MarkingApplicator.MarkingMethod = APILegality.CompetitiveMarking;
+            }
 
             if (APILegality.EnableDevMode && settings.LatestAllowedVersion == "0.0.0.0")
             {
@@ -292,12 +314,19 @@ namespace AutoModPlugins
                 APILegality.LatestAllowedVersion = settings.LatestAllowedVersion;
             }
             else
+            {
                 APILegality.LatestAllowedVersion = settings.LatestAllowedVersion;
+            }
 
-            settings.PrioritizeEncounters ??= EncounterPriority.ToList();
+            settings.PrioritizeEncounters ??= [.. EncounterPriority];
             foreach (var ep in EncounterPriority)
+            {
                 if (!settings.PrioritizeEncounters.Contains(ep))
+                {
                     settings.PrioritizeEncounters.Add(ep);
+                }
+            }
+
             settings.PrioritizeEncounters = settings.PrioritizeEncounters.Distinct().ToList();
             EncounterMovesetGenerator.PriorityList = settings.PrioritizeEncounters;
         }

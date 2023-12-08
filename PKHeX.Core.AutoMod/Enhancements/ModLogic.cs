@@ -11,7 +11,7 @@ namespace PKHeX.Core.AutoMod
     public static class ModLogic
     {
         // Living Dex Settings
-        public static LivingDexConfig cfg = new LivingDexConfig
+        public static LivingDexConfig cfg = new()
         {
             IncludeForms = false,
             SetShiny = false,
@@ -48,7 +48,6 @@ namespace PKHeX.Core.AutoMod
         /// Gets a living dex (one per species, not every form)
         /// </summary>
         /// <param name="sav">Save File to receive the generated <see cref="PKM"/>.</param>
-        /// <param name="speciesIDs">Species IDs to generate</param>
         /// <returns>Consumable list of newly generated <see cref="PKM"/> data.</returns>
         public static IEnumerable<PKM> GenerateLivingDex(this SaveFile sav) =>
             sav.GenerateLivingDex(cfg);
@@ -57,15 +56,10 @@ namespace PKHeX.Core.AutoMod
         /// Gets a living dex (one per species, not every form)
         /// </summary>
         /// <param name="sav">Save File to receive the generated <see cref="PKM"/>.</param>
-        /// <param name="speciesIDs">Species IDs to generate</param>
-        /// <param name="includeforms">Include all forms in the resulting list of data</param>
-        /// <param name="shiny"></param>
-        /// <param name="alpha"></param>
-        /// <param name="attempts"></param>
         /// <returns>Consumable list of newly generated <see cref="PKM"/> data.</returns>
         public static IEnumerable<PKM> GenerateLivingDex(this SaveFile sav, LivingDexConfig cfg)
         {
-            List<PKM> pklist = new();
+            List<PKM> pklist = [];
             var tr = APILegality.UseTrainerData
                 ? TrainerSettings.GetSavedTrainerData(
                     sav.Version,
@@ -79,21 +73,17 @@ namespace PKHeX.Core.AutoMod
             foreach (var s in species)
             {
                 if (!pt.IsSpeciesInGame(s))
+                {
                     continue;
+                }
 
                 var num_forms = pt[s].FormCount;
                 var str = GameInfo.Strings;
                 if (num_forms == 1 && cfg.IncludeForms) // Validate through form lists
-                    num_forms = (byte)
-                        FormConverter
-                            .GetFormList(
-                                s,
-                                str.types,
-                                str.forms,
-                                GameInfo.GenderSymbolUnicode,
-                                sav.Context
-                            )
-                            .Length;
+                {
+                    num_forms = (byte)FormConverter.GetFormList(s, str.types, str.forms, GameInfo.GenderSymbolUnicode, sav.Context).Length;
+                }
+
                 for (byte f = 0; f < num_forms; f++)
                 {
                     if (
@@ -103,18 +93,18 @@ namespace PKHeX.Core.AutoMod
                         || FormInfo.IsFusedForm(s, f, sav.Generation)
                         || (FormInfo.IsTotemForm(s, f) && sav.Context is not EntityContext.Gen7)
                     )
+                    {
                         continue;
+                    }
 
                     var pk = AddPKM(sav, tr, s, f, cfg.SetShiny, cfg.SetAlpha, cfg.NativeOnly);
-                    if (
-                        pk is not null
-                        && pklist.FirstOrDefault(x => x.Species == pk.Species && x.Form == pk.Form)
-                            is null
-                    )
+                    if (pk is not null && pklist.Find(x => x.Species == pk.Species && x.Form == pk.Form) is null)
                     {
                         pklist.Add(pk);
                         if (!cfg.IncludeForms)
+                        {
                             break;
+                        }
                     }
                 }
             }
@@ -131,35 +121,14 @@ namespace PKHeX.Core.AutoMod
             bool nativeOnly
         )
         {
-            if (
-                tr.GetRandomEncounter(species, form, shiny, alpha, nativeOnly, out var pk)
-                && pk != null
-                && pk.Species > 0
-            )
+            if (tr.GetRandomEncounter(species, form, shiny, alpha, nativeOnly, out var pk) && pk?.Species > 0)
             {
                 pk.Heal();
                 return pk;
             }
-            if (
-                sav is SAV2
-                && GetRandomEncounter(
-                    new SAV1(GameVersion.Y)
-                    {
-                        Language = tr.Language,
-                        OT = tr.OT,
-                        TID16 = tr.TID16
-                    },
-                    species,
-                    form,
-                    shiny,
-                    false,
-                    nativeOnly,
-                    out var pkm
-                )
-                && pkm is PK1 pk1
-            )
-                return pk1.ConvertToPK2();
-            return null;
+            return sav is SAV2 && GetRandomEncounter(new SAV1(GameVersion.Y) { Language = tr.Language, OT = tr.OT, TID16 = tr.TID16 }, species, form, shiny, false, nativeOnly, out var pkm) && pkm is PK1 pk1
+                ? pk1.ConvertToPK2()
+                : (PKM?)null;
         }
 
         /// <summary>
@@ -170,7 +139,6 @@ namespace PKHeX.Core.AutoMod
         /// <param name="form">Form to generate; if left null, picks first encounter</param>
         /// <param name="shiny"></param>
         /// <param name="alpha"></param>
-        /// <param name="attempt"></param>
         /// <param name="pk">Result legal pkm</param>
         /// <returns>True if a valid result was generated, false if the result should be ignored.</returns>
         public static bool GetRandomEncounter(
@@ -192,7 +160,6 @@ namespace PKHeX.Core.AutoMod
         /// <param name="form">Form to generate; if left null, picks first encounter</param>
         /// <param name="shiny"></param>
         /// <param name="alpha"></param>
-        /// <param name="attempt"></param>
         /// <param name="pk">Result legal pkm</param>
         /// <returns>True if a valid result was generated, false if the result should be ignored.</returns>
         public static bool GetRandomEncounter(
@@ -208,7 +175,9 @@ namespace PKHeX.Core.AutoMod
             var blank = EntityBlank.GetBlank(tr);
             pk = GetRandomEncounter(blank, tr, species, form, shiny, alpha, nativeOnly);
             if (pk is null)
+            {
                 return false;
+            }
 
             pk = EntityConverter.ConvertToType(pk, blank.GetType(), out _);
             return pk is not null;
@@ -223,7 +192,6 @@ namespace PKHeX.Core.AutoMod
         /// <param name="form">Form to generate; if left null, picks first encounter</param>
         /// <param name="shiny"></param>
         /// <param name="alpha"></param>
-        /// <param name="attempt"></param>
         /// <returns>Result legal pkm, null if data should be ignored.</returns>
         private static PKM? GetRandomEncounter(
             PKM blank,
@@ -238,30 +206,48 @@ namespace PKHeX.Core.AutoMod
             blank.Species = species;
             blank.Gender = blank.GetSaneGender();
             if (species is ((ushort)Species.Meowstic) or ((ushort)Species.Indeedee))
+            {
                 blank.Form = (byte)blank.Gender;
+            }
             else
+            {
                 blank.Form = form;
+            }
 
             var template = EntityBlank.GetBlank(tr.Generation, (GameVersion)tr.Game);
             var item = GetFormSpecificItem(tr.Game, blank.Species, blank.Form);
             if (item is not null)
+            {
                 blank.HeldItem = (int)item;
+            }
 
             if (blank.Species == (ushort)Species.Keldeo && blank.Form == 1)
+            {
                 blank.Move1 = (ushort)Move.SecretSword;
+            }
 
             if (blank.GetIsFormInvalid(tr, blank.Form))
+            {
                 return null;
+            }
 
             var setText = new ShowdownSet(blank).Text.Split(Environment.NewLine)[0];
             if (shiny && !SimpleEdits.IsShinyLockedSpeciesForm(blank.Species, blank.Form))
+            {
                 setText += Environment.NewLine + "Shiny: Yes";
+            }
 
             if (template is IAlphaReadOnly && alpha && tr.Game == (int)GameVersion.PLA)
+            {
                 setText += Environment.NewLine + "Alpha: Yes";
+            }
 
             var sset = new ShowdownSet(setText);
             var set = new RegenTemplate(sset) { Nickname = string.Empty };
+            if (set.Species == 664 || set.Species == 665)
+            {
+                set.Form = 0;
+            }
             template.ApplySetDetails(set);
 
             var t = template.Clone();
@@ -269,10 +255,14 @@ namespace PKHeX.Core.AutoMod
             var pk = almres.Created;
             var success = almres.Status;
             if (pk.Species == (ushort)Species.Unown && pk.Form != blank.Form)
+            {
                 pk.Form = blank.Form;
+            }
 
             if (success == LegalizationResult.Regenerated)
+            {
                 return pk;
+            }
 
             sset = new ShowdownSet(setText.Split(Environment.NewLine)[0]);
             set = new RegenTemplate(sset) { Nickname = string.Empty };
@@ -289,9 +279,7 @@ namespace PKHeX.Core.AutoMod
                 success = LegalizationResult.Regenerated;
             }
 
-            if (success == LegalizationResult.Regenerated)
-                return pk;
-            return null;
+            return success == LegalizationResult.Regenerated ? pk : null;
         }
 
         private static bool GetIsFormInvalid(this PKM pk, ITrainerInfo tr, byte form)
@@ -312,14 +300,21 @@ namespace PKHeX.Core.AutoMod
                     return true;
             }
             if (FormInfo.IsBattleOnlyForm(pk.Species, form, generation))
+            {
                 return true;
+            }
+
             if (form == 0)
+            {
                 return false;
+            }
 
             if (species == 25 || SimpleEdits.AlolanOriginForms.Contains(species))
             {
                 if (generation >= 7 && pk.Generation is < 7 and not -1)
+                {
                     return true;
+                }
             }
 
             return false;
@@ -328,7 +323,10 @@ namespace PKHeX.Core.AutoMod
         private static int? GetFormSpecificItem(int game, int species, int form)
         {
             if (game == (int)GameVersion.PLA)
+            {
                 return null;
+            }
+
             var generation = ((GameVersion)game).GetGeneration();
             return species switch
             {
@@ -356,12 +354,17 @@ namespace PKHeX.Core.AutoMod
         public static int LegalizeBox(this SaveFile sav, int box)
         {
             if ((uint)box >= sav.BoxCount)
+            {
                 return -1;
+            }
 
             var data = sav.GetBoxData(box);
             var ctr = sav.LegalizeAll(data);
             if (ctr > 0)
+            {
                 sav.SetBoxData(data, box);
+            }
+
             return ctr;
         }
 
@@ -373,13 +376,19 @@ namespace PKHeX.Core.AutoMod
         public static int LegalizeBoxes(this SaveFile sav)
         {
             if (!sav.HasBox)
+            {
                 return -1;
+            }
+
             var ctr = 0;
             for (int i = 0; i < sav.BoxCount; i++)
             {
                 var result = sav.LegalizeBox(i);
                 if (result < 0)
+                {
                     return result;
+                }
+
                 ctr += result;
             }
             return ctr;
@@ -398,12 +407,16 @@ namespace PKHeX.Core.AutoMod
             {
                 var pk = data[i];
                 if (pk.Species <= 0 || new LegalityAnalysis(pk).Valid)
+                {
                     continue;
+                }
 
                 var result = sav.Legalize(pk);
                 result.Heal();
                 if (!new LegalityAnalysis(result).Valid)
+                {
                     continue; // failed to legalize
+                }
 
                 data[i] = result;
                 ctr++;

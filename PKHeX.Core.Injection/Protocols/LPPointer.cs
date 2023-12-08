@@ -5,10 +5,10 @@ using System.Linq;
 
 namespace PKHeX.Core.Injection
 {
-    public class LPPointer : InjectionBase
+    public class LPPointer(LiveHeXVersion lv, bool useCache) : InjectionBase(lv, useCache)
     {
         private static readonly LiveHeXVersion[] SupportedVersions =
-        {
+        [
             LiveHeXVersion.SV_v101,
             LiveHeXVersion.SV_v110,
             LiveHeXVersion.SV_v120,
@@ -21,7 +21,7 @@ namespace PKHeX.Core.Injection
             LiveHeXVersion.LA_v101,
             LiveHeXVersion.LA_v102,
             LiveHeXVersion.LA_v111
-        };
+        ];
 
         public static LiveHeXVersion[] GetVersions() => SupportedVersions;
 
@@ -29,7 +29,7 @@ namespace PKHeX.Core.Injection
         private const int SV_MYSTATUS_BLOCK_SIZE = 0x68;
 
         public static readonly BlockData[] Blocks_SV_v202 =
-        {
+        [
             new()
             {
                 Name = "MyStatus",
@@ -58,10 +58,10 @@ namespace PKHeX.Core.Injection
                 SCBKey = 0x100B93DA,
                 Pointer = "[[[main+4623A30]+198]+88]+CD8"
             }
-        };
+        ];
 
         public static readonly BlockData[] Blocks_SV_v201 =
-        {
+        [
             new()
             {
                 Name = "MyStatus",
@@ -90,10 +90,10 @@ namespace PKHeX.Core.Injection
                 SCBKey = 0x100B93DA,
                 Pointer = "[[[main+4622A30]+198]+88]+CD8"
             }
-        };
+        ];
 
         public static readonly BlockData[] Blocks_SV_v132 =
-        {
+        [
             new()
             {
                 Name = "MyStatus",
@@ -115,10 +115,10 @@ namespace PKHeX.Core.Injection
                 SCBKey = 0xCAAC8800,
                 Pointer = "[[main+44C1C18]+180]+40"
             },
-        };
+        ];
 
         public static readonly BlockData[] Blocks_SV_v130 =
-        {
+        [
             new()
             {
                 Name = "MyStatus",
@@ -140,10 +140,10 @@ namespace PKHeX.Core.Injection
                 SCBKey = 0xCAAC8800,
                 Pointer = "[[main+44BFBA8]+180]+40"
             },
-        };
+        ];
 
         public static readonly BlockData[] Blocks_SV_v120 =
-        {
+        [
             new()
             {
                 Name = "MyStatus",
@@ -165,10 +165,10 @@ namespace PKHeX.Core.Injection
                 SCBKey = 0xCAAC8800,
                 Pointer = "[[main+44A98C8]+180]+40"
             },
-        };
+        ];
 
         public static readonly BlockData[] Blocks_SV_v101 =
-        {
+        [
             new()
             {
                 Name = "MyStatus",
@@ -190,10 +190,10 @@ namespace PKHeX.Core.Injection
                 SCBKey = 0xCAAC8800,
                 Pointer = "[[main+42DA8E8]+180]+40"
             },
-        };
+        ];
 
         public static readonly BlockData[] Blocks_SV_v110 =
-        {
+        [
             new()
             {
                 Name = "MyStatus",
@@ -215,10 +215,10 @@ namespace PKHeX.Core.Injection
                 SCBKey = 0xCAAC8800,
                 Pointer = "[[main+4384B18]+180]+40"
             },
-        };
+        ];
 
         public static readonly BlockData[] Blocks_LA_v100 =
-        {
+        [
             new()
             {
                 Name = "MyStatus",
@@ -277,10 +277,10 @@ namespace PKHeX.Core.Injection
                 SCBKey = 0x02168706,
                 Pointer = "[[[[main+4275470]+248]+58]+18]+1C"
             },
-        };
+        ];
 
         public static readonly BlockData[] Blocks_LA_v101 =
-        {
+        [
             new()
             {
                 Name = "MyStatus",
@@ -339,10 +339,10 @@ namespace PKHeX.Core.Injection
                 SCBKey = 0x02168706,
                 Pointer = "[[[[main+427B470]+248]+58]+18]+1C"
             },
-        };
+        ];
 
         public static readonly BlockData[] Blocks_LA_v102 =
-        {
+        [
             new()
             {
                 Name = "MyStatus",
@@ -401,10 +401,10 @@ namespace PKHeX.Core.Injection
                 SCBKey = 0x02168706,
                 Pointer = "[[[[main+427C470]+248]+58]+18]+1C"
             },
-        };
+        ];
 
         public static readonly BlockData[] Blocks_LA_v110 =
-        {
+        [
             new()
             {
                 Name = "MyStatus",
@@ -463,7 +463,7 @@ namespace PKHeX.Core.Injection
                 SCBKey = 0x02168706,
                 Pointer = "[[[[main+42BA6B0]+248]+58]+18]+1C"
             },
-        };
+        ];
 
         // LiveHexVersion -> Blockname -> List of <SCBlock Keys, OffsetValues>
         public static readonly Dictionary<LiveHeXVersion, BlockData[]> SCBlocks =
@@ -492,9 +492,6 @@ namespace PKHeX.Core.Injection
                 { "RaidKitakami", "B_OpenRaids_Click" },
                 //{ "Trainer Data", "B_OpenTrainerInfo_Click" },
             };
-
-        public LPPointer(LiveHeXVersion lv, bool useCache)
-            : base(lv, useCache) { }
 
         private static string GetB1S1Pointer(LiveHeXVersion lv)
         {
@@ -531,7 +528,10 @@ namespace PKHeX.Core.Injection
         public override byte[] ReadBox(PokeSysBotMini psb, int box, int _, List<byte[]> allpkm)
         {
             if (psb.com is not ICommunicatorNX sb)
+            {
                 return ArrayUtil.ConcatAll(allpkm.ToArray());
+            }
+
             var lv = psb.Version;
             var b1s1 = psb.GetCachedPointer(sb, GetB1S1Pointer(lv));
             var boxsize = RamOffsets.GetSlotCount(lv) * RamOffsets.GetSlotSize(lv);
@@ -542,7 +542,10 @@ namespace PKHeX.Core.Injection
         public override byte[] ReadSlot(PokeSysBotMini psb, int box, int slot)
         {
             if (psb.com is not ICommunicatorNX sb)
+            {
                 return new byte[psb.SlotSize];
+            }
+
             var lv = psb.Version;
             var slotsize = RamOffsets.GetSlotSize(lv);
             var b1s1 = psb.GetCachedPointer(sb, GetB1S1Pointer(lv));
@@ -555,7 +558,10 @@ namespace PKHeX.Core.Injection
         public override void SendSlot(PokeSysBotMini psb, byte[] data, int box, int slot)
         {
             if (psb.com is not ICommunicatorNX sb)
+            {
                 return;
+            }
+
             var lv = psb.Version;
             var slotsize = RamOffsets.GetSlotSize(lv);
             var b1s1 = psb.GetCachedPointer(sb, GetB1S1Pointer(lv));
@@ -568,7 +574,10 @@ namespace PKHeX.Core.Injection
         public override void SendBox(PokeSysBotMini psb, byte[] boxData, int box)
         {
             if (psb.com is not ICommunicatorNX sb)
+            {
                 return;
+            }
+
             var lv = psb.Version;
             var b1s1 = psb.GetCachedPointer(sb, GetB1S1Pointer(lv));
             var boxsize = RamOffsets.GetSlotCount(lv) * RamOffsets.GetSlotSize(lv);
@@ -585,7 +594,9 @@ namespace PKHeX.Core.Injection
         {
             read = null;
             if (psb.com is not ICommunicatorNX sb)
+            {
                 return false;
+            }
 
             try
             {
@@ -593,7 +604,9 @@ namespace PKHeX.Core.Injection
                 var blocks = sav.GetType().GetProperty("Blocks");
                 var allblocks = blocks?.GetValue(sav);
                 if (allblocks is not SCBlockAccessor scba)
+                {
                     return false;
+                }
 
                 foreach (var sub in offsets)
                 {
@@ -601,13 +614,15 @@ namespace PKHeX.Core.Injection
                     var offset = sub.Pointer;
                     var scb = scba.GetBlock(scbkey);
                     if (scb.Type == SCTypeCode.None && sub.Type != SCTypeCode.None)
+                    {
                         ReflectUtil.SetValue(scb, "Type", sub.Type);
+                    }
 
                     var ram = psb.com.ReadBytes(psb.GetCachedPointer(sb, offset), scb.Data.Length);
                     ram.CopyTo(scb.Data, 0);
                     if (read is null)
                     {
-                        read = new List<byte[]> { ram };
+                        read = [ram];
                         continue;
                     }
 
@@ -625,11 +640,17 @@ namespace PKHeX.Core.Injection
         public override void WriteBlocksFromSAV(PokeSysBotMini psb, string block, SaveFile sav)
         {
             if (psb.com is not ICommunicatorNX sb)
+            {
                 return;
+            }
+
             var blocks = sav.GetType().GetProperty("Blocks");
             var allblocks = blocks?.GetValue(sav);
             if (allblocks is not SCBlockAccessor scba)
+            {
                 return;
+            }
+
             var offsets = SCBlocks[psb.Version].Where(z => z.Display == block);
             foreach (var sub in offsets)
             {
@@ -643,25 +664,27 @@ namespace PKHeX.Core.Injection
         public static readonly Func<PokeSysBotMini, byte[]?> GetTrainerDataLA = psb =>
         {
             if (psb.com is not ICommunicatorNX sb)
+            {
                 return null;
+            }
+
             var lv = psb.Version;
             var ptr = SCBlocks[lv].First(z => z.Name == "MyStatus").Pointer;
             var ofs = psb.GetCachedPointer(sb, ptr);
-            if (ofs == 0)
-                return null;
-            return psb.com.ReadBytes(ofs, LA_MYSTATUS_BLOCK_SIZE);
+            return ofs == 0 ? null : psb.com.ReadBytes(ofs, LA_MYSTATUS_BLOCK_SIZE);
         };
 
         public static readonly Func<PokeSysBotMini, byte[]?> GetTrainerDataSV = psb =>
         {
             if (psb.com is not ICommunicatorNX sb)
+            {
                 return null;
+            }
+
             var lv = psb.Version;
             var ptr = SCBlocks[lv].First(z => z.Name == "MyStatus").Pointer;
             var ofs = psb.GetCachedPointer(sb, ptr);
-            if (ofs == 0)
-                return null;
-            return psb.com.ReadBytes(ofs, SV_MYSTATUS_BLOCK_SIZE);
+            return ofs == 0 ? null : psb.com.ReadBytes(ofs, SV_MYSTATUS_BLOCK_SIZE);
         };
     }
 }

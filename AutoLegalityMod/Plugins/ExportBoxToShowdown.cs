@@ -25,7 +25,10 @@ namespace AutoModPlugins
             {
                 var str = provider.GetRegenSetsFromBoxCurrent();
                 if (string.IsNullOrWhiteSpace(str))
+                {
                     return;
+                }
+
                 Clipboard.SetText(str);
                 WinFormsUtil.Alert("Exported the active box in RegenTemplate format to clipboard.");
             }

@@ -18,21 +18,21 @@ namespace PKHeX.Core.Enhancements
         public readonly string Page;
         public readonly bool LetsGo;
         public readonly bool BDSP;
-        public readonly List<string> SetFormat = new();
-        public readonly List<string> SetName = new();
-        public readonly List<string> SetConfig = new();
-        public readonly List<string> SetText = new();
-        public readonly List<ShowdownSet> Sets = new();
+        public readonly List<string> SetFormat = [];
+        public readonly List<string> SetName = [];
+        public readonly List<string> SetConfig = [];
+        public readonly List<string> SetText = [];
+        public readonly List<ShowdownSet> Sets = [];
 
         public static readonly string[] IllegalFormats =
-        {
+        [
             "Almost Any Ability", // Generates illegal abilities
             "BH", // Balanced Hackmons
             "Mix and Mega", // Assumes pokemon can mega evolve that cannot
             "STABmons", // Generates illegal movesets
             "National Dex", // Adds Megas to Generation VIII
             "National Dex AG" // Adds Megas to Generation VIII
-        };
+        ];
 
         public string Summary => AlertText(ShowdownSpeciesName, SetText.Count, GetTitles());
 
@@ -63,9 +63,7 @@ namespace PKHeX.Core.Enhancements
 
         private static string GetShowdownName(string species, string form)
         {
-            if (string.IsNullOrWhiteSpace(form) || ShowdownUtil.IsInvalidForm(form))
-                return species;
-            return $"{species}-{form}";
+            return string.IsNullOrWhiteSpace(form) || ShowdownUtil.IsInvalidForm(form) ? species : $"{species}-{form}";
         }
 
         private void LoadSetsFromPage()
@@ -86,17 +84,25 @@ namespace PKHeX.Core.Enhancements
                 }
 
                 if (IllegalFormats.Any(s => s.Equals(format, StringComparison.OrdinalIgnoreCase)))
+                {
                     continue;
+                }
 
                 if (LetsGo != format.StartsWith("LGPE", StringComparison.OrdinalIgnoreCase))
+                {
                     continue;
+                }
 
                 if (BDSP != format.StartsWith("BDSP", StringComparison.OrdinalIgnoreCase))
+                {
                     continue;
+                }
 
                 var level = format.StartsWith("LC") ? 5 : 100;
                 if (!split1[i - 1].Contains("\"name\":"))
+                {
                     continue;
+                }
 
                 var name = split1[i - 1][
                     (
@@ -114,12 +120,14 @@ namespace PKHeX.Core.Enhancements
                 SetName.Add(name);
 
                 if (!split1[i - 1].Contains("\"level\":0,") && split1[i - 1].Contains("\"level\":"))
+                {
                     _ = int.TryParse(
                         split1[i - 1].Split(new[] { "\"level\":" }, StringSplitOptions.None)[
                             1
                         ].Split(',')[0],
                         out level
                     );
+                }
 
                 var split2 = split1[i].Split(new[] { "\"]}" }, StringSplitOptions.None);
                 var tmp = split2[0];
@@ -164,9 +172,9 @@ namespace PKHeX.Core.Enhancements
             return string.Join(Environment.NewLine, result);
         }
 
-        private static readonly string[] statNames = { "HP", "Atk", "Def", "SpA", "SpD", "Spe" };
+        private static readonly string[] statNames = ["HP", "Atk", "Def", "SpA", "SpD", "Spe"];
 
-        private static IEnumerable<string> GetSetLines(
+        private static List<string> GetSetLines(
             string set,
             string species,
             bool shiny,
@@ -180,38 +188,62 @@ namespace PKHeX.Core.Enhancements
             TryGetToken(set, "\"natures\":[\"", "\"", out var nature);
             TryGetToken(set, "\"teratypes\":[\"", "\"", out var teratype);
 
-            if (teratype != null && teratype.StartsWith(']'))
+            if (teratype?.StartsWith(']') == true)
+            {
                 teratype = null;
+            }
 
             var evs = ParseEVIVs(evstr, false);
             var ivs = ParseEVIVs(ivstr, true);
             var ability = set[1] == ']' ? string.Empty : set.Split('\"')[1];
 
             if (item == "No Item") // LGPE actually lists an item, RBY sets have an empty [].
+            {
                 item = string.Empty;
+            }
 
             var result = new List<string>(9)
             {
                 item.Length == 0 ? species : $"{species} @ {item}",
             };
             if (level != 100)
+            {
                 result.Add($"Level: {level}");
+            }
+
             if (shiny)
+            {
                 result.Add("Shiny: Yes");
+            }
+
             if (!string.IsNullOrWhiteSpace(ability))
+            {
                 result.Add($"Ability: {ability}");
+            }
+
             if (!string.IsNullOrWhiteSpace(teratype))
+            {
                 result.Add($"Tera Type: {teratype}");
+            }
+
             if (evstr.Length >= 3)
+            {
                 result.Add(
                     $"EVs: {string.Join(" / ", statNames.Select((z, i) => $"{evs[i]} {z}"))}"
                 );
+            }
+
             if (ivstr.Length >= 3)
+            {
                 result.Add(
                     $"IVs: {string.Join(" / ", statNames.Select((z, i) => $"{ivs[i]} {z}"))}"
                 );
+            }
+
             if (!string.IsNullOrWhiteSpace(nature))
+            {
                 result.Add($"{nature} Nature");
+            }
 
             result.AddRange(GetMoves(movesets).Select(move => $"- {move}"));
             return result;
@@ -242,13 +274,15 @@ namespace PKHeX.Core.Enhancements
 
             var suffixStart = line.IndexOf(suffix, prefixStart, StringComparison.Ordinal);
             if (suffixStart < 0)
+            {
                 suffixStart = line.Length;
+            }
 
             result = line[prefixStart..suffixStart];
             return true;
         }
 
-        private static IEnumerable<string> GetMoves(string movesets)
+        private static List<string> GetMoves(string movesets)
         {
             var moves = new List<string>();
             var slots = movesets.Split(new[] { "],[" }, StringSplitOptions.None);
@@ -261,16 +295,24 @@ namespace PKHeX.Core.Enhancements
                 {
                     var move = GetMove(choice);
                     if (moves.Contains(move))
+                    {
                         continue;
+                    }
+
                     if (move.Equals("Hidden Power", StringComparison.OrdinalIgnoreCase))
+                    {
                         move =
                             $"{move} [{choice.Split(new[] { "\"type\":\"" }, StringSplitOptions.None)[1].Split('\"')[0]}]";
+                    }
+
                     moves.Add(move);
                     break;
                 }
 
                 if (moves.Count == 4)
+                {
                     break;
+                }
             }
 
             static string GetMove(string s) => s.Split('"')[0];
@@ -279,11 +321,13 @@ namespace PKHeX.Core.Enhancements
 
         private static string[] ParseEVIVs(string liststring, bool iv)
         {
-            string[] ivdefault = { "31", "31", "31", "31", "31", "31" };
-            string[] evdefault = { "0", "0", "0", "0", "0", "0" };
+            string[] ivdefault = ["31", "31", "31", "31", "31", "31"];
+            string[] evdefault = ["0", "0", "0", "0", "0", "0"];
             var val = iv ? ivdefault : evdefault;
             if (string.IsNullOrWhiteSpace(liststring))
+            {
                 return val;
+            }
 
             string getStat(string v) =>
                 liststring.Split(new[] { v }, StringSplitOptions.None)[1].Split(',')[0];
@@ -352,7 +396,10 @@ namespace PKHeX.Core.Enhancements
                     return form.Replace("50%", string.Empty);
                 case (int)Core.Species.Minior:
                     if (form.StartsWith("M-"))
+                    {
                         return "Meteor";
+                    }
+
                     return form.Replace("C-", string.Empty);
                 case (int)Core.Species.Necrozma when form == "Dusk":
                     return $"{form}-Mane";
@@ -370,24 +417,25 @@ namespace PKHeX.Core.Enhancements
 
                 default:
                     if (Totem_USUM.Contains(spec) && form == "Large")
+                    {
                         return Totem_Alolan.Contains(spec) && spec != (int)Core.Species.Mimikyu
                             ? "Alola-Totem"
                             : "Totem";
+                    }
+
                     return form.Replace(' ', '-');
             }
         }
 
         internal static readonly HashSet<int> Totem_Alolan =
-            new()
-            {
+            [
                 020, // Raticate (Normal, Alolan, Totem)
                 105, // Marowak (Normal, Alolan, Totem)
                 778, // Mimikyu (Normal, Busted, Totem, Totem_Busted)
-            };
+            ];
 
         internal static readonly HashSet<int> Totem_USUM =
-            new()
-            {
+            [
                 020, // Raticate
                 735, // Gumshoos
                 758, // Salazzle
@@ -399,7 +447,7 @@ namespace PKHeX.Core.Enhancements
                 752, // Araquanid
                 777, // Togedemaru
                 743, // Ribombee
-            };
+            ];
 
         private static string GetURL(string speciesName, string form, string baseURL)
         {
@@ -428,9 +476,13 @@ namespace PKHeX.Core.Enhancements
                 var format = SetFormat[i];
                 var name = SetName[i];
                 if (titles.TryGetValue(format, out var list))
+                {
                     list.Add(name);
+                }
                 else
-                    titles.Add(format, new List<string> { name });
+                {
+                    titles.Add(format, [name]);
+                }
             }
 
             return titles;
@@ -448,7 +500,7 @@ namespace PKHeX.Core.Enhancements
             sb.Append(Environment.NewLine);
             foreach (var entry in titles)
             {
-                sb.Append(entry.Key).Append(": ").Append(string.Join(", ", entry.Value));
+                sb.Append(entry.Key).Append(": ").AppendJoin(", ", entry.Value);
                 sb.Append(Environment.NewLine);
             }
             sb.Append(Environment.NewLine);

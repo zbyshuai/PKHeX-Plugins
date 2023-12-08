@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 
 namespace PKHeX.Core.Injection
 {
@@ -18,7 +19,9 @@ namespace PKHeX.Core.Injection
         {
             clientNTR.Connect(IP, Port);
             if (clientNTR.IsConnected)
+            {
                 Connected = true;
+            }
         }
 
         bool ICommunicator.Connected
@@ -57,7 +60,9 @@ namespace PKHeX.Core.Injection
             lock (_sync)
             {
                 if (!Connected)
+                {
                     Connect();
+                }
 
                 WriteLastLog("");
                 DataReadyWaiting myArgs = new(new byte[length], HandleMemoryRead, null);
@@ -74,10 +79,12 @@ namespace PKHeX.Core.Injection
                 {
                     Thread.Sleep(10);
                     if (CompareLastLog("finished"))
+                    {
                         break;
+                    }
                 }
 
-                byte[] result = _lastMemoryRead ?? System.Array.Empty<byte>();
+                byte[] result = _lastMemoryRead ?? [];
                 _lastMemoryRead = null;
                 return result;
             }
@@ -87,12 +94,15 @@ namespace PKHeX.Core.Injection
 
         private static bool CompareLastLog(string str) => clientNTR.Lastlog.Contains(str);
 
-        public void WriteBytes(byte[] data, ulong offset)
+        public void WriteBytes(ReadOnlySpan<byte> data, ulong offset)
         {
             lock (_sync)
             {
                 if (!Connected)
+                {
                     Connect();
+                }
+
                 while (clientNTR.PID == -1)
                 {
                     Thread.Sleep(10);
@@ -104,7 +114,9 @@ namespace PKHeX.Core.Injection
                     WriteLastLog("");
                     Thread.Sleep(10);
                     if (CompareLastLog("finished"))
+                    {
                         break;
+                    }
                 }
             }
         }

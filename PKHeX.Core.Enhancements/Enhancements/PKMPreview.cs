@@ -5,11 +5,8 @@ using System.Text;
 
 namespace PKHeX.Core.Enhancements
 {
-    public sealed class PKMPreview : EntitySummary
+    public sealed class PKMPreview(PKM p, GameStrings strings) : EntitySummary(p, strings)
     {
-        public PKMPreview(PKM p, GameStrings strings)
-            : base(p, strings) { }
-
         public static void ExportCSV(IEnumerable<PKMPreview> pklist, string path)
         {
             var sortedprev = pklist.OrderBy(p => p.Species).ToList();
@@ -29,8 +26,7 @@ namespace PKHeX.Core.Enhancements
                     region = gt.Region.ToString();
                     DSRegion = gt.ConsoleRegion.ToString();
                 }
-                sb.AppendLine(
-                    string.Join(
+                sb.AppendJoin(
                         ",",
                         p.Nickname,
                         p.Species,
@@ -81,7 +77,7 @@ namespace PKHeX.Core.Enhancements
                         p.Met_Month.ToString(),
                         p.Met_Day.ToString()
                     )
-                );
+.AppendLine();
             }
 
             File.WriteAllText(Path.Combine(path, "boxdump.csv"), sb.ToString(), Encoding.UTF8);

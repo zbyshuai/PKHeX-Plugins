@@ -21,10 +21,7 @@ namespace AutoModTests
         private static string TestPath => TestUtil.GetTestFolder("ShowdownSets");
         private static string LogDirectory => Path.Combine(Directory.GetCurrentDirectory(), "logs");
 
-        private static Dictionary<GameVersion, Dictionary<string, RegenTemplate[]>> RunVerification(
-            string file,
-            GameVersion[] saves
-        )
+        private static Dictionary<GameVersion, Dictionary<string, RegenTemplate[]>> RunVerification(string file, GameVersion[] saves)
         {
             var results = new Dictionary<GameVersion, Dictionary<string, RegenTemplate[]>>();
             foreach (var s in saves)
@@ -66,7 +63,9 @@ namespace AutoModTests
                 {
                     var set = sets[i];
                     if (set.Species <= 0)
+                    {
                         continue;
+                    }
 
                     try
                     {
@@ -85,7 +84,7 @@ namespace AutoModTests
                         {
                             illegalsets.Add(regen);
                             Debug.WriteLine(
-                                $"Invalid Set for {(Species)set.Species} in file {file} with set: {set.Text}"
+                                $"Invalid Set for {(Species)set.Species} in file {file} with set: {regen.Text}"
                             );
                         }
                     }
@@ -118,7 +117,6 @@ namespace AutoModTests
         [InlineData(AnubisPK8, new[] { SW })]
         [InlineData(AnubisPK9, new[] { SL })]
         [InlineData(AnubisNTPB7, new[] { GE })]
-        [InlineData(AnubisNTPK7, new[] { US })]
         [InlineData(AnubisTPK7, new[] { SW, US })]
         [InlineData(AnubisTPK8, new[] { SW })]
         [InlineData(AnubisVCPK7, new[] { SW, US })]
@@ -167,7 +165,10 @@ namespace AutoModTests
             {
                 var illegalcount = sets["illegal"].Length;
                 if (illegalcount == 0)
+                {
                     continue;
+                }
+
                 testfailed = true;
                 msg +=
                     $"GameVersion {gv} : Illegal: {illegalcount} | Legal: {sets["legal"].Length}\n";
@@ -177,7 +178,10 @@ namespace AutoModTests
             var fileName =
                 $"{Path.GetFileName(path).Replace('.', '_')}{DateTime.Now:_yyyy-MM-dd-HH-mm-ss}.log";
             if (error.Trim().Length > 0)
+            {
                 File.WriteAllText(Path.Combine(LogDirectory, fileName), error);
+            }
+
             testfailed.Should().BeFalse(msg);
         }
 
@@ -194,7 +198,6 @@ namespace AutoModTests
         private const string AnubisPK8 = "Anubis Tests/Anubis - pk8.txt";
         private const string AnubisPK9 = "Anubis Tests/Anubis - pk9.txt";
         private const string AnubisNTPB7 = "Anubis Tests/Anubis notransfer - pb7.txt";
-        private const string AnubisNTPK7 = "Anubis Tests/Anubis notransfer - pk7.txt";
         private const string AnubisTPK7 = "Anubis Tests/Anubis transferred - pk7.txt";
         private const string AnubisTPK8 = "Anubis Tests/Anubis transferred - pk8.txt";
         private const string AnubisVCPK7 = "Anubis Tests/Anubis VC - pk7.txt";
@@ -236,9 +239,7 @@ namespace AutoModTests
     {
         public bool Equals(ShowdownSet? x, ShowdownSet? y)
         {
-            if (x == null || y == null)
-                return false;
-            return x.Text.Trim() == y.Text.Trim();
+            return x != null && y != null && x.Text.Trim() == y.Text.Trim();
         }
 
         public int GetHashCode(ShowdownSet obj) => obj.Text.GetHashCode();

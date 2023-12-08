@@ -35,44 +35,61 @@ namespace PKHeX.Core.AutoMod
         {
             var orig = pk.Ball;
             if (ball == Ball.None)
+            {
                 force = false; // accept anything if no ball is specified
+            }
 
             if (enc is MysteryGift)
+            {
                 return;
+            }
 
             var legal = new LegalityAnalysis(pk).Valid;
 
             if (ball != Ball.None)
             {
-                if (
-                    pk.LA
-                    && ReplaceBallPrefixLA
-                    && LABallMapping.TryGetValue(ball, out var modified)
-                )
+                if (pk.LA && ReplaceBallPrefixLA && LABallMapping.TryGetValue(ball, out var modified))
+                {
                     ball = modified;
+                }
+
                 pk.Ball = (int)ball;
                 if (!force && !pk.ValidBall())
+                {
                     pk.Ball = orig;
+                }
             }
             else if (matching)
             {
                 if (!pk.IsShiny)
+                {
                     pk.SetMatchingBall();
+                }
                 else
+                {
                     Aesthetics.ApplyShinyBall(pk);
+                }
             }
 
             var la = new LegalityAnalysis(pk);
             if (force || la.Valid)
+            {
                 return;
+            }
 
             if (pk.Generation == 5 && pk.Met_Location == 75)
+            {
                 pk.Ball = (int)Ball.Dream;
+            }
             else
+            {
                 pk.Ball = orig;
+            }
 
             if (legal && !la.Valid)
+            {
                 pk.Ball = orig;
+            }
         }
 
         public static bool ValidBall(this PKM pk)
@@ -95,7 +112,10 @@ namespace PKHeX.Core.AutoMod
             bool allValid)
         {
             if (!allValid)
+            {
                 return;
+            }
+
             RibbonApplicator.SetAllValidRibbons(pk);
             if (pk is PK8 pk8 && pk8.Species != (int)Species.Shedinja && pk8.GetRandomValidMark(set, enc, out var mark))
             {
