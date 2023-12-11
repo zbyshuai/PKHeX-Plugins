@@ -545,7 +545,7 @@ namespace PKHeX.Core.AutoMod
             var pref_lang = (LanguageID)prefer;
             if (pref_lang == LanguageID.Hacked || pref_lang == LanguageID.UNUSED_6)
                 prefer = 2; // prefer English
-            }
+            
 
             if (pk is IHandlerLanguage pkm)
             {

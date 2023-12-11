@@ -87,7 +87,7 @@ namespace PKHeX.Core.AutoMod
         public RegenTemplate(PKM pk, int gen = PKX.Generation)
             : this(new ShowdownSet(pk), gen)
         {
-            this.FixGender(pk.PersonalInfo);
+            pk.FixGender(this);
             if (!pk.IsNicknamed)
             {
                 Nickname = string.Empty;

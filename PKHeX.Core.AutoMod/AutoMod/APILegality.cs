@@ -5,6 +5,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using PKHeX.Core;
 
 namespace PKHeX.Core.AutoMod
 {
@@ -46,7 +47,7 @@ namespace PKHeX.Core.AutoMod
             RegenSet regen;
             if (set is RegenTemplate t)
             {
-                t.FixGender(template.PersonalInfo);
+                template.FixGender(set);
                 regen = t.Regen;
             }
             else
@@ -499,7 +500,7 @@ namespace PKHeX.Core.AutoMod
         /// <param name="abilityreq">is HA requested</param>
         /// <param name="destVer">version to generate in</param>
         /// <returns>if the encounter is valid or not</returns>
-        private static bool IsEncounterValid(
+        public static bool IsEncounterValid(
             IBattleTemplate set,
             IEncounterable enc,
             AbilityRequest abilityreq,
@@ -743,7 +744,7 @@ namespace PKHeX.Core.AutoMod
             pk.SetHyperTrainingFlags(set, enc); // Hypertrain
             pk.SetEncryptionConstant(enc);
             pk.SetShinyBoolean(set.Shiny, enc, regen.Extra.ShinyType);
-            pk.FixGender(enc,set);
+            pk.FixGender(set);
 
             // Final tweaks
             pk.SetGimmicks(set);
