@@ -7,8 +7,7 @@ namespace PKHeX.Core.AutoMod
     /// </summary>
     public static class LegalEdits
     {
-        private static readonly Dictionary<Ball, Ball> LABallMapping =
-            new()
+        private static readonly Dictionary<Ball, Ball> LABallMapping = new()
             {
                 { Ball.Poke, Ball.LAPoke },
                 { Ball.Great, Ball.LAGreat },
@@ -25,13 +24,7 @@ namespace PKHeX.Core.AutoMod
         /// <param name="matching">Set matching ball</param>
         /// <param name="force"></param>
         /// <param name="ball"></param>
-        public static void SetSuggestedBall(
-            this PKM pk,
-            bool matching = true,
-            bool force = false,
-            Ball ball = Ball.None,
-            IEncounterable? enc = null
-        )
+        public static void SetSuggestedBall(this PKM pk, bool matching = true, bool force = false, Ball ball = Ball.None, IEncounterable? enc = null)
         {
             var orig = pk.Ball;
             if (ball == Ball.None)
@@ -95,8 +88,7 @@ namespace PKHeX.Core.AutoMod
         public static bool ValidBall(this PKM pk)
         {
             var rep = new LegalityAnalysis(pk).Report(true);
-            return rep.Contains(LegalityCheckStrings.LBallEnc)
-                || rep.Contains(LegalityCheckStrings.LBallSpeciesPass);
+            return rep.Contains(LegalityCheckStrings.LBallEnc) || rep.Contains(LegalityCheckStrings.LBallSpeciesPass);
         }
 
         /// <summary>
@@ -105,11 +97,7 @@ namespace PKHeX.Core.AutoMod
         /// <param name="pk">Pokémon to modify</param>
         /// <param name="enc">Encounter matched to</param>
         /// <param name="allValid">Set all valid ribbons only</param>
-        public static void SetSuggestedRibbons(
-            this PKM pk,
-            IBattleTemplate set,
-            IEncounterable enc,
-            bool allValid)
+        public static void SetSuggestedRibbons(this PKM pk, IBattleTemplate set, IEncounterable enc, bool allValid)
         {
             if (!allValid)
             {

@@ -585,12 +585,7 @@ namespace PKHeX.Core.Injection
             psb.com.WriteBytes(boxData, boxstart);
         }
 
-        public override bool ReadBlockFromString(
-            PokeSysBotMini psb,
-            SaveFile sav,
-            string block,
-            out List<byte[]>? read
-        )
+        public override bool ReadBlockFromString(PokeSysBotMini psb, SaveFile sav, string block, out List<byte[]>? read)
         {
             read = null;
             if (psb.com is not ICommunicatorNX sb)

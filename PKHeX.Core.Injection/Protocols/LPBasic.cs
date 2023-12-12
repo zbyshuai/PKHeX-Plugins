@@ -104,8 +104,7 @@ namespace PKHeX.Core.Injection
         ];
 
         // LiveHexVersion -> Blockname -> List of <SCBlock Keys, OffsetValues>
-        public static readonly Dictionary<LiveHeXVersion, BlockData[]> SCBlocks =
-            new() { { LiveHeXVersion.SWSH_v132, Blocks_Rigel2 }, };
+        public static readonly Dictionary<LiveHeXVersion, BlockData[]> SCBlocks = new() { { LiveHeXVersion.SWSH_v132, Blocks_Rigel2 }, };
 
         public override Dictionary<string, string> SpecialBlocks { get; } =
             new()
@@ -138,11 +137,9 @@ namespace PKHeX.Core.Injection
             return ArrayUtil.ConcatAll(allpkm.ToArray());
         }
 
-        public override byte[] ReadSlot(PokeSysBotMini psb, int box, int slot) =>
-            psb.com.ReadBytes(psb.GetSlotOffset(box, slot), psb.SlotSize + psb.GapSize);
+        public override byte[] ReadSlot(PokeSysBotMini psb, int box, int slot) => psb.com.ReadBytes(psb.GetSlotOffset(box, slot), psb.SlotSize + psb.GapSize);
 
-        public override void SendSlot(PokeSysBotMini psb, byte[] data, int box, int slot) =>
-            psb.com.WriteBytes(data, psb.GetSlotOffset(box, slot));
+        public override void SendSlot(PokeSysBotMini psb, byte[] data, int box, int slot) => psb.com.WriteBytes(data, psb.GetSlotOffset(box, slot));
 
         public override void SendBox(PokeSysBotMini psb, byte[] boxData, int box)
         {
@@ -169,20 +166,13 @@ namespace PKHeX.Core.Injection
         };
 
         // Reflection method
-        public override bool ReadBlockFromString(
-            PokeSysBotMini psb,
-            SaveFile sav,
-            string block,
-            out List<byte[]>? read
-        )
+        public override bool ReadBlockFromString(PokeSysBotMini psb, SaveFile sav, string block, out List<byte[]>? read)
         {
             read = null;
             try
             {
                 var offsets = SCBlocks[psb.Version].Where(z => z.Display == block);
-                var props =
-                    sav.GetType().GetProperty("Blocks")
-                    ?? throw new Exception("Blocks don't exist");
+                var props = sav.GetType().GetProperty("Blocks") ?? throw new Exception("Blocks don't exist");
                 var allblocks = props.GetValue(sav);
                 if (allblocks is not SCBlockAccessor scba)
                 {
@@ -217,8 +207,7 @@ namespace PKHeX.Core.Injection
 
         public override void WriteBlocksFromSAV(PokeSysBotMini psb, string block, SaveFile sav)
         {
-            var props =
-                sav.GetType().GetProperty("Blocks") ?? throw new Exception("Blocks don't exist");
+            var props = sav.GetType().GetProperty("Blocks") ?? throw new Exception("Blocks don't exist");
             var allblocks = props.GetValue(sav);
             if (allblocks is not SCBlockAccessor scba)
             {

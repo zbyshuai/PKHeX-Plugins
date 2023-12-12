@@ -116,9 +116,7 @@ namespace PKHeX.Core.AutoMod
                 return fallback;
             }
 
-            return lang == (LanguageID)fallback.Language
-                ? fallback
-                : special_version ? DefaultFallback(ver, lang) : DefaultFallback(generation, lang);
+            return lang == (LanguageID)fallback.Language ? fallback : special_version ? DefaultFallback(ver, lang) : DefaultFallback(generation, lang);
         }
 
         /// <summary>
@@ -129,12 +127,7 @@ namespace PKHeX.Core.AutoMod
         /// <param name="fallback">Fallback trainer data if no new parent is found.</param>
         /// <param name="lang">Language to request for</param>
         /// <returns>Parent trainer data that originates from the <see cref="PKM.Version"/>. If none found, will return the <see cref="fallback"/>.</returns>
-        public static ITrainerInfo GetSavedTrainerData(
-            GameVersion version,
-            int gen,
-            ITrainerInfo? fallback = null,
-            LanguageID? lang = null
-        )
+        public static ITrainerInfo GetSavedTrainerData(GameVersion version, int gen, ITrainerInfo? fallback = null, LanguageID? lang = null)
         {
             var byVer = Database.GetTrainer(version, lang);
             return byVer ?? GetSavedTrainerData(gen, version, fallback, lang);
@@ -147,22 +140,11 @@ namespace PKHeX.Core.AutoMod
         /// <param name="template_save">Fallback trainer data if no new parent is found.</param>
         /// <param name="lang">Language to request for</param>
         /// <returns>Parent trainer data that originates from the <see cref="PKM.Version"/>. If none found, will return the <see cref="fallback"/>.</returns>
-        public static ITrainerInfo GetSavedTrainerData(
-            PKM pk,
-            ITrainerInfo template_save,
-            LanguageID? lang = null
-        )
+        public static ITrainerInfo GetSavedTrainerData(PKM pk, ITrainerInfo template_save, LanguageID? lang = null)
         {
             int origin = pk.Generation;
             int format = pk.Format;
-            return format != origin
-                ? GetSavedTrainerData(
-                    format,
-                    (GameVersion)template_save.Game,
-                    fallback: template_save,
-                    lang: lang
-                )
-                : GetSavedTrainerData((GameVersion)pk.Version, origin, template_save, lang);
+            return format != origin ? GetSavedTrainerData(format, (GameVersion)template_save.Game, fallback: template_save, lang: lang) : GetSavedTrainerData((GameVersion)pk.Version, origin, template_save, lang);
         }
 
         /// <summary>

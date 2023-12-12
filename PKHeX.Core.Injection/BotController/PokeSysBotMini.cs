@@ -14,11 +14,9 @@ namespace PKHeX.Core.Injection
         public readonly InjectionBase Injector = GetInjector(lv, useCache);
         public bool Connected => com.Connected;
 
-        public ulong GetSlotOffset(int box, int slot) =>
-            GetBoxOffset(box) + (ulong)((SlotSize + GapSize) * slot);
+        public ulong GetSlotOffset(int box, int slot) => GetBoxOffset(box) + (ulong)((SlotSize + GapSize) * slot);
 
-        public ulong GetBoxOffset(int box) =>
-            (ulong)BoxStart + (ulong)((SlotSize + GapSize) * SlotCount * box);
+        public ulong GetBoxOffset(int box) => (ulong)BoxStart + (ulong)((SlotSize + GapSize) * SlotCount * box);
 
         public byte[] ReadSlot(int box, int slot) => Injector.ReadSlot(this, box, slot);
 
@@ -28,8 +26,7 @@ namespace PKHeX.Core.Injection
             return Injector.ReadBox(this, box, len, allpkm);
         }
 
-        public void SendSlot(byte[] data, int box, int slot) =>
-            Injector.SendSlot(this, data, box, slot);
+        public void SendSlot(byte[] data, int box, int slot) => Injector.SendSlot(this, data, box, slot);
 
         public void SendBox(byte[] boxData, int box)
         {

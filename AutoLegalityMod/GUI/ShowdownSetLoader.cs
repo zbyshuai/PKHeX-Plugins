@@ -37,10 +37,7 @@ namespace AutoModPlugins
             {
                 var teams = ShowdownTeamSet.GetTeams(source);
                 var names = teams.Select(z => z.Summary);
-                WinFormsUtil.Alert(
-                    "Generating the following teams:",
-                    string.Join(Environment.NewLine, names)
-                );
+                WinFormsUtil.Alert("Generating the following teams:", string.Join(Environment.NewLine, names));
                 Import(teams.SelectMany(z => z.Team).ToList());
                 return;
             }
@@ -87,11 +84,7 @@ namespace AutoModPlugins
         private static AutoModErrorCode ImportSetToTabs(ShowdownSet set, bool skipDialog = false)
         {
             var regen = new RegenTemplate(set, SaveFileEditor.SAV.Generation);
-            if (
-                !skipDialog
-                && DialogResult.Yes
-                    != WinFormsUtil.Prompt(MessageBoxButtons.YesNo, "Import this set?", regen.Text)
-            )
+            if (!skipDialog && DialogResult.Yes != WinFormsUtil.Prompt(MessageBoxButtons.YesNo, "Import this set?", regen.Text))
             {
                 return AutoModErrorCode.NoSingleImport;
             }
@@ -124,14 +117,11 @@ namespace AutoModPlugins
                 var res = error.DialogResult;
                 if (res == DialogResult.Retry)
                 {
-                    Process.Start(
-                        new ProcessStartInfo
+                    Process.Start(new ProcessStartInfo
                         {
-                            FileName =
-                                "https://github.com/architdate/PKHeX-Plugins/wiki/Installing-PKHeX-Plugins",
+                            FileName = "https://github.com/architdate/PKHeX-Plugins/wiki/Installing-PKHeX-Plugins",
                             UseShellExecute = true
-                        }
-                    );
+                        });
                 }
 
                 return AutoModErrorCode.VersionMismatch;
@@ -159,14 +149,11 @@ namespace AutoModPlugins
                 var res = error.DialogResult;
                 if (res == DialogResult.Retry)
                 {
-                    Process.Start(
-                        new ProcessStartInfo
+                    Process.Start(new ProcessStartInfo
                         {
-                            FileName =
-                                "https://github.com/architdate/PKHeX-Plugins/wiki/Getting-Started-with-Auto-Legality-Mod",
+                            FileName = "https://github.com/architdate/PKHeX-Plugins/wiki/Getting-Started-with-Auto-Legality-Mod",
                             UseShellExecute = true
-                        }
-                    );
+                        });
                 }
             }
 
@@ -174,9 +161,7 @@ namespace AutoModPlugins
             PKMEditor.PopulateFields(legal);
 
             var timespan = timer.Elapsed;
-            Debug.WriteLine(
-                $"Time to complete {nameof(ImportSetToTabs)}: {timespan.Minutes:00} minutes {timespan.Seconds:00} seconds {timespan.Milliseconds / 10:00} milliseconds"
-            );
+            Debug.WriteLine($"Time to complete {nameof(ImportSetToTabs)}: {timespan.Minutes:00} minutes {timespan.Seconds:00} seconds {timespan.Milliseconds / 10:00} milliseconds");
             return AutoModErrorCode.None;
         }
 
@@ -185,10 +170,7 @@ namespace AutoModPlugins
         /// </summary>
         /// <param name="sets">A list of ShowdownSet(s) that need to be generated</param>
         /// <param name="replace">A boolean that determines if current pokemon will be replaced or not</param>
-        private static AutoModErrorCode ImportSetsToBoxes(
-            IReadOnlyList<ShowdownSet> sets,
-            bool replace
-        )
+        private static AutoModErrorCode ImportSetsToBoxes(IReadOnlyList<ShowdownSet> sets, bool replace)
         {
             var timer = Stopwatch.StartNew();
             var sav = SaveFileEditor.SAV;
@@ -196,14 +178,7 @@ namespace AutoModPlugins
             var start = SaveFileEditor.CurrentBox * sav.BoxSlotCount;
 
             Debug.WriteLine($"Commencing Import of {sets.Count} set(s).");
-            var result = sav.ImportToExisting(
-                sets,
-                BoxData,
-                out var invalid,
-                out var timeout,
-                start,
-                replace
-            );
+            var result = sav.ImportToExisting(sets, BoxData, out var invalid, out var timeout, start, replace);
             if (timeout.Count > 0 || invalid.Count > 0)
             {
                 var errorstr =
@@ -217,14 +192,11 @@ namespace AutoModPlugins
                 var res = error.DialogResult;
                 if (res == DialogResult.Retry)
                 {
-                    Process.Start(
-                        new ProcessStartInfo
+                    Process.Start(new ProcessStartInfo
                         {
-                            FileName =
-                                "https://github.com/architdate/PKHeX-Plugins/wiki/Getting-Started-with-Auto-Legality-Mod",
+                            FileName = "https://github.com/architdate/PKHeX-Plugins/wiki/Getting-Started-with-Auto-Legality-Mod",
                             UseShellExecute = true
-                        }
-                    );
+                        });
                 }
             }
 
@@ -241,14 +213,11 @@ namespace AutoModPlugins
                 var res = error.DialogResult;
                 if (res == DialogResult.Retry)
                 {
-                    Process.Start(
-                        new ProcessStartInfo
+                    Process.Start(new ProcessStartInfo
                         {
-                            FileName =
-                                "https://github.com/architdate/PKHeX-Plugins/wiki/Installing-PKHeX-Plugins",
+                            FileName = "https://github.com/architdate/PKHeX-Plugins/wiki/Installing-PKHeX-Plugins",
                             UseShellExecute = true
-                        }
-                    );
+                        });
                 }
 
                 return AutoModErrorCode.VersionMismatch;
@@ -259,17 +228,13 @@ namespace AutoModPlugins
                 return result;
             }
 
-            Debug.WriteLine(
-                "Multi Set Genning Complete. Setting data to the save file and reloading view."
-            );
+            Debug.WriteLine("Multi Set Genning Complete. Setting data to the save file and reloading view.");
             SaveFileEditor.ReloadSlots();
 
             // Debug Statements
             timer.Stop();
             var timespan = timer.Elapsed;
-            Debug.WriteLine(
-                $"Time to complete {nameof(ImportSetsToBoxes)}: {timespan.Minutes:00} minutes {timespan.Seconds:00} seconds {timespan.Milliseconds / 10:00} milliseconds"
-            );
+            Debug.WriteLine($"Time to complete {nameof(ImportSetsToBoxes)}: {timespan.Minutes:00} minutes {timespan.Seconds:00} seconds {timespan.Milliseconds / 10:00} milliseconds");
             return AutoModErrorCode.None;
         }
 

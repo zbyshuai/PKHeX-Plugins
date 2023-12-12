@@ -50,19 +50,9 @@ namespace PKHeX.Core.AutoMod
         /// <param name="start">Starting offset to place converted details</param>
         /// <param name="overwrite">Overwrite</param>
         /// <returns>Result code indicating success or failure</returns>
-        public static AutoModErrorCode ImportToExisting(
-            this SaveFile tr,
-            IReadOnlyList<ShowdownSet> sets,
-            IList<PKM> arr,
-            out List<RegenTemplate> invalidAPISets,
-            out List<RegenTemplate> timedoutSets,
-            int start = 0,
-            bool overwrite = true
-        )
+        public static AutoModErrorCode ImportToExisting(this SaveFile tr, IReadOnlyList<ShowdownSet> sets, IList<PKM> arr, out List<RegenTemplate> invalidAPISets, out List<RegenTemplate> timedoutSets, int start = 0, bool overwrite = true)
         {
-            var emptySlots = overwrite
-                ? Enumerable.Range(start, sets.Count).Where(set => set < arr.Count).ToList()
-                : FindAllEmptySlots(arr, start);
+            var emptySlots = overwrite ? Enumerable.Range(start, sets.Count).Where(set => set < arr.Count).ToList() : FindAllEmptySlots(arr, start);
             invalidAPISets = [];
             timedoutSets = [];
 
@@ -116,9 +106,7 @@ namespace PKHeX.Core.AutoMod
                 Dump(r, true);
             }
 
-            Debug.WriteLine(
-                $"API Generated Sets: {generated - invalidAPISets.Count - timedoutSets.Count}/{sets.Count}, {invalidAPISets.Count} were invalid and {timedoutSets.Count} timed out."
-            );
+            Debug.WriteLine($"API Generated Sets: {generated - invalidAPISets.Count - timedoutSets.Count}/{sets.Count}, {invalidAPISets.Count} were invalid and {timedoutSets.Count} timed out.");
             foreach (var set in invalidAPISets)
             {
                 Debug.WriteLine(set.Text);
@@ -129,15 +117,7 @@ namespace PKHeX.Core.AutoMod
 
         public static void Dump(RegenTemplate set, bool invalid = false)
         {
-            var msg =
-                (
-                    invalid
-                        ? $"[Invalid] [DateTime: {DateTime.Now}]"
-                        : $"[Timeout : {APILegality.Timeout} seconds] [DateTime: {DateTime.Now}]"
-                )
-                + Environment.NewLine
-                + set.Text
-                + Environment.NewLine;
+            var msg = (invalid ? $"[Invalid] [DateTime: {DateTime.Now}]" : $"[Timeout : {APILegality.Timeout} seconds] [DateTime: {DateTime.Now}]") + Environment.NewLine + set.Text + Environment.NewLine;
             System.IO.File.AppendAllText("error_log.txt", msg);
         }
 
@@ -147,10 +127,7 @@ namespace PKHeX.Core.AutoMod
         /// <param name="tr">Source/Destination trainer</param>
         /// <param name="set">Set data to import</param>
         /// <returns>Legalization Result (hopefully legal)</returns>
-        public static AsyncLegalizationResult GetLegalFromSet(
-            this ITrainerInfo tr,
-            IBattleTemplate set
-        )
+        public static AsyncLegalizationResult GetLegalFromSet(this ITrainerInfo tr, IBattleTemplate set)
         {
             var template = EntityBlank.GetBlank(tr);
             if (template.Version == 0)
@@ -170,11 +147,7 @@ namespace PKHeX.Core.AutoMod
         /// <param name="set">Showdown set being used</param>
         /// <param name="template">template PKM to legalize</param>
         /// <returns>Legalization Result</returns>
-        private static AsyncLegalizationResult GetLegalFromSet(
-            this ITrainerInfo tr,
-            IBattleTemplate set,
-            PKM template
-        )
+        private static AsyncLegalizationResult GetLegalFromSet(this ITrainerInfo tr, IBattleTemplate set, PKM template)
         {
             if (set is ShowdownSet s)
             {
@@ -196,11 +169,7 @@ namespace PKHeX.Core.AutoMod
             return almres;
         }
 
-        private static PKM GetEasterEggFromSet(
-            this ITrainerInfo tr,
-            IBattleTemplate set,
-            PKM template
-        )
+        private static PKM GetEasterEggFromSet(this ITrainerInfo tr, IBattleTemplate set, PKM template)
         {
             var gen = EasterEggs.GetGeneration(template.Species);
             var species = (ushort)EasterEggs.GetMemeSpecies(gen, template);
@@ -213,14 +182,7 @@ namespace PKHeX.Core.AutoMod
             }
 
             template.Form = (byte)form;
-            var legalencs = tr.GetRandomEncounter(
-                template.Species,
-                template.Form,
-                set.Shiny,
-                false,
-                false,
-                out var legal
-            );
+            var legalencs = tr.GetRandomEncounter(template.Species, template.Form, set.Shiny, false, false, out var legal);
             if (legalencs && legal != null)
             {
                 template = legal;
@@ -245,12 +207,9 @@ namespace PKHeX.Core.AutoMod
                 return pk.Form;
             }
 
-            static bool IsPresentInGameSWSH(ushort species, byte form) =>
-                PersonalTable.SWSH.IsPresentInGame(species, form);
-            static bool IsPresentInGameBDSP(ushort species, byte form) =>
-                PersonalTable.BDSP.IsPresentInGame(species, form);
-            static bool IsPresentInGameLA(ushort species, byte form) =>
-                PersonalTable.LA.IsPresentInGame(species, form);
+            static bool IsPresentInGameSWSH(ushort species, byte form) => PersonalTable.SWSH.IsPresentInGame(species, form);
+            static bool IsPresentInGameBDSP(ushort species, byte form) => PersonalTable.BDSP.IsPresentInGame(species, form);
+            static bool IsPresentInGameLA(ushort species, byte form) => PersonalTable.LA.IsPresentInGame(species, form);
             for (byte f = 0; f < formcount; f++)
             {
                 if (pk.LA && IsPresentInGameLA(species, f))
@@ -278,12 +237,7 @@ namespace PKHeX.Core.AutoMod
         /// <param name="set">showdown set to legalize from</param>
         /// <param name="template">pkm file to legalize</param>
         /// <returns>LegalizationResult</returns>
-        public static AsyncLegalizationResult TryAPIConvert(
-            this ITrainerInfo tr,
-            IBattleTemplate set,
-            PKM template,
-            bool nativeOnly = false
-        )
+        public static AsyncLegalizationResult TryAPIConvert(this ITrainerInfo tr, IBattleTemplate set, PKM template, bool nativeOnly = false)
         {
             var almres = tr.GetLegalFromTemplateTimeout(template, set, nativeOnly);
             if (almres.Status != LegalizationResult.Regenerated)

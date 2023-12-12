@@ -138,12 +138,7 @@ namespace PKHeX.Core.AutoMod
         /// <param name="Form">Form to apply</param>
         /// <param name="enc">Encounter detail</param>
         /// <param name="lang">Language to apply</param>
-        public static void SetSpeciesLevel(
-            this PKM pk,
-            IBattleTemplate set,
-            byte Form,
-            IEncounterable enc,
-            LanguageID? lang)
+        public static void SetSpeciesLevel(this PKM pk, IBattleTemplate set, byte Form, IEncounterable enc, LanguageID? lang)
         {
             pk.ApplySetGender(set);
             pk.SetRecordFlags(set.Moves); // Set record flags before evolution (TODO: what if middle evolution has exclusive record moves??)
@@ -241,11 +236,7 @@ namespace PKHeX.Core.AutoMod
 
             var gen = enc.Generation;
             var maxlen = Legal.GetMaxLengthNickname(gen, finallang);
-            var newnick = RegenUtil.MutateNickname(
-                set.Nickname,
-                finallang,
-                (GameVersion)pk.Version
-            );
+            var newnick = RegenUtil.MutateNickname(set.Nickname, finallang, (GameVersion)pk.Version);
             var nickname = newnick.Length > maxlen ? newnick[..maxlen] : newnick;
             if (!WordFilter.IsFiltered(nickname, out _))
             {
@@ -312,14 +303,9 @@ namespace PKHeX.Core.AutoMod
             pkm.Species switch
             {
                 // Shedinja evolution gender glitch, should match original Gender
-                (int)Species.Shedinja when pkm.Format == 4
-                    => pkm.Gender == EntityGender.GetFromPIDAndRatio(pkm.EncryptionConstant, 0x7F), // 50M-50F
-
+                (int)Species.Shedinja when pkm.Format == 4 => pkm.Gender == EntityGender.GetFromPIDAndRatio(pkm.EncryptionConstant, 0x7F), // 50M-50F
                 // Evolved from Azurill after transferring to keep gender
-                (int)Species.Marill
-                or (int)Species.Azumarill when pkm.Format >= 6
-                    => pkm.Gender == 1 && (pkm.EncryptionConstant & 0xFF) > 0x3F,
-
+                (int)Species.Marill or (int)Species.Azumarill when pkm.Format >= 6 => pkm.Gender == 1 && (pkm.EncryptionConstant & 0xFF) > 0x3F,
                 _ => false,
             };
 
@@ -329,10 +315,7 @@ namespace PKHeX.Core.AutoMod
         /// <param name="pk">PKM to modify</param>
         /// <param name="set">Showdown Set to refer</param>
         /// <param name="enc">Encounter to reference</param>
-        public static void SetMovesEVs(
-            this PKM pk,
-            IBattleTemplate set,
-            IEncounterable enc)
+        public static void SetMovesEVs(this PKM pk, IBattleTemplate set, IEncounterable enc)
         {
             // If no moves are requested, just keep the encounter moves
             if (set.Moves[0] != 0)

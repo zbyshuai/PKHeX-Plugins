@@ -4,8 +4,7 @@ namespace PKHeX.Core.AutoMod
 {
     public static class Overworld8Search
     {
-        private static readonly Dictionary<int, uint> ZeroFixedIvs =
-            new()
+        private static readonly Dictionary<int, uint> ZeroFixedIvs = new()
             {
                 { ComputeIV32([31, 31, 31, 31, 0, 0]), 0x005DC65E },
                 { ComputeIV32([31, 0, 31, 0, 31, 31]), 0x022F7135 },
@@ -68,8 +67,7 @@ namespace PKHeX.Core.AutoMod
                 { ComputeIV32([31, 31, 31, 0, 0, 0]), 0xE66E8A08 },
             };
 
-        private static readonly Dictionary<int, uint> one_fixed_ivs =
-            new()
+        private static readonly Dictionary<int, uint> one_fixed_ivs = new()
             {
                 { ComputeIV32([0, 0, 31, 31, 0, 0]), 0x0002129F },
                 { ComputeIV32([31, 31, 0, 0, 31, 31]), 0x0006C34D },
@@ -136,8 +134,7 @@ namespace PKHeX.Core.AutoMod
                 { ComputeIV32([0, 0, 0, 31, 0, 0]), 0x3582A115 },
             };
 
-        private static readonly Dictionary<int, uint> two_fixed_ivs =
-            new()
+        private static readonly Dictionary<int, uint> two_fixed_ivs = new()
             {
                 { ComputeIV32([31, 0, 31, 31, 31, 31]), 0x00009BEC },
                 { ComputeIV32([0, 31, 31, 0, 31, 31]), 0x00010626 },
@@ -198,8 +195,7 @@ namespace PKHeX.Core.AutoMod
                 { ComputeIV32([0, 0, 0, 31, 31, 0]), 0x0394F8DC },
             };
 
-        private static readonly Dictionary<int, uint> three_fixed_ivs =
-            new()
+        private static readonly Dictionary<int, uint> three_fixed_ivs = new()
             {
                 { ComputeIV32([31, 31, 31, 0, 31, 0]), 0x000033F7 },
                 { ComputeIV32([31, 31, 31, 0, 0, 31]), 0x0000443F },
@@ -245,8 +241,7 @@ namespace PKHeX.Core.AutoMod
                 { ComputeIV32([31, 31, 0, 0, 31, 0]), 0x002D61F4 },
             };
 
-        private static readonly Dictionary<int, uint> four_fixed_ivs =
-            new()
+        private static readonly Dictionary<int, uint> four_fixed_ivs = new()
             {
                 { ComputeIV32([31, 0, 31, 31, 31, 31]), 0x6ACF03B6 },
                 { ComputeIV32([31, 31, 31, 31, 0, 31]), 0x6ACF049D },
@@ -272,8 +267,7 @@ namespace PKHeX.Core.AutoMod
                 { ComputeIV32([31, 31, 0, 31, 0, 31]), 0x6ACFC2BC },
             };
 
-        private static readonly Dictionary<int, uint> five_fixed_ivs =
-            new()
+        private static readonly Dictionary<int, uint> five_fixed_ivs = new()
             {
                 { ComputeIV32([31, 31, 31, 31, 31, 31]), 0x112AAE7B },
                 { ComputeIV32([0, 31, 31, 31, 31, 31]), 0x112AAE98 },

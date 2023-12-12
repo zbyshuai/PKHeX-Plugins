@@ -594,9 +594,7 @@ namespace AutoModPlugins
                     else
                     {
                         form.Bytes = result;
-                        WinFormsUtil.Error(
-                            "Size mismatch. Please report this issue on the Discord server."
-                        );
+                        WinFormsUtil.Error("Size mismatch. Please report this issue on the Discord server.");
                     }
                 }
 
@@ -795,17 +793,7 @@ namespace AutoModPlugins
                     }
                 }
 
-                using (
-                    var form = new SimpleHexEditor(
-                        result,
-                        Remote.Bot,
-                        address,
-                        RWMethod.Absolute,
-                        blk_key,
-                        keyval,
-                        header
-                    )
-                )
+                using (var form = new SimpleHexEditor(result, Remote.Bot, address, RWMethod.Absolute, blk_key, keyval, header))
                 {
                     var loadgrid =
                         blockview
@@ -919,9 +907,7 @@ namespace AutoModPlugins
                 };
 
                 // Invoke function
-                cc.GetType()
-                    .GetMethod(v, BindingFlags.NonPublic | BindingFlags.Instance)
-                    ?.Invoke(cc, new[] { s, e });
+                cc.GetType().GetMethod(v, BindingFlags.NonPublic | BindingFlags.Instance)?.Invoke(cc, new[] { s, e });
 
                 for (var i = 0; i < objects.Count; i++)
                 {
@@ -973,12 +959,7 @@ namespace AutoModPlugins
 
             if (Remote.Bot.Injector is LPBDSP)
             {
-                Remote.Bot.Injector.WriteBlockFromString(
-                    Remote.Bot,
-                    txt,
-                    GetBlockDataRaw(sb!, data[0]),
-                    sb!
-                );
+                Remote.Bot.Injector.WriteBlockFromString(Remote.Bot, txt, GetBlockDataRaw(sb!, data[0]),sb!);
             }
             else
             {
@@ -994,12 +975,7 @@ namespace AutoModPlugins
                 _ => data,
             };
 
-        private static bool ReadBlock(
-            PokeSysBotMini bot,
-            SaveFile sav,
-            string display,
-            out List<byte[]>? data
-        )
+        private static bool ReadBlock(PokeSysBotMini bot, SaveFile sav, string display, out List<byte[]>? data)
         {
             return bot.Injector.ReadBlockFromString(bot, sav, display, out data);
         }
@@ -1037,14 +1013,7 @@ namespace AutoModPlugins
             return (ofs, size);
         }
 
-        private bool TryGetObjectInSave(
-            LiveHeXVersion version,
-            SaveFile sav,
-            string display,
-            int index,
-            byte[]? customdata,
-            out object? sb
-        )
+        private bool TryGetObjectInSave(LiveHeXVersion version, SaveFile sav, string display, int index, byte[]? customdata, out object? sb)
         {
             sb = null;
             if (Remote.Bot.Injector is LPBDSP)
@@ -1099,13 +1068,7 @@ namespace AutoModPlugins
             return sb is not null;
         }
 
-        private bool ConnectionValidated(
-            PokeSysBotMini psb,
-            string gameVer,
-            LiveHeXVersion version,
-            LiveHeXValidation validation,
-            string msg
-        )
+        private bool ConnectionValidated(PokeSysBotMini psb, string gameVer, LiveHeXVersion version, LiveHeXValidation validation, string msg)
         {
             if (psb.com is not ICommunicatorNX nx)
             {
@@ -1134,25 +1097,17 @@ namespace AutoModPlugins
 
             var url = validation switch
             {
-                LiveHeXValidation.Botbase
-                    when nx.Protocol is InjectorCommunicationType.SocketNetwork
-                    => "https://github.com/olliz0r/sys-botbase/releases/latest",
-                LiveHeXValidation.Botbase when nx.Protocol is InjectorCommunicationType.USB
-                    => "https://github.com/Koi-3088/usb-botbase/releases/latest",
-                LiveHeXValidation.BlankSAV
-                    => "https://github.com/architdate/PKHeX-Plugins/wiki/FAQ-and-Troubleshooting#pkhex-plugins-is-telling-me-that-the-detected-game-does-not-match-the-current-save-file-the-top-of-the-window-says-forced-for-the-game-version",
-                LiveHeXValidation.GameVersion
-                    => "https://github.com/architdate/PKHeX-Plugins/wiki/FAQ-and-Troubleshooting#pkhex-plugins-is-telling-me-that-the-detected-game-does-not-match-the-current-save-file-the-top-of-the-window-says-forced-for-the-game-version",
-                LiveHeXValidation.RAMShift
-                    => "https://github.com/architdate/PKHeX-Plugins/wiki/FAQ-and-Troubleshooting#pkhex-plugins-is-telling-me-that-a-possible-ram-shift-is-detected",
-                _
-                    => "https://github.com/architdate/PKHeX-Plugins/wiki/FAQ-and-Troubleshooting#troubleshooting",
+                LiveHeXValidation.Botbase when nx.Protocol is InjectorCommunicationType.SocketNetwork => "https://github.com/olliz0r/sys-botbase/releases/latest",
+                LiveHeXValidation.Botbase when nx.Protocol is InjectorCommunicationType.USB => "https://github.com/Koi-3088/usb-botbase/releases/latest",
+                LiveHeXValidation.BlankSAV => "https://github.com/architdate/PKHeX-Plugins/wiki/FAQ-and-Troubleshooting#pkhex-plugins-is-telling-me-that-the-detected-game-does-not-match-the-current-save-file-the-top-of-the-window-says-forced-for-the-game-version",
+                LiveHeXValidation.GameVersion => "https://github.com/architdate/PKHeX-Plugins/wiki/FAQ-and-Troubleshooting#pkhex-plugins-is-telling-me-that-the-detected-game-does-not-match-the-current-save-file-the-top-of-the-window-says-forced-for-the-game-version",
+                LiveHeXValidation.RAMShift => "https://github.com/architdate/PKHeX-Plugins/wiki/FAQ-and-Troubleshooting#pkhex-plugins-is-telling-me-that-a-possible-ram-shift-is-detected",
+                _ => "https://github.com/architdate/PKHeX-Plugins/wiki/FAQ-and-Troubleshooting#troubleshooting",
             };
 
             switch (validation)
             {
                 case LiveHeXValidation.Botbase:
-
                     {
                         var error = WinFormsUtil.ALMErrorBasic(msg, true);
                         error.ShowDialog();
@@ -1160,17 +1115,13 @@ namespace AutoModPlugins
                         var res = error.DialogResult;
                         if (res == DialogResult.Retry)
                         {
-                            Process.Start(
-                                new ProcessStartInfo { FileName = url, UseShellExecute = true }
-                            );
+                            Process.Start(new ProcessStartInfo { FileName = url, UseShellExecute = true });
                         }
 
                         return false;
                     }
 
-                case LiveHeXValidation.BlankSAV
-                or LiveHeXValidation.GameVersion:
-
+                case LiveHeXValidation.BlankSAV or LiveHeXValidation.GameVersion:
                     {
                         Remote.Bot = new PokeSysBotMini(version, nx, _settings.UseCachedPointers);
                         Text += $" SAV/Version (Detected: {gameVer} | Forced: {version})";
@@ -1181,16 +1132,13 @@ namespace AutoModPlugins
                         var res = error.DialogResult;
                         if (res == DialogResult.Retry)
                         {
-                            Process.Start(
-                                new ProcessStartInfo { FileName = url, UseShellExecute = true }
-                            );
+                            Process.Start(new ProcessStartInfo { FileName = url, UseShellExecute = true });
                         }
 
                         return false;
                     }
 
                 case LiveHeXValidation.RAMShift:
-
                     {
                         Text += $" Possible RAM Shift | Detected: {version}";
                         var error = WinFormsUtil.ALMErrorBasic(msg);
@@ -1199,11 +1147,8 @@ namespace AutoModPlugins
                         var res = error.DialogResult;
                         if (res == DialogResult.Retry)
                         {
-                            Process.Start(
-                                new ProcessStartInfo { FileName = url, UseShellExecute = true }
-                            );
+                            Process.Start(new ProcessStartInfo { FileName = url, UseShellExecute = true });
                         }
-
                         return false;
                     }
             }

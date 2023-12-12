@@ -19,12 +19,9 @@ public static class SwitchCommand
         return Encoder.GetBytes(command);
     }
 
-    private static string ToHex(byte[] data)
-        => string.Concat(data.Select(z => $"{z:X2}"));
-    private static string Encode(IEnumerable<long> jumps)
-        => string.Concat(jumps.Select(z => $" {z}"));
-    private static string Encode(IReadOnlyDictionary<ulong, int> offsetSizeDictionary)
-        => string.Concat(offsetSizeDictionary.Select(z => $" 0x{z.Key:X16} {z.Value}"));
+    private static string ToHex(byte[] data) => string.Concat(data.Select(z => $"{z:X2}"));
+    private static string Encode(IEnumerable<long> jumps) => string.Concat(jumps.Select(z => $" {z}"));
+    private static string Encode(IReadOnlyDictionary<ulong, int> offsetSizeDictionary) => string.Concat(offsetSizeDictionary.Select(z => $" 0x{z.Key:X16} {z.Value}"));
 
     private static string ToHex(ReadOnlySpan<byte> data)
     {
@@ -38,8 +35,7 @@ public static class SwitchCommand
     /// Removes the virtual controller from the bot. Allows physical controllers to control manually.
     /// </summary>
     /// <returns>Encoded command bytes</returns>
-    public static byte[] DetachController(bool crlf = true)
-        => Encode("detachController", crlf);
+    public static byte[] DetachController(bool crlf = true) => Encode("detachController", crlf);
 
     /*
      *
@@ -54,8 +50,7 @@ public static class SwitchCommand
     /// <param name="button">Button to click.</param>
     /// <param name="crlf">Line terminator (unused by USB protocol)</param>
     /// <returns>Encoded command bytes</returns>
-    public static byte[] Click(SwitchButton button, bool crlf = true)
-        => Encode($"click {button}", crlf);
+    public static byte[] Click(SwitchButton button, bool crlf = true) => Encode($"click {button}", crlf);
 
     /// <summary>
     /// Presses and does NOT release a <see cref="SwitchButton"/>.
@@ -63,8 +58,7 @@ public static class SwitchCommand
     /// <param name="button">Button to hold.</param>
     /// <param name="crlf">Line terminator (unused by USB protocol)</param>
     /// <returns>Encoded command bytes</returns>
-    public static byte[] Hold(SwitchButton button, bool crlf = true)
-        => Encode($"press {button}", crlf);
+    public static byte[] Hold(SwitchButton button, bool crlf = true) => Encode($"press {button}", crlf);
 
     /// <summary>
     /// Releases the held <see cref="SwitchButton"/>.
@@ -72,8 +66,7 @@ public static class SwitchCommand
     /// <param name="button">Button to release.</param>
     /// <param name="crlf">Line terminator (unused by USB protocol)</param>
     /// <returns>Encoded command bytes</returns>
-    public static byte[] Release(SwitchButton button, bool crlf = true)
-        => Encode($"release {button}", crlf);
+    public static byte[] Release(SwitchButton button, bool crlf = true) => Encode($"release {button}", crlf);
 
     /*
      *
@@ -89,8 +82,7 @@ public static class SwitchCommand
     /// <param name="y">Y position</param>
     /// <param name="crlf">Line terminator (unused by USB protocol)</param>
     /// <returns>Encoded command bytes</returns>
-    public static byte[] SetStick(SwitchStick stick, short x, short y, bool crlf = true)
-        => Encode($"setStick {stick} {x} {y}", crlf);
+    public static byte[] SetStick(SwitchStick stick, short x, short y, bool crlf = true) => Encode($"setStick {stick} {x} {y}", crlf);
 
     /// <summary>
     /// Resets the specified <see cref="stick"/> to (0,0)
@@ -98,8 +90,7 @@ public static class SwitchCommand
     /// <param name="stick">Stick to reset</param>
     /// <param name="crlf">Line terminator (unused by USB protocol)</param>
     /// <returns>Encoded command bytes</returns>
-    public static byte[] ResetStick(SwitchStick stick, bool crlf = true)
-        => SetStick(stick, 0, 0, crlf);
+    public static byte[] ResetStick(SwitchStick stick, bool crlf = true) => SetStick(stick, 0, 0, crlf);
 
     /*
      *
@@ -114,8 +105,7 @@ public static class SwitchCommand
     /// <param name="count">Amount of bytes</param>
     /// <param name="crlf">Line terminator (unused by USB protocol)</param>
     /// <returns>Encoded command bytes</returns>
-    public static byte[] Peek(ulong offset, int count, bool crlf = true)
-        => Encode($"peek 0x{offset:X16} {count}", crlf);
+    public static byte[] Peek(ulong offset, int count, bool crlf = true) => Encode($"peek 0x{offset:X16} {count}", crlf);
 
     /// <summary>
     /// Requests the Bot to send concat bytes from offsets of sizes in the <see cref="offsetSizeDictionary"/> relative to the heap.
@@ -123,8 +113,7 @@ public static class SwitchCommand
     /// <param name="offsetSizeDictionary">Dictionary of offset and sizes to be looked up</param>
     /// <param name="crlf">Line terminator (unused by USB protocol)</param>
     /// <returns>Encoded command bytes</returns>
-    public static byte[] PeekMulti(IReadOnlyDictionary<ulong, int> offsetSizeDictionary, bool crlf = true)
-        => Encode($"peekMulti{Encode(offsetSizeDictionary)}", crlf);
+    public static byte[] PeekMulti(IReadOnlyDictionary<ulong, int> offsetSizeDictionary, bool crlf = true) => Encode($"peekMulti{Encode(offsetSizeDictionary)}", crlf);
 
     /// <summary>
     /// Sends the Bot <see cref="data"/> to be written to <see cref="offset"/>.
@@ -133,8 +122,7 @@ public static class SwitchCommand
     /// <param name="data">Data to write</param>
     /// <param name="crlf">Line terminator (unused by USB protocol)</param>
     /// <returns>Encoded command bytes</returns>
-    public static byte[] Poke(ulong offset, ReadOnlySpan<byte> data, bool crlf = true)
-        => Encode($"poke 0x{offset:X16} 0x{ToHex(data)}", crlf);
+    public static byte[] Poke(ulong offset, ReadOnlySpan<byte> data, bool crlf = true) => Encode($"poke 0x{offset:X16} 0x{ToHex(data)}", crlf);
 
     /// <summary>
     /// Requests the Bot to send <see cref="count"/> bytes from absolute <see cref="offset"/>.
@@ -143,8 +131,7 @@ public static class SwitchCommand
     /// <param name="count">Amount of bytes</param>
     /// <param name="crlf">Line terminator (unused by USB protocol)</param>
     /// <returns>Encoded command bytes</returns>
-    public static byte[] PeekAbsolute(ulong offset, int count, bool crlf = true)
-        => Encode($"peekAbsolute 0x{offset:X16} {count}", crlf);
+    public static byte[] PeekAbsolute(ulong offset, int count, bool crlf = true) => Encode($"peekAbsolute 0x{offset:X16} {count}", crlf);
 
     /// <summary>
     /// Requests the Bot to send concat bytes from offsets of sizes in the <see cref="offsetSizeDictionary"/> in absolute space.
@@ -152,8 +139,7 @@ public static class SwitchCommand
     /// <param name="offsetSizeDictionary">Dictionary of offset and sizes to be looked up</param>
     /// <param name="crlf">Line terminator (unused by USB protocol)</param>
     /// <returns>Encoded command bytes</returns>
-    public static byte[] PeekAbsoluteMulti(IReadOnlyDictionary<ulong, int> offsetSizeDictionary, bool crlf = true)
-        => Encode($"peekAbsoluteMulti{Encode(offsetSizeDictionary)}", crlf);
+    public static byte[] PeekAbsoluteMulti(IReadOnlyDictionary<ulong, int> offsetSizeDictionary, bool crlf = true) => Encode($"peekAbsoluteMulti{Encode(offsetSizeDictionary)}", crlf);
 
     /// <summary>
     /// Sends the Bot <see cref="data"/> to be written to absolute <see cref="offset"/>.
@@ -162,8 +148,7 @@ public static class SwitchCommand
     /// <param name="data">Data to write</param>
     /// <param name="crlf">Line terminator (unused by USB protocol)</param>
     /// <returns>Encoded command bytes</returns>
-    public static byte[] PokeAbsolute(ulong offset, ReadOnlySpan<byte> data, bool crlf = true)
-        => Encode($"pokeAbsolute 0x{offset:X16} 0x{ToHex(data)}", crlf);
+    public static byte[] PokeAbsolute(ulong offset, ReadOnlySpan<byte> data, bool crlf = true) => Encode($"pokeAbsolute 0x{offset:X16} 0x{ToHex(data)}", crlf);
 
     /// <summary>
     /// Requests the Bot to send <see cref="count"/> bytes from main <see cref="offset"/>.
@@ -172,8 +157,7 @@ public static class SwitchCommand
     /// <param name="count">Amount of bytes</param>
     /// <param name="crlf">Line terminator (unused by USB protocol)</param>
     /// <returns>Encoded command bytes</returns>
-    public static byte[] PeekMain(ulong offset, int count, bool crlf = true)
-        => Encode($"peekMain 0x{offset:X16} {count}", crlf);
+    public static byte[] PeekMain(ulong offset, int count, bool crlf = true) => Encode($"peekMain 0x{offset:X16} {count}", crlf);
 
     /// <summary>
     /// Requests the Bot to send concat bytes from offsets of sizes in the <see cref="offsetSizeDictionary"/> relative to the main region.
@@ -181,8 +165,7 @@ public static class SwitchCommand
     /// <param name="offsetSizeDictionary">Dictionary of offset and sizes to be looked up</param>
     /// <param name="crlf">Line terminator (unused by USB protocol)</param>
     /// <returns>Encoded command bytes</returns>
-    public static byte[] PeekMainMulti(IReadOnlyDictionary<ulong, int> offsetSizeDictionary, bool crlf = true)
-        => Encode($"peekMainMulti{Encode(offsetSizeDictionary)}", crlf);
+    public static byte[] PeekMainMulti(IReadOnlyDictionary<ulong, int> offsetSizeDictionary, bool crlf = true) => Encode($"peekMainMulti{Encode(offsetSizeDictionary)}", crlf);
 
     /// <summary>
     /// Sends the Bot <see cref="data"/> to be written to main <see cref="offset"/>.
@@ -191,8 +174,7 @@ public static class SwitchCommand
     /// <param name="data">Data to write</param>
     /// <param name="crlf">Line terminator (unused by USB protocol)</param>
     /// <returns>Encoded command bytes</returns>
-    public static byte[] PokeMain(ulong offset, ReadOnlySpan<byte> data, bool crlf = true)
-        => Encode($"pokeMain 0x{offset:X16} 0x{ToHex(data)}", crlf);
+    public static byte[] PokeMain(ulong offset, ReadOnlySpan<byte> data, bool crlf = true) => Encode($"pokeMain 0x{offset:X16} 0x{ToHex(data)}", crlf);
 
     /*
      *
@@ -207,8 +189,7 @@ public static class SwitchCommand
     /// <param name="count">Amount of bytes</param>
     /// <param name="crlf">Line terminator (unused by USB protocol)</param>
     /// <returns>Encoded command bytes</returns>
-    public static byte[] PointerPeek(IEnumerable<long> jumps, int count, bool crlf = true)
-        => Encode($"pointerPeek {count}{Encode(jumps)}", crlf);
+    public static byte[] PointerPeek(IEnumerable<long> jumps, int count, bool crlf = true) => Encode($"pointerPeek {count}{Encode(jumps)}", crlf);
 
     /// <summary>
     /// Sends the Bot <see cref="data"/> to be written to the offset at the end pointer traversals defined by <see cref="jumps"/>.
@@ -217,8 +198,7 @@ public static class SwitchCommand
     /// <param name="data">Data to write</param>
     /// <param name="crlf">Line terminator (unused by USB protocol)</param>
     /// <returns>Encoded command bytes</returns>
-    public static byte[] PointerPoke(IEnumerable<long> jumps, ReadOnlySpan<byte> data, bool crlf = true)
-        => Encode($"pointerPoke 0x{ToHex(data)}{Encode(jumps)}", crlf);
+    public static byte[] PointerPoke(IEnumerable<long> jumps, ReadOnlySpan<byte> data, bool crlf = true) => Encode($"pointerPoke 0x{ToHex(data)}{Encode(jumps)}", crlf);
 
     /// <summary>
     /// Requests the Bot to solve the pointer traversals defined by <see cref="jumps"/> and send the final absolute offset.
@@ -226,8 +206,7 @@ public static class SwitchCommand
     /// <param name="jumps">All traversals in the pointer expression</param>
     /// <param name="crlf">Line terminator (unused by USB protocol)</param>
     /// <returns>Encoded command bytes</returns>
-    public static byte[] PointerAll(IEnumerable<long> jumps, bool crlf = true)
-        => Encode($"pointerAll{Encode(jumps)}", crlf);
+    public static byte[] PointerAll(IEnumerable<long> jumps, bool crlf = true) => Encode($"pointerAll{Encode(jumps)}", crlf);
 
     /// <summary>
     /// Requests the Bot to solve the pointer traversals defined by <see cref="jumps"/> and send the final offset relative to the heap region.
@@ -235,8 +214,7 @@ public static class SwitchCommand
     /// <param name="jumps">All traversals in the pointer expression</param>
     /// <param name="crlf">Line terminator (unused by USB protocol)</param>
     /// <returns>Encoded command bytes</returns>
-    public static byte[] PointerRelative(IEnumerable<long> jumps, bool crlf = true)
-        => Encode($"pointerRelative{Encode(jumps)}", crlf);
+    public static byte[] PointerRelative(IEnumerable<long> jumps, bool crlf = true) => Encode($"pointerRelative{Encode(jumps)}", crlf);
 
     /*
      *
@@ -249,40 +227,35 @@ public static class SwitchCommand
     /// </summary>
     /// <param name="crlf">Line terminator (unused by USB protocol)</param>
     /// <returns>Encoded command bytes</returns>
-    public static byte[] GetMainNsoBase(bool crlf = true)
-        => Encode("getMainNsoBase", crlf);
+    public static byte[] GetMainNsoBase(bool crlf = true) => Encode("getMainNsoBase", crlf);
 
     /// <summary>
     /// Requests the heap base of attached process.
     /// </summary>
     /// <param name="crlf">Line terminator (unused by USB protocol)</param>
     /// <returns>Encoded command bytes</returns>
-    public static byte[] GetHeapBase(bool crlf = true)
-        => Encode("getHeapBase", crlf);
+    public static byte[] GetHeapBase(bool crlf = true) => Encode("getHeapBase", crlf);
 
     /// <summary>
     /// Requests the title id of attached process.
     /// </summary>
     /// <param name="crlf">Line terminator (unused by USB protocol)</param>
     /// <returns>Encoded command bytes</returns>
-    public static byte[] GetTitleID(bool crlf = true)
-        => Encode("getTitleID", crlf);
+    public static byte[] GetTitleID(bool crlf = true) => Encode("getTitleID", crlf);
 
     /// <summary>
     /// Requests the build id of attached process.
     /// </summary>
     /// <param name="crlf">Line terminator (unused by USB protocol)</param>
     /// <returns>Encoded command bytes</returns>
-    public static byte[] GetBuildID(bool crlf = true)
-        => Encode("getBuildID", crlf);
+    public static byte[] GetBuildID(bool crlf = true) => Encode("getBuildID", crlf);
 
     /// <summary>
     /// Requests the sys-botbase or usb-botbase version.
     /// </summary>
     /// <param name="crlf">Line terminator (unused by USB protocol)</param>
     /// <returns>Encoded command bytes</returns>
-    public static byte[] GetBotbaseVersion(bool crlf = true)
-        => Encode("getVersion", crlf);
+    public static byte[] GetBotbaseVersion(bool crlf = true) => Encode("getVersion", crlf);
 
     /// <summary>
     /// Receives requested information about the currently running game application.
@@ -290,8 +263,7 @@ public static class SwitchCommand
     /// <param name="info">Valid parameters and their return types: icon (byte[]), version (string), rating (int), author (string), name (string)</param>
     /// <param name="crlf">Line terminator (unused by USB's protocol)</param>
     /// <returns>Encoded command bytes</returns>
-    public static byte[] GetGameInfo(ReadOnlySpan<char> info, bool crlf = true)
-        => Encode($"game {info}", crlf);
+    public static byte[] GetGameInfo(ReadOnlySpan<char> info, bool crlf = true) => Encode($"game {info}", crlf);
 
     /// <summary>
     /// Checks if a process is running.
@@ -299,6 +271,5 @@ public static class SwitchCommand
     /// <param name="pid">Process ID</param>
     /// <param name="crlf">Line terminator (unused by USB protocol)</param>
     /// <returns>Encoded command bytes</returns>
-    public static byte[] IsProgramRunning(ulong pid, bool crlf = true)
-        => Encode($"isProgramRunning 0x{pid:x16}", crlf);
+    public static byte[] IsProgramRunning(ulong pid, bool crlf = true) => Encode($"isProgramRunning 0x{pid:x16}", crlf);
 }

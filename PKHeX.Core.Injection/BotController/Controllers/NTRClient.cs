@@ -70,10 +70,7 @@ namespace PKHeX.Core.Injection
                 {
                     Thread.Sleep(10);
                 }
-                clientNTR.AddWaitingForData(
-                    clientNTR.Data((uint)offset, (uint)length, clientNTR.PID),
-                    myArgs
-                );
+                clientNTR.AddWaitingForData(clientNTR.Data((uint)offset, (uint)length, clientNTR.PID), myArgs);
 
                 for (int readcount = 0; readcount < timeout * 100; readcount++)
                 {

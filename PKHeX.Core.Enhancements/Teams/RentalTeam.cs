@@ -34,7 +34,6 @@ namespace PKHeX.Core.Enhancements
             UnknownData = data[0x128..];
         }
 
-        public IEnumerable<ShowdownSet> ConvertedTeam =>
-            Team.Select(z => z.ConvertToPKM(Dummy)).Select(z => new ShowdownSet(z));
+        public IEnumerable<ShowdownSet> ConvertedTeam => Team.Select(z => z.ConvertToPKM(Dummy)).Select(z => new ShowdownSet(z));
     }
 }

@@ -141,10 +141,10 @@ namespace PKHeX.Core.Injection
             sway_grass.AsSpan(0x0, 0x8).CopyTo(bSpan);
             sway_grass.AsSpan(0x20, 0xD).CopyTo(bSpan[0x8..]);
             sway_grass.AsSpan(0x38, 0x2).CopyTo(bSpan[0x15..]);
-            grass_one  .CopyTo(bSpan[(0x20 + (0 * 0x28))..]);
-            grass_two  .CopyTo(bSpan[(0x20 + (1 * 0x28))..]);
+            grass_one.CopyTo(bSpan[(0x20 + (0 * 0x28))..]);
+            grass_two.CopyTo(bSpan[(0x20 + (1 * 0x28))..]);
             grass_three.CopyTo(bSpan[(0x20 + (2 * 0x28))..]);
-            grass_four .CopyTo(bSpan[(0x20 + (3 * 0x28))..]);
+            grass_four.CopyTo(bSpan[(0x20 + (3 * 0x28))..]);
             return block;
         }
 

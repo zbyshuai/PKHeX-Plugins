@@ -26,9 +26,7 @@ namespace AutoModPlugins
             ctrl.Name = "Menu_PasteImporter";
             modmenu.DropDownItems.Add(ctrl);
             ToolStripItem parent = modmenu.OwnerItem;
-            var form = (
-                parent.GetCurrentParent().Parent ?? throw new Exception("Parent not found")
-            ).FindForm();
+            var form = (parent.GetCurrentParent().Parent ?? throw new Exception("Parent not found")).FindForm();
             if (form is not null)
             {
                 form.Icon = Resources.icon;
@@ -84,9 +82,7 @@ namespace AutoModPlugins
                 return text;
             }
 
-            WinFormsUtil.Alert(
-                "Text file with invalid data provided. Please provide a text file with proper Showdown data"
-            );
+            WinFormsUtil.Alert("Text file with invalid data provided. Please provide a text file with proper Showdown data");
             return null;
         }
     }

@@ -15,8 +15,7 @@ namespace PKHeX.Core.Enhancements
 
         public string Summary => $"{Format}: {TeamName}";
 
-        public static bool IsLineShowdownTeam(string line) =>
-            line.TrimStart().StartsWith("===") && line.TrimEnd().EndsWith("===");
+        public static bool IsLineShowdownTeam(string line) => line.TrimStart().StartsWith("===") && line.TrimEnd().EndsWith("===");
 
         public static List<ShowdownTeamSet> GetTeams(string paste)
         {
