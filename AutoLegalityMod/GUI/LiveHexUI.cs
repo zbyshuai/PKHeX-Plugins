@@ -40,27 +40,19 @@ namespace AutoModPlugins
             CurrentInjectionType = _settings.USBBotBasePreferred
                 ? InjectorCommunicationType.USB
                 : InjectorCommunicationType.SocketNetwork;
-            Remote = new LiveHeXController(
-                sav,
-                editor,
-                CurrentInjectionType,
-                _settings.UseCachedPointers
-            );
+            Remote = new LiveHeXController(sav, editor, CurrentInjectionType, _settings.UseCachedPointers);
 
             InitializeComponent();
             this.TranslateInterface(WinFormsTranslator.CurrentLanguage);
 
             TB_IP.Text = _settings.LatestIP;
             var default_port = RamOffsets.IsSwitchTitle(sav.SAV) ? 6000 : 8000; // default port for loaded save
-            TB_Port.Text = int.Parse(_settings.LatestPort) is 6000 or 8000
-                ? default_port.ToString()
-                : _settings.LatestPort;
+            TB_Port.Text = int.Parse(_settings.LatestPort) is 6000 or 8000 ? default_port.ToString() : _settings.LatestPort;
             SetInjectionTypeView();
 
             // add an event to the editor
             // ReSharper disable once SuspiciousTypeConversion.Global
-            BoxSelect =
-                ((Control)sav).Controls.Find("CB_BoxSelect", true).FirstOrDefault() as ComboBox;
+            BoxSelect = ((Control)sav).Controls.Find("CB_BoxSelect", true).FirstOrDefault() as ComboBox;
             if (BoxSelect is not null)
             {
                 BoxSelect.SelectedIndexChanged += ChangeBox;
@@ -70,10 +62,7 @@ namespace AutoModPlugins
             var type = sav.GetType();
             var fields = type.GetTypeInfo().DeclaredFields;
             var test = fields.First(z => z.Name == "EditEnv");
-            x =
-                (SaveDataEditor<PictureBox>)(
-                    test.GetValue(sav) ?? new Exception("Error with LiveHeXUI init.")
-                );
+            x = (SaveDataEditor<PictureBox>)(test.GetValue(sav) ?? new Exception("Error with LiveHeXUI init."));
             x.Slots.Publisher.Subscribers.Add(this);
 
             CenterToParent();
@@ -102,13 +91,7 @@ namespace AutoModPlugins
                 return;
             }
 
-            Remote.Bot.SendSlot(
-                RamOffsets.WriteBoxData(Remote.Bot.Version)
-                    ? pkm.EncryptedBoxData
-                    : pkm.EncryptedPartyData,
-                box,
-                slotpkm
-            );
+            Remote.Bot.SendSlot(RamOffsets.WriteBoxData(Remote.Bot.Version) ? pkm.EncryptedBoxData : pkm.EncryptedPartyData, box, slotpkm);
         }
 
         private void SetTrainerData(SaveFile sav)
@@ -214,10 +197,7 @@ namespace AutoModPlugins
                     (validation, msg, lv) = Connect_Switch(nx, versions, ref gameVer, ref gameName);
                 }
 
-                var currVer =
-                    lv is LiveHeXVersion.Unknown
-                        ? RamOffsets.GetValidVersions(SAV.SAV).Reverse().ToArray()[0]
-                        : lv;
+                var currVer = lv is LiveHeXVersion.Unknown ? RamOffsets.GetValidVersions(SAV.SAV).Reverse().ToArray()[0] : lv;
                 bool validated = ConnectionValidated(Remote.Bot, gameVer, currVer, validation, msg);
                 if (!validated && !_settings.EnableDevMode)
                 {
@@ -269,8 +249,7 @@ namespace AutoModPlugins
                     Process.Start(
                         new ProcessStartInfo
                         {
-                            FileName =
-                                "https://github.com/architdate/PKHeX-Plugins/wiki/FAQ-and-Troubleshooting#troubleshooting",
+                            FileName = "https://github.com/architdate/PKHeX-Plugins/wiki/FAQ-and-Troubleshooting#troubleshooting",
                             UseShellExecute = true
                         }
                     );
@@ -280,35 +259,17 @@ namespace AutoModPlugins
             }
 
             B_Connect.Enabled = B_Connect.Visible = TB_IP.Enabled = TB_Port.Enabled = false;
-            B_Disconnect.Enabled =
-                B_Disconnect.Visible =
-                groupBox1.Enabled =
-                groupBox2.Enabled =
-                groupBox3.Enabled =
-                    true;
+            B_Disconnect.Enabled = B_Disconnect.Visible = groupBox1.Enabled = groupBox2.Enabled = groupBox3.Enabled = true;
         }
 
-        private (LiveHeXValidation, string, LiveHeXVersion) Connect_NTR(
-            ICommunicator com,
-            LiveHeXVersion[] versions
-        )
+        private (LiveHeXValidation, string, LiveHeXVersion) Connect_NTR(ICommunicator com, LiveHeXVersion[] versions)
         {
             foreach (var version in versions)
             {
                 Remote.Bot = new PokeSysBotMini(version, com, _settings.UseCachedPointers);
                 var data = Remote.Bot.ReadSlot(0, 0);
                 var pkm = SAV.SAV.GetDecryptedPKM(data);
-                bool valid =
-                    pkm.Species <= pkm.MaxSpeciesID
-                    && pkm.ChecksumValid
-                    && (
-                        (pkm.Species == 0 && pkm.EncryptionConstant == 0)
-                        || (
-                            pkm.Species > 0
-                            && pkm.Language != (int)LanguageID.Hacked
-                            && pkm.Language != (int)LanguageID.UNUSED_6
-                        )
-                    );
+                bool valid = pkm.Species <= pkm.MaxSpeciesID && pkm.ChecksumValid && ( (pkm.Species == 0 && pkm.EncryptionConstant == 0) || ( pkm.Species > 0 && pkm.Language != (int)LanguageID.Hacked && pkm.Language != (int)LanguageID.UNUSED_6));
                 if (valid)
                 {
                     return (LiveHeXValidation.None, "", version);
@@ -320,17 +281,10 @@ namespace AutoModPlugins
             return (LiveHeXValidation.GameVersion, msg, LiveHeXVersion.Unknown);
         }
 
-        private (LiveHeXValidation, string, LiveHeXVersion) Connect_Switch(
-            ICommunicatorNX nx,
-            LiveHeXVersion[] versions,
-            ref string gameVer,
-            ref string gameName
-        )
+        private (LiveHeXValidation, string, LiveHeXVersion) Connect_Switch(ICommunicatorNX nx, LiveHeXVersion[] versions, ref string gameVer, ref string gameName)
         {
             var botbaseVer = nx.GetBotbaseVersion();
-            var version = decimal.TryParse(botbaseVer, CultureInfo.InvariantCulture, out var v)
-                ? v
-                : 0;
+            var version = decimal.TryParse(botbaseVer, CultureInfo.InvariantCulture, out var v) ? v : 0;
             if (version < InjectionBase.BotbaseVersion && !_settings.EnableDevMode)
             {
                 var msg =
@@ -346,9 +300,7 @@ namespace AutoModPlugins
             gameVer = nx.GetGameInfo("version").Trim();
 
             var compatible = InjectionBase.SaveCompatibleWithTitle(SAV.SAV, titleID);
-            var lv = compatible
-                ? InjectionBase.GetVersionFromTitle(titleID, gameVer)
-                : LiveHeXVersion.Unknown;
+            var lv = compatible ? InjectionBase.GetVersionFromTitle(titleID, gameVer) : LiveHeXVersion.Unknown;
             if (!compatible && !_settings.EnableDevMode)
             {
                 var saveName = GameInfo.GetVersionName(SAV_Version);
@@ -375,10 +327,7 @@ namespace AutoModPlugins
                 return (LiveHeXValidation.GameVersion, msg, lv);
             }
 
-            var connect_ver =
-                lv is LiveHeXVersion.Unknown
-                    ? RamOffsets.GetValidVersions(SAV.SAV).Reverse().ToArray()[0]
-                    : lv;
+            var connect_ver = lv is LiveHeXVersion.Unknown ? RamOffsets.GetValidVersions(SAV.SAV).Reverse().ToArray()[0] : lv;
             Remote.Bot = new PokeSysBotMini(connect_ver, nx, _settings.UseCachedPointers);
             if (lv is LiveHeXVersion.Unknown && _settings.EnableDevMode)
             {

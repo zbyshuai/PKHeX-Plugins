@@ -17,6 +17,7 @@ namespace PKHeX.Core.Injection
             LiveHeXVersion.SV_v132,
             LiveHeXVersion.SV_v201,
             LiveHeXVersion.SV_v202,
+            LiveHeXVersion.SV_v300,
             LiveHeXVersion.LA_v100,
             LiveHeXVersion.LA_v101,
             LiveHeXVersion.LA_v102,
@@ -27,6 +28,44 @@ namespace PKHeX.Core.Injection
 
         private const int LA_MYSTATUS_BLOCK_SIZE = 0x80;
         private const int SV_MYSTATUS_BLOCK_SIZE = 0x68;
+        public static readonly BlockData[] Blocks_SV_v300 =
+        [
+            new()
+            {
+                Name = "MyStatus",
+                Display = "Trainer Data",
+                SCBKey = 0xE3E89BD1,
+                Pointer = "[[[main+47350d8]+1C0]+0]+40 "
+            },
+            new()
+            {
+                Name = "KItem",
+                Display = "Items",
+                SCBKey = 0x21C9BD44,
+                Pointer = "[[[main+47350d8]+1C0]+C8]+40"
+            },
+            new()
+            {
+                Name = "KTeraRaidPaldea",
+                Display = "Raid",
+                SCBKey = 0xCAAC8800,
+                Pointer = "[[[main+47350d8]+1C0]+88]+40"
+            },
+            new()
+            {
+                Name = "KTeraRaidKitakami",
+                Display = "RaidKitakami",
+                SCBKey = 0x100B93DA,
+                Pointer = "[[[main+47350d8]+1C0]+88]+CD8"
+            },
+            new()
+            {
+                Name = "KTeraRaidBlueberry",
+                Display = "RaidBlueberry",
+                Pointer = "[[[main+47350d8]+1C0]+88]+1958"
+            }
+
+        ];
 
         public static readonly BlockData[] Blocks_SV_v202 =
         [
@@ -469,6 +508,7 @@ namespace PKHeX.Core.Injection
         public static readonly Dictionary<LiveHeXVersion, BlockData[]> SCBlocks =
             new()
             {
+                { LiveHeXVersion.SV_v300, Blocks_SV_v300 },
                 { LiveHeXVersion.SV_v202, Blocks_SV_v202 },
                 { LiveHeXVersion.SV_v201, Blocks_SV_v201 },
                 { LiveHeXVersion.SV_v132, Blocks_SV_v132 },
@@ -490,13 +530,15 @@ namespace PKHeX.Core.Injection
                 { "Pokedex", "B_OpenPokedex_Click" },
                 { "Raid", "B_OpenRaids_Click" },
                 { "RaidKitakami", "B_OpenRaids_Click" },
+                {"RaidBlueberry", "B_OpenRaids_Click" }
                 //{ "Trainer Data", "B_OpenTrainerInfo_Click" },
             };
 
         private static string GetB1S1Pointer(LiveHeXVersion lv)
         {
             return lv switch
-            {
+            { 
+                LiveHeXVersion.SV_v300 => "[[[[main+47350d8]+1C0]+30]+9D0]",
                 LiveHeXVersion.SV_v202 => "[[[[main+4623A30]+198]+30]+9D0]",
                 LiveHeXVersion.SV_v201 => "[[[[main+4622A30]+198]+30]+9D0]",
                 LiveHeXVersion.SV_v132 => "[[[main+44C1C18]+130]+9B0]",
@@ -516,6 +558,7 @@ namespace PKHeX.Core.Injection
         {
             return lv switch
             {
+                LiveHeXVersion.SV_v300 => "[[[[[main+47350d8]+D8]]]+30]",
                 LiveHeXVersion.SV_v202 => "[[[[[main+4617648]+D8]]]+30]",
                 LiveHeXVersion.SV_v201 => "[[[[[main+4616648]+D8]]]+30]",
                 LiveHeXVersion.SV_v132 => "[[[[[main+44B71A8]+D8]]]+30]",
