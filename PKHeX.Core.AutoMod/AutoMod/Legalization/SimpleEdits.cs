@@ -385,7 +385,7 @@ namespace PKHeX.Core.AutoMod
                 return;
             }
 
-            if (enc is EncounterTrade8b)
+            if (enc is EncounterTrade8b or EncounterTrade9)
             {
                 return;
             }
