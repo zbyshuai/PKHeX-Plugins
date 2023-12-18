@@ -552,9 +552,7 @@ namespace PKHeX.Core.AutoMod
             {
                 d.DynamaxLevel = d.GetSuggestedDynamaxLevel(pk, requested: set.DynamaxLevel);
             }
-            if (
-                pk is ITeraType t && set.TeraType != MoveType.Any && t.GetTeraType() != set.TeraType
-            )
+            if (pk is ITeraType t && set.TeraType != MoveType.Any && t.GetTeraType() != set.TeraType)
             {
                 t.SetTeraType(set.TeraType);
             }

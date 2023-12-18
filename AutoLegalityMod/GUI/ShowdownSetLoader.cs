@@ -274,8 +274,7 @@ namespace AutoModPlugins
 
             if (APILegality.EnableDevMode && settings.LatestAllowedVersion == "0.0.0.0")
             {
-                settings.LatestAllowedVersion =
-                    ALMVersion.Versions.CoreVersionLatest?.ToString() ?? "0.0.0.0";
+                settings.LatestAllowedVersion = ALMVersion.Versions.CoreVersionLatest?.ToString() ?? "0.0.0.0";
                 APILegality.LatestAllowedVersion = settings.LatestAllowedVersion;
             }
             else
