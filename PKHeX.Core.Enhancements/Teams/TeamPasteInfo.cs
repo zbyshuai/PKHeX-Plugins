@@ -12,8 +12,7 @@ namespace PKHeX.Core.Enhancements
         public readonly string URL;
         public readonly string Sets = string.Empty;
 
-        public string Summary =>
-            $"{Source} data:\nTitle: {Title}\nAuthor: {Author}\nDescription: {Description}";
+        public string Summary => $"{Source} data:\nTitle: {Title}\nAuthor: {Author}\nDescription: {Description}";
 
         public string Author { get; private set; } = "Showdown Paste";
         public string Title { get; private set; } = "Pokémon Trainer";
@@ -29,10 +28,7 @@ namespace PKHeX.Core.Enhancements
         private void GetFromPokePaste(string url)
         {
             var htmldoc = NetUtil.GetPageText(url);
-            var pastedata = htmldoc.Split(new[] { "<aside>" }, StringSplitOptions.None)[1].Split(
-                new[] { "</aside>" },
-                StringSplitOptions.None
-            )[0];
+            var pastedata = htmldoc.Split(new[] { "<aside>" }, StringSplitOptions.None)[1].Split(new[] { "</aside>" }, StringSplitOptions.None)[0];
 
             var title = pastedata.Split(new[] { "<h1>" }, StringSplitOptions.None);
             if (title.Length > 1)
@@ -60,9 +56,7 @@ namespace PKHeX.Core.Enhancements
             var title = page.Split(new[] { "<h1>" }, StringSplitOptions.None)[1];
             Title = GetVal(title);
 
-            var auth = page.Split(new[] { "<div class=\"username\">" }, StringSplitOptions.None)[
-                1
-            ].Split('>');
+            var auth = page.Split(new[] { "<div class=\"username\">" }, StringSplitOptions.None)[1].Split('>');
             Author = GetVal(auth[0]);
 
             var datestr = auth[3];
@@ -85,10 +79,7 @@ namespace PKHeX.Core.Enhancements
             return Source switch
             {
                 PasteSource.PokePaste => url.EndsWith("/raw") ? url : url + "/raw",
-                PasteSource.Pastebin
-                    => url.Contains("/raw/")
-                        ? url
-                        : url.Replace("pastebin.com/", "pastebin.com/raw/"),
+                PasteSource.Pastebin => url.Contains("/raw/") ? url : url.Replace("pastebin.com/", "pastebin.com/raw/"),
                 _ => url, // This should never happen
             };
         }

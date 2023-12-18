@@ -15,12 +15,7 @@ namespace AutoModPlugins
         {
             SystemSounds.Asterisk.Play();
             string msg = string.Join(Environment.NewLine + Environment.NewLine, lines);
-            return MessageBox.Show(
-                msg,
-                nameof(Alert),
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Information
-            );
+            return MessageBox.Show(msg, nameof(Alert), MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
         public static DialogResult Prompt(MessageBoxButtons btn, params string[] lines)
@@ -68,10 +63,7 @@ namespace AutoModPlugins
         /// <returns>Result of whether or not a file is to be loaded from the output path.</returns>
         public static bool OpenSAVPKMDialog(IEnumerable<string> Extensions, out string? path)
         {
-            string supported = string.Join(
-                ";",
-                Extensions.Select(s => $"*.{s}").Concat(new[] { "*.pkm" })
-            );
+            string supported = string.Join(";", Extensions.Select(s => $"*.{s}").Concat(new[] { "*.pkm" }));
             using var ofd = new OpenFileDialog
             {
                 Filter =

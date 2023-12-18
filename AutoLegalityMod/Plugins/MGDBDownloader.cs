@@ -26,11 +26,7 @@ namespace AutoModPlugins
         {
             if (Directory.Exists(MGDatabasePath))
             {
-                var result = WinFormsUtil.Prompt(
-                    MessageBoxButtons.YesNo,
-                    "MGDB already exists!",
-                    "Update MGDB?"
-                );
+                var result = WinFormsUtil.Prompt(MessageBoxButtons.YesNo, "MGDB already exists!", "Update MGDB?");
                 if (result != DialogResult.Yes)
                 {
                     return;
@@ -43,12 +39,7 @@ namespace AutoModPlugins
                 return;
             }
 
-            var prompt = WinFormsUtil.Prompt(
-                MessageBoxButtons.YesNoCancel,
-                "Download entire database?",
-                "Download the entire database, which includes past generation events?",
-                "Selecting No will download only the public release of the database."
-            );
+            var prompt = WinFormsUtil.Prompt(MessageBoxButtons.YesNoCancel, "Download entire database?", "Download the entire database, which includes past generation events?", "Selecting No will download only the public release of the database.");
 
             if (prompt == DialogResult.Cancel)
             {

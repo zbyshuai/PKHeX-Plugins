@@ -85,11 +85,7 @@ namespace PKHeX.Core.AutoMod
                 template.EXP = 0; // no relearn moves in gen 1/2 so pass level 1 to generator
             }
 
-            var encounters = GetAllEncounters(
-                pk: template,
-                moves: new ReadOnlyMemory<ushort>(set.Moves),
-                gamelist
-            );
+            var encounters = GetAllEncounters(pk: template, moves: new ReadOnlyMemory<ushort>(set.Moves), gamelist);
             var criteria = EncounterCriteria.GetCriteria(set, template.PersonalInfo);
             criteria.ForceMinLevelRange = true;
             if (regen.EncounterFilters.Any())
@@ -183,7 +179,6 @@ namespace PKHeX.Core.AutoMod
                     if (!Gigantamax.CanToggle(pk.Species, pk.Form, enc.Species, enc.Form))
                         continue;
 
-
                     gmax.CanGigantamax = set.CanGigantamax; // soup hax
                 }
                 // Try applying batch editor values.
@@ -220,17 +215,9 @@ namespace PKHeX.Core.AutoMod
             }
             satisfied = LegalizationResult.Failed;
             return last ?? template;
-
         }
 
-
-
-
-        private static PKM GetPokemonFromEncounter(
-            this IEncounterable enc,
-            ITrainerInfo tr,
-            EncounterCriteria criteria,
-            IBattleTemplate set)
+        private static PKM GetPokemonFromEncounter(this IEncounterable enc, ITrainerInfo tr, EncounterCriteria criteria, IBattleTemplate set)
         {
             var basepkm = enc.ConvertToPKM(tr, criteria);
 
@@ -247,10 +234,7 @@ namespace PKHeX.Core.AutoMod
             return basepkm;
         }
 
-        private static IEnumerable<IEncounterable> GetAllEncounters(
-            PKM pk,
-            ReadOnlyMemory<ushort> moves,
-            IReadOnlyList<GameVersion> vers)
+        private static IEnumerable<IEncounterable> GetAllEncounters(PKM pk, ReadOnlyMemory<ushort> moves, IReadOnlyList<GameVersion> vers)
         {
             var orig_encs = EncounterMovesetGenerator.GenerateEncounters(pk, moves, vers);
             foreach (var enc in orig_encs)
@@ -338,12 +322,7 @@ namespace PKHeX.Core.AutoMod
         /// <param name="set">Set information to be used to filter the game list</param>
         /// <param nativeOnly="set">Whether to only return encounters from the current version</param>
         /// <returns>List of filtered games to check encounters for</returns>
-        internal static GameVersion[] FilteredGameList(
-            PKM template,
-            GameVersion destVer,
-            bool batchEdit,
-            IBattleTemplate set,
-            bool nativeOnly = false)
+        internal static GameVersion[] FilteredGameList(PKM template, GameVersion destVer, bool batchEdit, IBattleTemplate set, bool nativeOnly = false)
         {
             if (batchEdit && set is RegenTemplate { Regen.VersionFilters: { Count: not 0 } x } && TryGetSingleVersion(x, out var single))
             {
@@ -351,8 +330,7 @@ namespace PKHeX.Core.AutoMod
             }
 
             var versionlist = GameUtil.GetVersionsWithinRange(template, template.Format);
-            var gamelist =
-                (!nativeOnly && AllowHOMETransferGeneration) ? [.. versionlist.OrderByDescending(c => c.GetGeneration())] : GetPairedVersions(destVer, versionlist);
+            var gamelist = (!nativeOnly && AllowHOMETransferGeneration) ? [.. versionlist.OrderByDescending(c => c.GetGeneration())] : GetPairedVersions(destVer, versionlist);
             if (PrioritizeGame && !nativeOnly)
             {
                 gamelist = PrioritizeGameVersion == GameVersion.Any ? PrioritizeVersion(gamelist, destVer.GetIsland()) : PrioritizeVersion(gamelist, PrioritizeGameVersion);
@@ -366,9 +344,7 @@ namespace PKHeX.Core.AutoMod
             return gamelist;
         }
 
-        private static bool TryGetSingleVersion(
-            IReadOnlyList<StringInstruction> filters,
-            [NotNullWhen(true)] out GameVersion[]? gamelist)
+        private static bool TryGetSingleVersion(IReadOnlyList<StringInstruction> filters, [NotNullWhen(true)] out GameVersion[]? gamelist)
         {
             gamelist = null;
             foreach (var filter in filters)
@@ -405,16 +381,11 @@ namespace PKHeX.Core.AutoMod
                 gamelist = filter.Comparer switch
                 {
                     InstructionComparer.IsEqual => result,
-                    InstructionComparer.IsNotEqual
-                        => GameUtil.GameVersions.Where(z => !result.Contains(z)).ToArray(),
-                    InstructionComparer.IsGreaterThan
-                        => GameUtil.GameVersions.Where(z => result.Any(g => z > g)).ToArray(),
-                    InstructionComparer.IsGreaterThanOrEqual
-                        => GameUtil.GameVersions.Where(z => result.Any(g => z >= g)).ToArray(),
-                    InstructionComparer.IsLessThan
-                        => GameUtil.GameVersions.Where(z => result.Any(g => z < g)).ToArray(),
-                    InstructionComparer.IsLessThanOrEqual
-                        => GameUtil.GameVersions.Where(z => result.Any(g => z <= g)).ToArray(),
+                    InstructionComparer.IsNotEqual  => GameUtil.GameVersions.Where(z => !result.Contains(z)).ToArray(),
+                    InstructionComparer.IsGreaterThan => GameUtil.GameVersions.Where(z => result.Any(g => z > g)).ToArray(),
+                    InstructionComparer.IsGreaterThanOrEqual => GameUtil.GameVersions.Where(z => result.Any(g => z >= g)).ToArray(),
+                    InstructionComparer.IsLessThan => GameUtil.GameVersions.Where(z => result.Any(g => z < g)).ToArray(),
+                    InstructionComparer.IsLessThanOrEqual  => GameUtil.GameVersions.Where(z => result.Any(g => z <= g)).ToArray(),
                     _ => result,
                 };
                 return gamelist.Length != 0;
@@ -427,10 +398,7 @@ namespace PKHeX.Core.AutoMod
         /// </summary>
         /// <param name="regen">Regenset</param>
         /// <returns>ITrainerInfo of the trainerdetails</returns>
-        private static ITrainerInfo GetTrainer(
-            RegenSet regen,
-            IEncounterable enc,
-            IBattleTemplate set)
+        private static ITrainerInfo GetTrainer(RegenSet regen, IEncounterable enc, IBattleTemplate set)
         {
             var ver = enc.Version;
             var gen = enc.Generation;
@@ -462,9 +430,7 @@ namespace PKHeX.Core.AutoMod
                 return regen.Trainer.MutateLanguage(mutate, ver);
             }
 
-            return UseTrainerData
-                ? TrainerSettings.GetSavedTrainerData(ver, gen).MutateLanguage(mutate, ver)
-                : TrainerSettings.DefaultFallback(ver, regen.Extra.Language);
+            return UseTrainerData ? TrainerSettings.GetSavedTrainerData(ver, gen).MutateLanguage(mutate, ver) : TrainerSettings.DefaultFallback(ver, regen.Extra.Language);
         }
 
         /// <summary>
@@ -500,11 +466,7 @@ namespace PKHeX.Core.AutoMod
         /// <param name="abilityreq">is HA requested</param>
         /// <param name="destVer">version to generate in</param>
         /// <returns>if the encounter is valid or not</returns>
-        public static bool IsEncounterValid(
-            IBattleTemplate set,
-            IEncounterable enc,
-            AbilityRequest abilityreq,
-            GameVersion destVer)
+        private static bool IsEncounterValid(IBattleTemplate set, IEncounterable enc, AbilityRequest abilityreq, GameVersion destVer)
         {
             // Don't process if encounter min level is higher than requested level
             if (!IsRequestedLevelValid(set, enc))
@@ -548,8 +510,7 @@ namespace PKHeX.Core.AutoMod
                 switch (enc.Generation)
                 {
                     case 6 when set.Form != (enc is EncounterStatic6 ? enc.Form : 0):
-                    case >= 7
-                        when set.Form != (enc is EncounterInvalid or EncounterEgg ? 0 : enc.Form):
+                    case >= 7 when set.Form != (enc is EncounterInvalid or EncounterEgg ? 0 : enc.Form):
                         return false;
                 }
             }
@@ -570,10 +531,7 @@ namespace PKHeX.Core.AutoMod
 
             if (enc.LevelMin > set.Level)
             {
-                var isRaid = enc is EncounterStatic8N
-                            or EncounterStatic8NC
-                            or EncounterStatic8ND
-                            or EncounterStatic8U;
+                var isRaid = enc is EncounterStatic8N or EncounterStatic8NC or EncounterStatic8ND or EncounterStatic8U;
                 if (enc is EncounterSlot6AO s)
                 {
                     if (s.LevelMin - 4 > set.Level)
@@ -716,12 +674,7 @@ namespace PKHeX.Core.AutoMod
         /// <param name="handler">Trainer to handle the Pokémon</param>
         /// <param name="enc">Encounter details matched to the Pokémon</param>
         /// <param name="regen">Regeneration information</param>
-        private static void ApplySetDetails(
-            PKM pk,
-            IBattleTemplate set,
-            ITrainerInfo handler,
-            IEncounterable enc,
-            RegenSet regen)
+        private static void ApplySetDetails(PKM pk, IBattleTemplate set, ITrainerInfo handler, IEncounterable enc, RegenSet regen)
         {
             byte Form = set.Form;
             var language = regen.Extra.Language;
@@ -854,10 +807,7 @@ namespace PKHeX.Core.AutoMod
         /// </summary>
         /// <param name="pk">passed pkm object</param>
         /// <param name="set">showdown set to base hypertraining on</param>
-        private static void SetHyperTrainingFlags(
-            this PKM pk,
-            IBattleTemplate set,
-            IEncounterable enc)
+        private static void SetHyperTrainingFlags(this PKM pk, IBattleTemplate set, IEncounterable enc)
         {
             if (pk is not IHyperTrain t || pk.Species == (ushort)Species.Stakataka)
             {
@@ -878,14 +828,10 @@ namespace PKHeX.Core.AutoMod
                 case (int)Species.Kartana when pk.StatNature == (int)Nature.Timid && set.IVs[1] <= 21: // Speed boosting Timid Kartana ATK IVs <= 19
                     t.HT_ATK = false;
                     break;
-                case (int)Species.Stakataka
-                    when pk.StatNature == (int)Nature.Lonely && set.IVs[2] <= 17: // Atk boosting Lonely Stakataka DEF IVs <= 15
+                case (int)Species.Stakataka when pk.StatNature == (int)Nature.Lonely && set.IVs[2] <= 17: // Atk boosting Lonely Stakataka DEF IVs <= 15
                     t.HT_DEF = false;
                     break;
-                case (int)Species.Pyukumuku
-                    when set.IVs[2] == 0
-                        && set.IVs[5] == 0
-                        && pk.Ability == (int)Ability.InnardsOut: // 0 Def / 0 Spd Pyukumuku with innards out
+                case (int)Species.Pyukumuku when set.IVs[2] == 0 && set.IVs[5] == 0 && pk.Ability == (int)Ability.InnardsOut: // 0 Def / 0 Spd Pyukumuku with innards out
                     t.HT_DEF = false;
                     t.HT_SPD = false;
                     break;
@@ -966,10 +912,7 @@ namespace PKHeX.Core.AutoMod
         /// <param name="pk">pkm distributed as an egg</param>
         /// <param name="enc">encounter detail</param>
         /// <param name="tr">save file</param>
-        private static void HandleEggEncounters(
-            this PKM pk,
-            IEncounterable enc,
-            ITrainerInfo tr)
+        private static void HandleEggEncounters(this PKM pk, IEncounterable enc, ITrainerInfo tr)
         {
             if (!pk.IsEgg)
             {
@@ -998,12 +941,7 @@ namespace PKHeX.Core.AutoMod
         /// <param name="method"></param>
         /// <param name="hpType"></param>
         /// <param name="enc"></param>
-        private static void SetPINGA(
-            this PKM pk,
-            IBattleTemplate set,
-            PIDType method,
-            int hpType,
-            IEncounterable enc)
+        private static void SetPINGA(this PKM pk, IBattleTemplate set, PIDType method, int hpType, IEncounterable enc)
         {
             var ivprop = enc.GetType().GetProperty("IVs");
             if (enc is not EncounterStatic4Pokewalker && enc.Generation > 2)
@@ -1117,11 +1055,7 @@ namespace PKHeX.Core.AutoMod
         /// <param name="pk">Pokémon to be edited</param>
         /// <param name="enc">Raid encounter encounterable</param>
         /// <param name="set">Set to pass in requested IVs</param>
-        private static void PreSetPIDIV(
-            this PKM pk,
-            IEncounterable enc,
-            IBattleTemplate set,
-            EncounterCriteria criteria)
+        private static void PreSetPIDIV(this PKM pk, IEncounterable enc, IBattleTemplate set, EncounterCriteria criteria)
         {
             var ivsetfor = string.Empty;
             if (enc is ITeraRaid9)
@@ -1246,12 +1180,7 @@ namespace PKHeX.Core.AutoMod
             }
         }
 
-        private static void FindTeraPIDIV<T>(
-            PK9 pk,
-            T enc,
-            IBattleTemplate set,
-            EncounterCriteria criteria)
-            where T : ITeraRaid9, IEncounterTemplate
+        private static void FindTeraPIDIV<T>(PK9 pk, T enc, IBattleTemplate set, EncounterCriteria criteria) where T : ITeraRaid9, IEncounterTemplate
         {
             if (IsMatchCriteria9(pk, set, criteria))
             {
@@ -1269,48 +1198,9 @@ namespace PKHeX.Core.AutoMod
                 var pi = PersonalTable.SV.GetFormEntry(enc.Species, enc.Form);
                 var param = enc switch
                 {
-                    EncounterDist9 e
-                        => new GenerateParam9(
-                            pk.Species,
-                            pi.Gender,
-                            e.FlawlessIVCount,
-                            rollCount,
-                            undefinedSize,
-                            undefinedSize,
-                            e.ScaleType,
-                            e.Scale,
-                            e.Ability,
-                            e.Shiny,
-                            IVs: e.IVs
-                        ),
-                    EncounterMight9 e
-                        => new GenerateParam9(
-                            pk.Species,
-                            pi.Gender,
-                            e.FlawlessIVCount,
-                            rollCount,
-                            undefinedSize,
-                            undefinedSize,
-                            e.ScaleType,
-                            e.Scale,
-                            e.Ability,
-                            e.Shiny,
-                            e.Nature,
-                            e.IVs
-                        ),
-                    EncounterTera9 e
-                        => new GenerateParam9(
-                            pk.Species,
-                            pi.Gender,
-                            e.FlawlessIVCount,
-                            rollCount,
-                            undefinedSize,
-                            undefinedSize,
-                            undefinedSize,
-                            undefinedSize,
-                            e.Ability,
-                            e.Shiny
-                        ),
+                    EncounterDist9 e => new GenerateParam9(pk.Species, pi.Gender, e.FlawlessIVCount, rollCount, undefinedSize, undefinedSize, e.ScaleType, e.Scale, e.Ability, e.Shiny, IVs: e.IVs),
+                    EncounterMight9 e => new GenerateParam9(pk.Species, pi.Gender, e.FlawlessIVCount, rollCount, undefinedSize, undefinedSize, e.ScaleType, e.Scale, e.Ability, e.Shiny, e.Nature, e.IVs),
+                    EncounterTera9 e => new GenerateParam9(pk.Species, pi.Gender, e.FlawlessIVCount, rollCount, undefinedSize, undefinedSize, undefinedSize, undefinedSize, e.Ability, e.Shiny),
                     _ => throw new NotImplementedException("Unknown ITeraRaid9 type detected"),
                 };
                 var valid = enc.TryApply32(pk, seed, param, criteria);
@@ -1333,11 +1223,7 @@ namespace PKHeX.Core.AutoMod
         /// <param name="shiny">Shiny type requested</param>
         /// <param name="flawless">number of flawless ivs</param>
         /// <param name="fixedseed">Optional fixed RNG seed</param>
-        public static void FindWildPIDIV8(
-            PK8 pk,
-            Shiny shiny,
-            int flawless = 0,
-            uint? fixedseed = null)
+        public static void FindWildPIDIV8(PK8 pk, Shiny shiny, int flawless = 0, uint? fixedseed = null)
         {
             // Modified version of the standard XOROSHIRO algorithm (32 bit seed 0, same const seed 1)
             // EC -> PID -> Flawless IV rolls -> Non Flawless IVs -> height -> weight
@@ -1511,14 +1397,14 @@ namespace PKHeX.Core.AutoMod
                     ivs[stat] = required_ivs[stat];
                     inherited++;
                 }
-                Span<uint> ivs2 = stackalloc[] {
+                Span<uint> ivs2 = [
                     rng.NextUInt(32),
                     rng.NextUInt(32),
                     rng.NextUInt(32),
                     rng.NextUInt(32),
                     rng.NextUInt(32),
                     rng.NextUInt(32),
-                };
+                ];
                 for (int i = 0; i < 6; i++)
                 {
                     if (ivs[i] == -1)
@@ -1551,11 +1437,7 @@ namespace PKHeX.Core.AutoMod
             }
         }
 
-        private static bool IsMatchCriteria9(
-            PK9 pk,
-            IBattleTemplate template,
-            EncounterCriteria criteria,
-            bool compromise = false)
+        private static bool IsMatchCriteria9(PK9 pk, IBattleTemplate template, EncounterCriteria criteria, bool compromise = false)
         {
             // compromise on nature since they can be minted
             if (criteria.Nature != Nature.Random && criteria.Nature != (Nature)pk.Nature && !compromise) // match nature
@@ -1584,13 +1466,7 @@ namespace PKHeX.Core.AutoMod
         /// <param name="HPType">HPType INT for preserving Hidden powers</param>
         /// <param name="shiny">Only used for CHANNEL RNG type</param>
         /// <param name="enc"></param>
-        private static void FindPIDIV(
-            PKM pk,
-            PIDType Method,
-            int HPType,
-            bool shiny,
-            IEncounterable enc,
-            IBattleTemplate set)
+        private static void FindPIDIV(PKM pk, PIDType Method, int HPType, bool shiny, IEncounterable enc, IBattleTemplate set)
         {
             if (Method == PIDType.None)
             {
@@ -1630,8 +1506,7 @@ namespace PKHeX.Core.AutoMod
             }
 
             var count = 0;
-            var isWishmaker =
-                Method == PIDType.BACD_R && shiny && enc is WC3 { OT_Name: "WISHMKR" };
+            var isWishmaker = Method == PIDType.BACD_R && shiny && enc is WC3 { OT_Name: "WISHMKR" };
             var compromise = false;
             var gr = pk.PersonalInfo.Gender;
             do
@@ -1682,8 +1557,7 @@ namespace PKHeX.Core.AutoMod
                 {
                     pk.EncryptionConstant = pk.PID;
                     var ec = pk.PID;
-                    bool xorPID =
-                        ((pk.TID16 ^ pk.SID16 ^ (int)(ec & 0xFFFF) ^ (int)(ec >> 16)) & ~0x7) == 8;
+                    bool xorPID = ((pk.TID16 ^ pk.SID16 ^ (int)(ec & 0xFFFF) ^ (int)(ec >> 16)) & ~0x7) == 8;
                     if (enc is EncounterStatic3XD && enc.Species == (int)Species.Eevee && (shiny != pk.IsShiny || xorPID)) // Starter Correlation
                     {
                         continue;
@@ -1927,15 +1801,11 @@ namespace PKHeX.Core.AutoMod
         /// Handle search criteria for very specific encounters.
         /// </summary>
         ///
-        public static EncounterCriteria SetSpecialCriteria(
-            EncounterCriteria criteria,
-            IEncounterable enc,
-            IBattleTemplate set)
+        public static EncounterCriteria SetSpecialCriteria(EncounterCriteria criteria, IEncounterable enc, IBattleTemplate set)
         {
             switch (enc.Species)
             {
-                case (int)Species.Kartana
-                    when criteria is { Nature: Nature.Timid, IV_ATK: <= 21 }: // Speed boosting Timid Kartana ATK IVs <= 19
+                case (int)Species.Kartana when criteria is { Nature: Nature.Timid, IV_ATK: <= 21 }: // Speed boosting Timid Kartana ATK IVs <= 19
                     return criteria with
                     {
                         IV_HP = -1,
@@ -1946,8 +1816,7 @@ namespace PKHeX.Core.AutoMod
                         IV_SPE = -1,
                     };
 
-                case (int)Species.Stakataka
-                    when criteria is { Nature: Nature.Lonely, IV_DEF: <= 17 }: // Atk boosting Lonely Stakataka DEF IVs <= 15
+                case (int)Species.Stakataka when criteria is { Nature: Nature.Lonely, IV_DEF: <= 17 }: // Atk boosting Lonely Stakataka DEF IVs <= 15
                     return criteria with
                     {
                         IV_HP = -1,
@@ -1958,8 +1827,7 @@ namespace PKHeX.Core.AutoMod
                         IV_SPE = criteria.IV_SPE
                     };
 
-                case (int)Species.Pyukumuku
-                    when criteria is { IV_DEF: 0, IV_SPD: 0 } && set.Ability == (int)Ability.InnardsOut: // 0 Def / 0 Spd Pyukumuku with innards out
+                case (int)Species.Pyukumuku when criteria is { IV_DEF: 0, IV_SPD: 0 } && set.Ability == (int)Ability.InnardsOut: // 0 Def / 0 Spd Pyukumuku with innards out
                     return criteria with
                     {
                         IV_HP = -1,
@@ -2026,11 +1894,7 @@ namespace PKHeX.Core.AutoMod
         /// <summary>
         /// Wrapper function for GetLegalFromTemplate but with a Timeout
         /// </summary>
-        public static AsyncLegalizationResult GetLegalFromTemplateTimeout(
-            this ITrainerInfo dest,
-            PKM template,
-            IBattleTemplate set,
-            bool nativeOnly = false)
+        public static AsyncLegalizationResult GetLegalFromTemplateTimeout(this ITrainerInfo dest, PKM template, IBattleTemplate set, bool nativeOnly = false)
         {
             AsyncLegalizationResult GetLegal()
             {
@@ -2041,12 +1905,7 @@ namespace PKHeX.Core.AutoMod
                         return new(template, LegalizationResult.VersionMismatch);
                     }
 
-                    var res = dest.GetLegalFromTemplate(
-                        template,
-                        set,
-                        out var s,
-                        nativeOnly
-                    );
+                    var res = dest.GetLegalFromTemplate(template, set, out var s, nativeOnly);
                     return new AsyncLegalizationResult(res, s);
                 }
                 catch (MissingMethodException)
@@ -2063,17 +1922,13 @@ namespace PKHeX.Core.AutoMod
         /// <summary>
         /// Async Related actions for global timer.
         /// </summary>
-        public class AsyncLegalizationResult(
-            PKM pk,
-            LegalizationResult res)
+        public class AsyncLegalizationResult(PKM pk, LegalizationResult res)
         {
             public readonly PKM Created = pk;
             public readonly LegalizationResult Status = res;
         }
 
-        private static async Task<AsyncLegalizationResult?>? TimeoutAfter(
-            this Task<AsyncLegalizationResult> task,
-            TimeSpan timeout)
+        private static async Task<AsyncLegalizationResult?>? TimeoutAfter(this Task<AsyncLegalizationResult> task, TimeSpan timeout)
         {
             using var cts = new CancellationTokenSource(timeout);
             var delay = Task.Delay(timeout, cts.Token);
@@ -2086,9 +1941,7 @@ namespace PKHeX.Core.AutoMod
             return await task.ConfigureAwait(false); // will re-fire exception if present
         }
 
-        private static GameVersion[] GetPairedVersions(
-            GameVersion version,
-            IEnumerable<GameVersion> versionlist)
+        private static GameVersion[] GetPairedVersions(GameVersion version, IEnumerable<GameVersion> versionlist)
         {
             var group = version switch
             {
@@ -2101,4 +1954,3 @@ namespace PKHeX.Core.AutoMod
         }
     }
 }
-

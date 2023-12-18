@@ -79,19 +79,15 @@ namespace PKHeX.Core.Injection
 
         private void OnInfoReady(InfoReadyEventArgs e) => InfoReady.Invoke(this, e);
 
-        private static string ByteToHex(byte[] datBuf) =>
-            datBuf.Aggregate("", (current, b) => current + (b.ToString("X2") + " "));
+        private static string ByteToHex(byte[] datBuf) => datBuf.Aggregate("", (current, b) => current + (b.ToString("X2") + " "));
 
-        public void AddWaitingForData(uint newkey, DataReadyWaiting newvalue) =>
-            _waitingForData.Add(newkey, newvalue);
+        public void AddWaitingForData(uint newkey, DataReadyWaiting newvalue) => _waitingForData.Add(newkey, newvalue);
 
         public void ListProcess() => SendEmptyPacket(5);
 
-        public uint Data(uint addr, uint size = 0x100, int pid = -1) =>
-            SendReadMemPacket(addr, size, (uint)pid);
+        public uint Data(uint addr, uint size = 0x100, int pid = -1) => SendReadMemPacket(addr, size, (uint)pid);
 
-        public void Write(uint addr, ReadOnlySpan<byte> buf, int pid = -1) =>
-            SendWriteMemPacket(addr, (uint)pid, buf);
+        public void Write(uint addr, ReadOnlySpan<byte> buf, int pid = -1) => SendWriteMemPacket(addr, (uint)pid, buf);
 
         public void Connect(string host, int port)
         {
@@ -272,9 +268,7 @@ namespace PKHeX.Core.Injection
             }
             catch
             {
-                Console.WriteLine(
-                    "Could not connect, make sure the IP is correct, you're running NTR and you're online in-game!"
-                );
+                Console.WriteLine("Could not connect, make sure the IP is correct, you're running NTR and you're online in-game!");
             }
         }
 

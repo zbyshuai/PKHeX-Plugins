@@ -66,37 +66,31 @@ namespace AutoModPlugins
                         switch (error)
                         {
                             case "your pokemon is being held for manual review":
-                                msg =
-                                    $"Your pokemon was uploaded to GPSS, however it is being held for manual review. Once approved it will be available at https://{Url}/gpss/{decoded["code"]} (copied to clipboard)";
+                                msg = $"Your pokemon was uploaded to GPSS, however it is being held for manual review. Once approved it will be available at https://{Url}/gpss/{decoded["code"]} (copied to clipboard)";
                                 copyToClipboard = true;
                                 break;
                             case "Your Pokemon is already uploaded":
-                                msg =
-                                    $"Your pokemon was already uploaded to GPSS, and is available at https://{Url}/gpss/{decoded["code"]} (copied to clipboard)";
+                                msg = $"Your pokemon was already uploaded to GPSS, and is available at https://{Url}/gpss/{decoded["code"]} (copied to clipboard)";
                                 copyToClipboard = true;
                                 break;
                             default:
-                                msg =
-                                    $"Could not upload your Pokemon to GPSS, please try again later or ask Allen if something seems wrong.\n Error details: {decoded["code"]}";
+                                msg = $"Could not upload your Pokemon to GPSS, please try again later or ask Allen if something seems wrong.\n Error details: {decoded["code"]}";
                                 break;
                         }
                     }
                     else
                     {
-                        msg =
-                            $"Pokemon added to the GPSS database. Here is your URL (has been copied to the clipboard):\n https://{Url}/gpss/{decoded["code"]}";
+                        msg = $"Pokemon added to the GPSS database. Here is your URL (has been copied to the clipboard):\n https://{Url}/gpss/{decoded["code"]}";
                         copyToClipboard = true;
                     }
                 }
                 else if (response.StatusCode == System.Net.HttpStatusCode.ServiceUnavailable)
                 {
-                    msg =
-                        "Uploading to GPSS is currently disabled, please try again later, or check the FlagBrew discord for more information.";
+                    msg = "Uploading to GPSS is currently disabled, please try again later, or check the FlagBrew discord for more information.";
                 }
                 else
                 {
-                    msg =
-                        $"Uploading to GPSS returned an unexpected status code {response.StatusCode}\nError details (if any returned from server): {error}";
+                    msg = $"Uploading to GPSS returned an unexpected status code {response.StatusCode}\nError details (if any returned from server): {error}";
                 }
 
                 if (copyToClipboard)
@@ -107,9 +101,7 @@ namespace AutoModPlugins
             }
             catch (Exception ex)
             {
-                WinFormsUtil.Alert(
-                    $"Something went wrong uploading to GPSS.\nError details: {ex.Message}"
-                );
+                WinFormsUtil.Alert($"Something went wrong uploading to GPSS.\nError details: {ex.Message}");
             }
         }
 
@@ -139,9 +131,7 @@ namespace AutoModPlugins
                 var pkm = EntityFormat.GetFromBytes(pkbytes, EntityContext.None);
                 if (pkm == null || !LoadPKM(pkm))
                 {
-                    WinFormsUtil.Error(
-                        "Error parsing PKM bytes. Make sure the pokemon is valid and can exist in this generation."
-                    );
+                    WinFormsUtil.Error("Error parsing PKM bytes. Make sure the pokemon is valid and can exist in this generation.");
                     return;
                 }
                 WinFormsUtil.Alert("GPSS Pokemon loaded to PKM Editor");

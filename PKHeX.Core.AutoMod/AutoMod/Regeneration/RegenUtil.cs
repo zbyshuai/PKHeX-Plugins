@@ -6,11 +6,7 @@ namespace PKHeX.Core.AutoMod
 {
     public static class RegenUtil
     {
-        public static bool GetTrainerInfo(
-            IEnumerable<string> lines,
-            int format,
-            out ITrainerInfo tr
-        )
+        public static bool GetTrainerInfo(IEnumerable<string> lines, int format, out ITrainerInfo tr)
         {
             var sti = new SimpleTrainerInfo { Generation = format };
 
@@ -142,10 +138,7 @@ namespace PKHeX.Core.AutoMod
             return string.Join(Environment.NewLine, result);
         }
 
-        public static string GetSummary(
-            IEnumerable<StringInstruction> filters,
-            char prefix = EncounterFilterPrefix
-        )
+        public static string GetSummary(IEnumerable<StringInstruction> filters, char prefix = EncounterFilterPrefix)
         {
             var result = new List<string>();
             foreach (var s in filters)
@@ -162,11 +155,7 @@ namespace PKHeX.Core.AutoMod
         /// <param name="tr">Trainerdata to clone</param>
         /// <param name="lang">language to mutate</param>
         /// <param name="ver"></param>
-        public static ITrainerInfo MutateLanguage(
-            this ITrainerInfo tr,
-            LanguageID? lang,
-            GameVersion ver
-        )
+        public static ITrainerInfo MutateLanguage(this ITrainerInfo tr, LanguageID? lang, GameVersion ver)
         {
             if (lang is LanguageID.UNUSED_6 or LanguageID.Hacked or null)
             {
@@ -182,10 +171,7 @@ namespace PKHeX.Core.AutoMod
             }
             if (tr is SimpleTrainerInfo s)
             {
-                var version = Array.Find(
-                    GameUtil.GameVersions,
-                    z => ver.Contains(z) && z != GameVersion.BU
-                );
+                var version = Array.Find(GameUtil.GameVersions,z => ver.Contains(z) && z != GameVersion.BU);
                 return new SimpleTrainerInfo(version)
                 {
                     OT = MutateOT(s.OT, lang, version),
@@ -217,12 +203,7 @@ namespace PKHeX.Core.AutoMod
                 return OT;
             }
 
-            var full =
-                lang
-                    is LanguageID.Japanese
-                        or LanguageID.Korean
-                        or LanguageID.ChineseS
-                        or LanguageID.ChineseT;
+            var full = lang is LanguageID.Japanese or LanguageID.Korean or LanguageID.ChineseS or LanguageID.ChineseT;
             if (full && GlyphLegality.ContainsHalfWidth(OT))
             {
                 return GlyphLegality.StringConvert(OT, StringConversionType.FullWidth);
@@ -239,18 +220,11 @@ namespace PKHeX.Core.AutoMod
                 return nick;
             }
 
-            var full =
-                lang
-                    is LanguageID.Japanese
-                        or LanguageID.Korean
-                        or LanguageID.ChineseS
-                        or LanguageID.ChineseT;
+            var full = lang is LanguageID.Japanese or LanguageID.Korean or LanguageID.ChineseS or LanguageID.ChineseT;
             return full switch
             {
-                true when GlyphLegality.ContainsHalfWidth(nick)
-                    => GlyphLegality.StringConvert(nick, StringConversionType.FullWidth),
-                false when GlyphLegality.ContainsFullWidth(nick)
-                    => GlyphLegality.StringConvert(nick, StringConversionType.HalfWidth),
+                true when GlyphLegality.ContainsHalfWidth(nick) => GlyphLegality.StringConvert(nick, StringConversionType.FullWidth),
+                false when GlyphLegality.ContainsFullWidth(nick) => GlyphLegality.StringConvert(nick, StringConversionType.HalfWidth),
                 _ => nick,
             };
         }
@@ -259,9 +233,7 @@ namespace PKHeX.Core.AutoMod
         {
             var pi = GameData.GetPersonal(GetGameVersionFromGen(gen))[species];
             var abils_ct = pi.AbilityCount;
-            return pi is not IPersonalAbility12 a
-                ? -1
-                : ar switch
+            return pi is not IPersonalAbility12 a ? -1 : ar switch
                 {
                     AbilityRequest.Any => -1,
                     AbilityRequest.First => a.Ability1,

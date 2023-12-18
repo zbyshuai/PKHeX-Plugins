@@ -22,18 +22,9 @@ namespace PKHeX.Core.AutoMod
         /// Checks for plugin mismatch. If "EnableDevMode" is enabled it will allow a user to skip update warnings until the next release. Will otherwise check plugin mismatch for current versions.
         /// </summary>
         /// <returns>True if a plugin mismatch is found. False if any of the versions are null or no mismatch found.</returns>
-        public static bool GetIsMismatch() =>
-            GetIsMismatch(
-                currentCore: Versions.CoreVersionCurrent,
-                currentALM: Versions.AlmVersionCurrent,
-                latestCore: Versions.CoreVersionLatest
-            );
+        public static bool GetIsMismatch() => GetIsMismatch(currentCore: Versions.CoreVersionCurrent, currentALM: Versions.AlmVersionCurrent, latestCore: Versions.CoreVersionLatest);
 
-        public static bool GetIsMismatch(
-            Version? currentCore,
-            Version? currentALM,
-            Version? latestCore
-        )
+        public static bool GetIsMismatch(Version? currentCore, Version? currentALM, Version? latestCore)
         {
             if (currentCore is null || currentALM is null || latestCore is null)
             {
@@ -41,7 +32,7 @@ namespace PKHeX.Core.AutoMod
             }
 
             var latestAllowed = new Version(APILegality.LatestAllowedVersion);
-            return APILegality.EnableDevMode && (latestCore > latestAllowed) && (latestCore > currentCore)  || !APILegality.EnableDevMode && (currentCore > currentALM);
+            return (APILegality.EnableDevMode && (latestCore > latestAllowed) && (latestCore > currentCore)) || (!APILegality.EnableDevMode && (currentCore > currentALM));
         }
 
         /// <summary>

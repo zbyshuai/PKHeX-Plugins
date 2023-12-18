@@ -18,9 +18,7 @@ namespace AutoModPlugins
                 var sav = SaveFileEditor.SAV;
                 if (!RamOffsets.IsLiveHeXSupported(sav))
                 {
-                    WinFormsUtil.Error(
-                        "Must have a 3DS or Switch main line game save file currently loaded."
-                    );
+                    WinFormsUtil.Error("Must have a 3DS or Switch main line game save file currently loaded.");
                     return;
                 }
 

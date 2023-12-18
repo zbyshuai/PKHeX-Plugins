@@ -135,8 +135,7 @@ namespace PKHeX.Core.AutoMod
                 (IronLeaves, 0),
             ];
 
-        public static readonly HashSet<int> Gen1TradeEvos =
-            [(int)Kadabra, (int)Machoke, (int)Graveler, (int)Haunter];
+        public static readonly HashSet<int> Gen1TradeEvos = [(int)Kadabra, (int)Machoke, (int)Graveler, (int)Haunter];
 
         private static Func<int, int, int> FlagIVsAutoMod(PKM pk)
         {
@@ -161,9 +160,7 @@ namespace PKHeX.Core.AutoMod
         /// </summary>
         /// <param name="pk">PKM to modify</param>
         /// <param name="enc">Encounter details</param>
-        public static void SetEncryptionConstant(
-            this PKM pk,
-            IEncounterable enc)
+        public static void SetEncryptionConstant(this PKM pk, IEncounterable enc)
         {
             if (pk.Format < 6)
             {
@@ -180,8 +177,7 @@ namespace PKHeX.Core.AutoMod
             {
                 var ec = pk.PID;
                 pk.EncryptionConstant = ec;
-                var pidxor =
-                    ((pk.TID16 ^ pk.SID16 ^ (int)(ec & 0xFFFF) ^ (int)(ec >> 16)) & ~0x7) == 8;
+                var pidxor = ((pk.TID16 ^ pk.SID16 ^ (int)(ec & 0xFFFF) ^ (int)(ec >> 16)) & ~0x7) == 8;
                 pk.PID = pidxor ? ec ^ 0x80000000 : ec;
                 return;
             }
@@ -213,11 +209,7 @@ namespace PKHeX.Core.AutoMod
         /// <param name="isShiny">Shiny value that needs to be set</param>
         /// <param name="enc">Encounter details</param>
         /// <param name="shiny">Set is shiny</param>
-        public static void SetShinyBoolean(
-            this PKM pk,
-            bool isShiny,
-            IEncounterable enc,
-            Shiny shiny)
+        public static void SetShinyBoolean(this PKM pk, bool isShiny, IEncounterable enc, Shiny shiny)
         {
             if (pk.IsShiny == isShiny)
             {
@@ -230,10 +222,7 @@ namespace PKHeX.Core.AutoMod
                 return;
             }
 
-            if (enc is EncounterStatic8N
-                    or EncounterStatic8NC
-                    or EncounterStatic8ND
-                    or EncounterStatic8U)
+            if (enc is EncounterStatic8N or EncounterStatic8NC or EncounterStatic8ND or EncounterStatic8U)
             {
                 pk.SetRaidShiny(shiny, enc);
                 return;
@@ -304,14 +293,7 @@ namespace PKHeX.Core.AutoMod
 
             while (true)
             {
-                pk.PID = EntityPID.GetRandomPID(
-                    Util.Rand,
-                    pk.Species,
-                    pk.Gender,
-                    pk.Version,
-                    pk.Nature,
-                    pk.Form,
-                    pk.PID);
+                pk.PID = EntityPID.GetRandomPID(Util.Rand, pk.Species, pk.Gender, pk.Version, pk.Nature, pk.Form, pk.PID);
                 if (shiny == Shiny.AlwaysSquare && pk.ShinyXor != 0)
                 {
                     continue;
@@ -403,7 +385,7 @@ namespace PKHeX.Core.AutoMod
                 return;
             }
 
-            if (enc is EncounterTrade8b)
+            if (enc is EncounterTrade8b or EncounterTrade9)
             {
                 return;
             }
@@ -448,9 +430,7 @@ namespace PKHeX.Core.AutoMod
                     var top = (int)(pk.PID >> 16);
                     var bottom = (int)(pk.PID & 0xFFFF);
                     height = (top % 0x80) + (bottom % 0x81);
-                    weight =
-                        ((int)(pk.EncryptionConstant >> 16) % 0x80)
-                        + ((int)(pk.EncryptionConstant & 0xFFFF) % 0x81);
+                    weight = ((int)(pk.EncryptionConstant >> 16) % 0x80) + ((int)(pk.EncryptionConstant & 0xFFFF) % 0x81);
                 }
                 else if (pk.GG)
                 {
@@ -553,10 +533,7 @@ namespace PKHeX.Core.AutoMod
             }
         }
 
-        public static void SetGigantamaxFactor(
-            this PKM pk,
-            IBattleTemplate set,
-            IEncounterable enc)
+        public static void SetGigantamaxFactor(this PKM pk, IBattleTemplate set, IEncounterable enc)
         {
             if (pk is not IGigantamax gmax || gmax.CanGigantamax == set.CanGigantamax)
             {
@@ -575,9 +552,7 @@ namespace PKHeX.Core.AutoMod
             {
                 d.DynamaxLevel = d.GetSuggestedDynamaxLevel(pk, requested: set.DynamaxLevel);
             }
-            if (
-                pk is ITeraType t && set.TeraType != MoveType.Any && t.GetTeraType() != set.TeraType
-            )
+            if (pk is ITeraType t && set.TeraType != MoveType.Any && t.GetTeraType() != set.TeraType)
             {
                 t.SetTeraType(set.TeraType);
             }
@@ -660,8 +635,7 @@ namespace PKHeX.Core.AutoMod
                 EntityContext.Gen7b => PersonalTable.GG[species].BaseFriendship,
                 EntityContext.Gen8 => PersonalTable.SWSH.GetFormEntry(species, form).BaseFriendship,
                 EntityContext.Gen8a => PersonalTable.LA.GetFormEntry(species, form).BaseFriendship,
-                EntityContext.Gen8b
-                    => PersonalTable.BDSP.GetFormEntry(species, form).BaseFriendship,
+                EntityContext.Gen8b => PersonalTable.BDSP.GetFormEntry(species, form).BaseFriendship,
                 EntityContext.Gen9 => PersonalTable.SV.GetFormEntry(species, form).BaseFriendship,
                 _ => throw new IndexOutOfRangeException(),
             };
@@ -684,10 +658,7 @@ namespace PKHeX.Core.AutoMod
         /// </summary>
         /// <param name="pk">PKM to modify</param>
         /// <param name="trainer">Trainer to handle the <see cref="pk"/></param>
-        public static void SetHandlerandMemory(
-            this PKM pk,
-            ITrainerInfo trainer,
-            IEncounterable enc)
+        public static void SetHandlerandMemory(this PKM pk, ITrainerInfo trainer, IEncounterable enc)
         {
             if (IsUntradeableEncounter(enc))
             {
@@ -790,11 +761,7 @@ namespace PKHeX.Core.AutoMod
             }
         }
 
-        public static bool TryApplyHardcodedSeedWild8(
-            PK8 pk,
-            IEncounterable enc,
-            int[] ivs,
-            Shiny requestedShiny)
+        public static bool TryApplyHardcodedSeedWild8(PK8 pk, IEncounterable enc, int[] ivs, Shiny requestedShiny)
         {
             // Don't bother if there is no overworld correlation
             if (enc is not IOverworldCorrelation8 eo)
@@ -943,8 +910,7 @@ namespace PKHeX.Core.AutoMod
             644
         ];
 
-        public static int? GetArceusHeldItemFromForm(int form) =>
-            form is >= 1 and <= 17 ? Arceus_PlateIDs[form - 1] : null;
+        public static int? GetArceusHeldItemFromForm(int form) => form is >= 1 and <= 17 ? Arceus_PlateIDs[form - 1] : null;
 
         public static int? GetSilvallyHeldItemFromForm(int form) => form == 0 ? null : form + 903;
 

@@ -54,14 +54,11 @@ namespace AutoModPlugins
                 var res = error.DialogResult;
                 if (res == DialogResult.Retry)
                 {
-                    Process.Start(
-                        new ProcessStartInfo
+                    Process.Start(new ProcessStartInfo
                         {
-                            FileName =
-                                "https://github.com/architdate/PKHeX-Plugins/wiki/Installing-PKHeX-Plugins",
+                            FileName = "https://github.com/architdate/PKHeX-Plugins/wiki/Installing-PKHeX-Plugins",
                             UseShellExecute = true
-                        }
-                    );
+                        });
                 }
             }
         }
@@ -120,16 +117,12 @@ namespace AutoModPlugins
                 var res = error.DialogResult;
                 if (res == DialogResult.Retry)
                 {
-                    Process.Start(
-                        new ProcessStartInfo
+                    Process.Start(new ProcessStartInfo
                         {
-                            FileName =
-                                "https://github.com/architdate/PKHeX-Plugins/wiki/Getting-Started-with-Auto-Legality-Mod",
+                            FileName = "https://github.com/architdate/PKHeX-Plugins/wiki/Getting-Started-with-Auto-Legality-Mod",
                             UseShellExecute = true
-                        }
-                    );
+                        });
                 }
-
                 return;
             }
 

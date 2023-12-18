@@ -34,8 +34,7 @@ namespace PKHeX.Core.Enhancements
 
         private static readonly string[] separator = ["\n"];
 
-        public static bool IsInvalidForm(string form) =>
-            form.Contains("Mega") || InvalidFormes.Contains(form);
+        public static bool IsInvalidForm(string form) => form.Contains("Mega") || InvalidFormes.Contains(form);
 
         /// <summary>
         /// A method to get a list of ShowdownSet(s) from a string paste

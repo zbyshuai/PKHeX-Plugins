@@ -47,11 +47,7 @@ namespace PKHeX.Core.Injection
         private const int MYSTATUS_BLOCK_SIZE = 0x50;
         private const int MYSTATUS_BLOCK_SIZE_RAM = 0x34;
 
-        public static readonly Dictionary<
-            string,
-            (Func<PokeSysBotMini, byte[]?>, Action<PokeSysBotMini, byte[]>)
-        > FunctionMap =
-            new()
+        public static readonly Dictionary<string, (Func<PokeSysBotMini, byte[]?>, Action<PokeSysBotMini, byte[]>)> FunctionMap = new()
             {
                 { "Items", (GetItemBlock, SetItemBlock) },
                 { "MyStatus", (GetMyStatusBlock, SetMyStatusBlock) },
@@ -59,18 +55,14 @@ namespace PKHeX.Core.Injection
                 { "Daycare", (GetDaycareBlock, SetDaycareBlock) },
             };
 
-        public override Dictionary<string, string> SpecialBlocks { get; } =
-            new()
+        public override Dictionary<string, string> SpecialBlocks { get; } = new()
             {
                 { "Items", "B_OpenItemPouch_Click" },
                 { "Underground", "B_OpenUGSEditor_Click" }
             };
 
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
-        public static readonly IEnumerable<Type> types = Assembly
-            .GetAssembly(typeof(ICustomBlock))
-            .GetTypes()
-            .Where(t => typeof(ICustomBlock).IsAssignableFrom(t) && !t.IsInterface);
+        public static readonly IEnumerable<Type> types = Assembly.GetAssembly(typeof(ICustomBlock)).GetTypes().Where(t => typeof(ICustomBlock).IsAssignableFrom(t) && !t.IsInterface);
 
         private static ulong[] GetPokemonPointers(PokeSysBotMini psb, int box)
         {
@@ -83,17 +75,10 @@ namespace PKHeX.Core.Injection
             }
 
             var b = psb.com.ReadBytes(addr, count * 8);
-            var boxptr =
-                Core.ArrayUtil
-                    .EnumerateSplit(b, 8)
-                    .Select(z => BitConverter.ToUInt64(z, 0))
-                    .ToArray()[box] + 0x20; // add 0x20 to remove vtable bytes
+            var boxptr = Core.ArrayUtil.EnumerateSplit(b, 8).Select(z => BitConverter.ToUInt64(z, 0)).ToArray()[box] + 0x20; // add 0x20 to remove vtable bytes
             b = sb.ReadBytesAbsolute(boxptr, psb.SlotCount * 8);
 
-            var pkmptrs = Core.ArrayUtil
-                .EnumerateSplit(b, 8)
-                .Select(z => BitConverter.ToUInt64(z, 0))
-                .ToArray();
+            var pkmptrs = Core.ArrayUtil.EnumerateSplit(b, 8).Select(z => BitConverter.ToUInt64(z, 0)).ToArray();
             return pkmptrs;
         }
 
@@ -266,9 +251,7 @@ namespace PKHeX.Core.Injection
             }
 
             var item_blk = psb.com.ReadBytes(addr, ITEM_BLOCK_SIZE_RAM);
-            var items = Core.ArrayUtil
-                .EnumerateSplit(item_blk, 0xC)
-                .Select(z =>
+            var items = Core.ArrayUtil.EnumerateSplit(item_blk, 0xC).Select(z =>
                 {
                     var retval = new byte[0x10];
                     var zSpan = z.AsSpan();
@@ -277,8 +260,7 @@ namespace PKHeX.Core.Injection
                     zSpan[0x5..0x6].CopyTo(rSpan[0x8..]);
                     zSpan[0xA..].CopyTo(rSpan[0xC..]);
                     return retval;
-                })
-                .ToArray();
+                }).ToArray();
             return ArrayUtil.ConcatAll(items);
         }
 
@@ -298,9 +280,7 @@ namespace PKHeX.Core.Injection
             }
 
             data = data.AsSpan(0, ITEM_BLOCK_SIZE).ToArray();
-            var items = Core.ArrayUtil
-                .EnumerateSplit(data, 0x10)
-                .Select(z =>
+            var items = Core.ArrayUtil.EnumerateSplit(data, 0x10).Select(z =>
                 {
                     var retval = new byte[0xC];
                     var zSpan = z.AsSpan();
@@ -309,8 +289,7 @@ namespace PKHeX.Core.Injection
                     zSpan[0x8..0x9].CopyTo(rSpan[0x5..]);
                     zSpan[0xC..0xE].CopyTo(rSpan[0xA..]);
                     return retval;
-                })
-                .ToArray();
+                }).ToArray();
             var payload = ArrayUtil.ConcatAll(items);
             psb.com.WriteBytes(payload, addr);
         }
@@ -332,10 +311,7 @@ namespace PKHeX.Core.Injection
 
             var item_blk = psb.com.ReadBytes(addr, UG_ITEM_BLOCK_SIZE_RAM);
             var extra_data = new byte[] { 0x0, 0x0, 0x0, 0x0 };
-            var items = Core.ArrayUtil
-                .EnumerateSplit(item_blk, 0x8)
-                .Select(z => z.Concat(extra_data).ToArray())
-                .ToArray();
+            var items = Core.ArrayUtil.EnumerateSplit(item_blk, 0x8).Select(z => z.Concat(extra_data).ToArray()).ToArray();
             return ArrayUtil.ConcatAll(items);
         }
 
@@ -355,10 +331,7 @@ namespace PKHeX.Core.Injection
             }
 
             data = data.AsSpan(0, UG_ITEM_BLOCK_SIZE).ToArray();
-            var items = Core.ArrayUtil
-                .EnumerateSplit(data, 0xC)
-                .Select(z => z.AsSpan(0, 0x8).ToArray())
-                .ToArray();
+            var items = Core.ArrayUtil.EnumerateSplit(data, 0xC).Select(z => z.AsSpan(0, 0x8).ToArray()).ToArray();
             var payload = ArrayUtil.ConcatAll(items);
             psb.com.WriteBytes(payload, addr);
         }
@@ -446,12 +419,7 @@ namespace PKHeX.Core.Injection
             psb.com.WriteBytes(payload, addr + 0x8);
         }
 
-        public override bool ReadBlockFromString(
-            PokeSysBotMini psb,
-            SaveFile sav,
-            string block,
-            out List<byte[]>? read
-        )
+        public override bool ReadBlockFromString(PokeSysBotMini psb, SaveFile sav, string block, out List<byte[]>? read)
         {
             read = null;
             if (!FunctionMap.TryGetValue(block, out (Func<PokeSysBotMini, byte[]?>, Action<PokeSysBotMini, byte[]>) value))
@@ -482,9 +450,7 @@ namespace PKHeX.Core.Injection
             }
             try
             {
-                var data = (
-                    sav.GetType().GetProperty(block) ?? throw new Exception("Invalid Block")
-                ).GetValue(sav);
+                var data = (sav.GetType().GetProperty(block) ?? throw new Exception("Invalid Block")).GetValue(sav);
 
                 if (data is IDataIndirect sb)
                 {
@@ -511,12 +477,7 @@ namespace PKHeX.Core.Injection
             }
         }
 
-        public override void WriteBlockFromString(
-            PokeSysBotMini psb,
-            string block,
-            byte[] data,
-            object sb
-        )
+        public override void WriteBlockFromString(PokeSysBotMini psb, string block, byte[] data, object sb)
         {
             if (!FunctionMap.TryGetValue(block, out (Func<PokeSysBotMini, byte[]?>, Action<PokeSysBotMini, byte[]>) value))
             {

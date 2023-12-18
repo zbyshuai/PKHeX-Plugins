@@ -262,11 +262,7 @@ namespace AutoModPlugins
         public static void RemoveAll(string defaultLanguage, params string[] banlist)
         {
             var badKeys = Context[defaultLanguage];
-            var split = badKeys
-                .Write()
-                .Select(z => z.Split(TranslationContext.Separator)[0])
-                .Where(l => !banlist.Any(l.StartsWith))
-                .ToArray();
+            var split = badKeys.Write().Select(z => z.Split(TranslationContext.Separator)[0]).Where(l => !banlist.Any(l.StartsWith)).ToArray();
             foreach (var c in Context)
             {
                 var lang = c.Key;
@@ -318,10 +314,7 @@ namespace AutoModPlugins
 
         public IEnumerable<string> Write(char separator = Separator)
         {
-            return translation
-                .Select(z => $"{z.Key}{separator}{z.Value}")
-                .OrderBy(z => z.Contains('.'))
-                .ThenBy(z => z);
+            return translation.Select(z => $"{z.Key}{separator}{z.Value}").OrderBy(z => z.Contains('.')).ThenBy(z => z);
         }
 
         public void UpdateFrom(TranslationContext other)

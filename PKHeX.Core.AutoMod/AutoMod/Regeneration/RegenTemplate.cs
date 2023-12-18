@@ -60,8 +60,7 @@ namespace PKHeX.Core.AutoMod
             SanitizeMoves(set, Moves);
         }
 
-        public RegenTemplate(ShowdownSet set, int gen = PKX.Generation)
-            : this(set, gen, set.Text)
+        public RegenTemplate(ShowdownSet set, int gen = PKX.Generation) : this(set, gen, set.Text)
         {
             this.SanitizeForm(gen);
             this.SanitizeBattleMoves();
@@ -84,8 +83,7 @@ namespace PKHeX.Core.AutoMod
             set.InvalidLines.Clear();
         }
 
-        public RegenTemplate(PKM pk, int gen = PKX.Generation)
-            : this(new ShowdownSet(pk), gen)
+        public RegenTemplate(PKM pk, int gen = PKX.Generation) : this(new ShowdownSet(pk), gen)
         {
             pk.FixGender(this);
             if (!pk.IsNicknamed)
@@ -100,12 +98,7 @@ namespace PKHeX.Core.AutoMod
         private static int[] SanitizeEVs(int[] evs, int gen)
         {
             var copy = (int[])evs.Clone();
-            int maxEV =
-                gen >= 6
-                    ? 252
-                    : gen >= 3
-                        ? 255
-                        : 65535;
+            int maxEV = gen >= 6 ? 252 : gen >= 3 ? 255 : 65535;
             for (int i = 0; i < evs.Length; i++)
             {
                 if (copy[i] > maxEV)
@@ -139,14 +132,8 @@ namespace PKHeX.Core.AutoMod
             bool hasRegen = !string.IsNullOrWhiteSpace(regen);
 
             // Add Showdown content except moves
-            var split = text.Split(
-                new[] { Environment.NewLine },
-                StringSplitOptions.RemoveEmptyEntries
-            );
-            var group = split
-                .Where(z => !IsIgnored(z, Regen))
-                .GroupBy(z => z.StartsWith("- "))
-                .ToArray();
+            var split = text.Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
+            var group = split.Where(z => !IsIgnored(z, Regen)).GroupBy(z => z.StartsWith("- ")).ToArray();
             if (group.Length == 0)
             {
                 return sb.ToString();

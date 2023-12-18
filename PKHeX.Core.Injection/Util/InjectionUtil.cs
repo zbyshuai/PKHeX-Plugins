@@ -7,11 +7,7 @@ namespace PKHeX.Core.Injection
     {
         public const ulong INVALID_PTR = 0;
 
-        public static ulong GetPointerAddress(
-            this ICommunicatorNX sb,
-            string ptr,
-            bool heapRelative = true
-        )
+        public static ulong GetPointerAddress(this ICommunicatorNX sb, string ptr, bool heapRelative = true)
         {
             if (string.IsNullOrWhiteSpace(ptr) || ptr.IndexOfAny(['-', '/', '*']) != -1)
             {
@@ -29,10 +25,7 @@ namespace PKHeX.Core.Injection
                 finadd = Util.GetHexValue(ptr.Split('+').Last());
                 ptr = ptr[..ptr.LastIndexOf('+')];
             }
-            var jumps = ptr.Replace("main", "")
-                .Replace("[", "")
-                .Replace("]", "")
-                .Split(new[] { "+" }, StringSplitOptions.RemoveEmptyEntries);
+            var jumps = ptr.Replace("main", "").Replace("[", "").Replace("]", "").Split(new[] { "+" }, StringSplitOptions.RemoveEmptyEntries);
             if (jumps.Length == 0)
             {
                 return INVALID_PTR;

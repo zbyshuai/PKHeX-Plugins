@@ -418,9 +418,7 @@ namespace PKHeX.Core.Enhancements
                 default:
                     if (Totem_USUM.Contains(spec) && form == "Large")
                     {
-                        return Totem_Alolan.Contains(spec) && spec != (int)Core.Species.Mimikyu
-                            ? "Alola-Totem"
-                            : "Totem";
+                        return Totem_Alolan.Contains(spec) && spec != (int)Core.Species.Mimikyu ? "Alola-Totem": "Totem";
                     }
 
                     return form.Replace(' ', '-');
@@ -451,10 +449,7 @@ namespace PKHeX.Core.Enhancements
 
         private static string GetURL(string speciesName, string form, string baseURL)
         {
-            if (
-                string.IsNullOrWhiteSpace(form)
-                || (ShowdownUtil.IsInvalidForm(form) && form != "Crowned")
-            ) // Crowned Formes have separate pages
+            if (string.IsNullOrWhiteSpace(form) || (ShowdownUtil.IsInvalidForm(form) && form != "Crowned")) // Crowned Formes have separate pages
             {
                 var spec = ConvertSpeciesToURLSpecies(speciesName).ToLower();
                 return $"{baseURL}/{spec}/";
@@ -488,11 +483,7 @@ namespace PKHeX.Core.Enhancements
             return titles;
         }
 
-        private static string AlertText(
-            string showdownSpec,
-            int count,
-            Dictionary<string, List<string>> titles
-        )
+        private static string AlertText(string showdownSpec, int count, Dictionary<string, List<string>> titles)
         {
             var sb = new StringBuilder();
             sb.Append(showdownSpec).Append(':');

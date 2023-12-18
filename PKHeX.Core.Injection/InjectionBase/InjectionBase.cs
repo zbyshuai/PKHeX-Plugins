@@ -93,7 +93,8 @@ namespace PKHeX.Core.Injection
                         LiveHeXVersion.SV_v131,
                         LiveHeXVersion.SV_v132,
                         LiveHeXVersion.SV_v201,
-                        LiveHeXVersion.SV_v202
+                        LiveHeXVersion.SV_v202,
+                        LiveHeXVersion.SV_v300,
                     }
                 },
                 {
@@ -107,7 +108,8 @@ namespace PKHeX.Core.Injection
                         LiveHeXVersion.SV_v131,
                         LiveHeXVersion.SV_v132,
                         LiveHeXVersion.SV_v201,
-                        LiveHeXVersion.SV_v202
+                        LiveHeXVersion.SV_v202,
+                        LiveHeXVersion.SV_v300
                     }
                 },
             };
@@ -131,9 +133,7 @@ namespace PKHeX.Core.Injection
                 return new LPPointer(version, useCache);
             }
 
-            return LPBasic.GetVersions().Contains(version)
-                ? (InjectionBase)new LPBasic(version, useCache)
-                : throw new NotImplementedException("Unknown LiveHeXVersion.");
+            return LPBasic.GetVersions().Contains(version) ? (InjectionBase)new LPBasic(version, useCache) : throw new NotImplementedException("Unknown LiveHeXVersion.");
         }
 
         public virtual byte[] ReadBox(PokeSysBotMini psb, int box, int len, List<byte[]> allpkm)
@@ -152,20 +152,10 @@ namespace PKHeX.Core.Injection
 
         public virtual void WriteBlocksFromSAV(PokeSysBotMini psb, string block, SaveFile sav) { }
 
-        public virtual void WriteBlockFromString(
-            PokeSysBotMini psb,
-            string block,
-            byte[] data,
-            object sb
-        )
+        public virtual void WriteBlockFromString(PokeSysBotMini psb, string block, byte[] data, object sb)
         { }
 
-        public virtual bool ReadBlockFromString(
-            PokeSysBotMini psb,
-            SaveFile sav,
-            string block,
-            out List<byte[]>? read
-        )
+        public virtual bool ReadBlockFromString(PokeSysBotMini psb, SaveFile sav, string block, out List<byte[]>? read)
         {
             read = null;
             return false;
@@ -227,9 +217,7 @@ namespace PKHeX.Core.Injection
             }
 
             bool detected = msg != "";
-            msg += detected
-                ? " detected.\n\nPlease remove or close the interfering applications and reboot your Switch."
-                : "";
+            msg += detected ? " detected.\n\nPlease remove or close the interfering applications and reboot your Switch." : "";
             return detected;
         }
     }
