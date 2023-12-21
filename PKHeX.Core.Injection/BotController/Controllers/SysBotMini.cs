@@ -171,20 +171,26 @@ namespace PKHeX.Core.Injection
             }
 
             int chunk = 0;
-            while (data.Length != 0)
+            int byteCount = data.Length;
+            for (int i = 0; i < byteCount; i += maxlength)
             {
-                if (chunk * maxlength < data.Length)
-                {
-                    var lengthArray = data[(chunk * maxlength)..];
-                    var ba = data.Slice(chunk * maxlength, maxlength < lengthArray.Length ? maxlength : lengthArray.Length);
-                    WriteBytes(ba, offset, method);
-                    offset += maxlength;
-                    chunk++;
-                }
-                else { break; }
+
+                var ba = SliceSafe(data,i,maxlength);
+                WriteBytes(ba, offset, method);
+                offset += maxlength;
+                chunk++;
             }
         }
+        public byte[] SliceSafe(ReadOnlySpan<byte> src, int offset, int length)
+        {
+            var delta = src.Length - offset;
+            if (delta < length)
+                length = delta;
 
+            byte[] data = new byte[length];
+            Buffer.BlockCopy(src.ToArray(), offset, data, 0, data.Length);
+            return data;
+        }
         public ulong GetHeapBase()
         {
             var cmd = SwitchCommand.GetHeapBase();
