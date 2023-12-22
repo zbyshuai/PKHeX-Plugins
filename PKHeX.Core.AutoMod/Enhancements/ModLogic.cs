@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 namespace PKHeX.Core.AutoMod
@@ -109,7 +110,11 @@ namespace PKHeX.Core.AutoMod
                 _ => false,
             };
             if (HasRegionalForm)
+            {
+                if (sav.Version is GameVersion.SW or GameVersion.SH && ((Species)s == Species.Slowbro || (Species)s == Species.Meowth || (Species)s == Species.Darmanitan))
+                    return 2;
                 return 1;
+            }
             else
                 return f;
          }
@@ -301,7 +306,7 @@ namespace PKHeX.Core.AutoMod
                 (ushort)Species.Arceus => generation != 4 || form < 9 ? SimpleEdits.GetArceusHeldItemFromForm(form) : SimpleEdits.GetArceusHeldItemFromForm(form - 1),
                 (ushort)Species.Silvally => SimpleEdits.GetSilvallyHeldItemFromForm(form),
                 (ushort)Species.Genesect => SimpleEdits.GetGenesectHeldItemFromForm(form),
-                (ushort)Species.Giratina => form == 1 ? 112 : null, // Griseous Orb
+                (ushort)Species.Giratina => form == 1 && generation < 9 ? 112 : form == 1 ? 1779 : null, // Griseous Orb
                 (ushort)Species.Zacian => form == 1 ? 1103 : null, // Rusted Sword
                 (ushort)Species.Zamazenta => form == 1 ? 1104 : null, // Rusted Shield
                 _ => null
