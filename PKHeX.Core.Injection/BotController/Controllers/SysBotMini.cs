@@ -174,14 +174,13 @@ namespace PKHeX.Core.Injection
             int byteCount = data.Length;
             for (int i = 0; i < byteCount; i += maxlength)
             {
-
                 var ba = SliceSafe(data,i,maxlength);
                 WriteBytes(ba, offset, method);
                 offset += maxlength;
                 chunk++;
             }
         }
-        public byte[] SliceSafe(ReadOnlySpan<byte> src, int offset, int length)
+        public static byte[] SliceSafe(ReadOnlySpan<byte> src, int offset, int length)
         {
             var delta = src.Length - offset;
             if (delta < length)
