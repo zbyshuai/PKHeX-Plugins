@@ -69,7 +69,7 @@ namespace PKHeX.Core.AutoMod
             for (int j = 0; j < nthreads; j++)
             {
                 var n = j;
-                new Thread(async delegate ()
+                new Thread(delegate ()
                 {
                     List<PKM> Tpklist = [];
                     List<ushort> subspecies = [];
@@ -79,7 +79,7 @@ namespace PKHeX.Core.AutoMod
                     {
                         subspecies = species.ToList()[InitialEnc..FinalEnc];
                     }
-                    catch (Exception ex)
+                    catch (Exception)
                     {
                         subspecies = species.ToList()[InitialEnc..];
                     }
