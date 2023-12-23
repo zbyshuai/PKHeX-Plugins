@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
 
@@ -81,8 +82,8 @@ namespace PKHeX.Core.AutoMod
                     {
                         continue;
                     }
-
-                    var pk = AddPKM(sav, tr, s, f, cfg.SetShiny, cfg.SetAlpha, cfg.NativeOnly);
+                    var form = cfg.IncludeForms ? f : GetBaseForm(s,f,str,sav);
+                    var pk = AddPKM(sav, tr, s, form, cfg.SetShiny, cfg.SetAlpha, cfg.NativeOnly);
                     if (pk is not null && pklist.Find(x => x.Species == pk.Species && x.Form == pk.Form) is null)
                     {
                         pklist.Add(pk);
@@ -95,7 +96,30 @@ namespace PKHeX.Core.AutoMod
             }
             return pklist;
         }
-
+        private static byte GetBaseForm(ushort s, byte f, GameStrings str, SaveFile sav)
+        {
+            List<Species> SV = [Species.Tauros, Species.Wooper];
+            List<Species> LA = [Species.Growlithe, Species.Arcanine, Species.Voltorb, Species.Electrode, Species.Typhlosion, Species.Qwilfish, Species.Sneasel, Species.Samurott, Species.Lilligant, Species.Zorua, Species.Zoroark, Species.Braviary, Species.Sliggoo, Species.Goodra, Species.Avalugg, Species.Decidueye];
+            List<Species> SH = [Species.Meowth, Species.Slowpoke, Species.Ponyta, Species.Rapidash, Species.Slowbro, Species.Slowking, Species.Farfetchd, Species.Weezing, Species.MrMime, Species.Articuno, Species.Moltres, Species.Zapdos, Species.Corsola, Species.Zigzagoon, Species.Linoone, Species.Darumaka, Species.Darmanitan, Species.Yamask, Species.Stunfisk];
+            List<Species> SM = [Species.Rattata, Species.Raticate, Species.Raichu, Species.Sandshrew, Species.Sandslash, Species.Vulpix, Species.Ninetales, Species.Diglett, Species.Dugtrio, Species.Meowth, Species.Persian, Species.Geodude, Species.Graveler, Species.Golem, Species.Grimer, Species.Muk, Species.Marowak];
+            var HasRegionalForm = sav.Version switch
+            {
+                GameVersion.VL or GameVersion.SL => SV.Contains((Species)s),
+                GameVersion.PLA => LA.Contains((Species)s),
+                GameVersion.SH or GameVersion.SW => SH.Contains((Species)s),
+                GameVersion.SN or GameVersion.MN or GameVersion.UM or GameVersion.US => SM.Contains((Species)s),
+                _ => false,
+            };
+            if (HasRegionalForm)
+            {
+                if (sav.Version is GameVersion.SW or GameVersion.SH && ((Species)s == Species.Slowbro || (Species)s == Species.Meowth || (Species)s == Species.Darmanitan))
+                    return 2;
+                return 1;
+            }
+            else
+                return f;
+         }
+       
         private static PKM? AddPKM(SaveFile sav, ITrainerInfo tr, ushort species, byte form, bool shiny, bool alpha, bool nativeOnly)
         {
             if (tr.GetRandomEncounter(species, form, shiny, alpha, nativeOnly, out var pk) && pk?.Species > 0)

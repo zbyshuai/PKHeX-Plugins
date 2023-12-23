@@ -4,6 +4,6 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="LibUsbDotNet" Version="2.2.29" />
-    <PackageReference Include="PKHeX.Core" Version="23.10.12" />
+    <PackageReference Include="PKHeX.Core" Version="23.12.22" />
   </ItemGroup>
 </Project>

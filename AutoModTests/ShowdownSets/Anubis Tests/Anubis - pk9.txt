@@ -19867,48 +19867,6 @@ Quirky Nature
 - Psychic
 - Misty Terrain
 
-Carbink
-IVs: 10 HP / 26 Atk / 12 Def / 11 SpA / 13 SpD / 26 Spe
-Ability: Clear Body
-Tera Type: Rock
-Level: 67
-Bashful Nature
-~=Location=196
-~=Version=SL
-.Version=50
-- Power Gem
-- Stealth Rock
-- Moonblast
-- Stone Edge
-
-Carbink
-IVs: 21 HP / 8 Atk / 3 Def / 26 SpA / 25 SpD / 11 Spe
-Ability: Clear Body
-Tera Type: Rock
-Level: 65
-Careful Nature
-~=Location=196
-~=Version=SL
-.Version=50
-- Power Gem
-- Stealth Rock
-- Moonblast
-- Stone Edge
-
-Carbink
-IVs: 7 HP / 2 Atk / 13 Def / 27 SpA / 20 SpD / 14 Spe
-Ability: Clear Body
-Tera Type: Rock
-Level: 65
-Careful Nature
-~=Location=196
-~=Version=SL
-.Version=50
-- Power Gem
-- Stealth Rock
-- Moonblast
-- Stone Edge
-
 Rowlet (M)
 IVs: 22 HP / 30 Atk / 11 Def / 24 SpA / 12 SpD / 28 Spe
 Ability: Overgrow
@@ -20287,20 +20245,6 @@ Modest Nature
 - Toxic
 - Rock Throw
 - Smack Down
-
-Glimmora (M)
-IVs: 16 HP / 29 Atk / 28 Def / 3 SpA / 21 SpD / 4 Spe
-Ability: Toxic Debris
-Tera Type: Rock
-Level: 69
-Jolly Nature
-~=Location=196
-~=Version=SL
-.Version=50
-- Rock Slide
-- Power Gem
-- Acid Armor
-- Sludge Wave
 
 Greavard (M)
 IVs: 15 HP / 26 Atk / 14 Def / 4 SpA / 16 Spe
@@ -22165,48 +22109,6 @@ Calm Nature
 - Topsy-Turvy
 - Superpower
 
-Carbink
-IVs: 10 HP / 26 Atk / 12 Def / 11 SpA / 13 SpD / 26 Spe
-Ability: Clear Body
-Tera Type: Rock
-Level: 67
-Bashful Nature
-~=Location=196
-~=Version=SL
-.Version=50
-- Power Gem
-- Stealth Rock
-- Moonblast
-- Stone Edge
-
-Carbink
-IVs: 21 HP / 8 Atk / 3 Def / 26 SpA / 25 SpD / 11 Spe
-Ability: Clear Body
-Tera Type: Rock
-Level: 65
-Careful Nature
-~=Location=196
-~=Version=SL
-.Version=50
-- Power Gem
-- Stealth Rock
-- Moonblast
-- Stone Edge
-
-Carbink
-IVs: 7 HP / 2 Atk / 13 Def / 27 SpA / 20 SpD / 14 Spe
-Ability: Clear Body
-Tera Type: Rock
-Level: 65
-Careful Nature
-~=Location=196
-~=Version=SL
-.Version=50
-- Power Gem
-- Stealth Rock
-- Moonblast
-- Stone Edge
-
 Rowlet (M)
 IVs: 22 HP / 30 Atk / 11 Def / 24 SpA / 12 SpD / 28 Spe
 Ability: Overgrow
@@ -22600,20 +22502,6 @@ Modest Nature
 - Rock Throw
 - Smack Down
 
-Glimmora (M)
-IVs: 16 HP / 29 Atk / 28 Def / 3 SpA / 21 SpD / 4 Spe
-Ability: Toxic Debris
-Tera Type: Rock
-Level: 69
-Jolly Nature
-~=Location=196
-~=Version=SL
-.Version=50
-- Rock Slide
-- Power Gem
-- Acid Armor
-- Sludge Wave
-
 Greavard (M)
 IVs: 15 HP / 26 Atk / 14 Def / 4 SpA / 16 Spe
 Ability: Fluffy
@@ -22695,3 +22583,59 @@ Sassy Nature
 .Version=50
 - Astonish
 - Tackle
+
+Carbink
+IVs: 10 HP / 26 Atk / 12 Def / 11 SpA / 13 SpD / 26 Spe
+Ability: Clear Body
+Tera Type: Rock
+Level: 67
+Bashful Nature
+~=Location=196
+~=Version=SL
+.Version=50
+- Power Gem
+- Stealth Rock
+- Moonblast
+- Stone Edge
+
+Carbink
+IVs: 21 HP / 8 Atk / 3 Def / 26 SpA / 25 SpD / 11 Spe
+Ability: Clear Body
+Tera Type: Rock
+Level: 65
+Careful Nature
+~=Location=196
+~=Version=SL
+.Version=50
+- Power Gem
+- Stealth Rock
+- Moonblast
+- Stone Edge
+
+Carbink
+IVs: 7 HP / 2 Atk / 13 Def / 27 SpA / 20 SpD / 14 Spe
+Ability: Clear Body
+Tera Type: Rock
+Level: 65
+Careful Nature
+~=Location=196
+~=Version=SL
+.Version=50
+- Power Gem
+- Stealth Rock
+- Moonblast
+- Stone Edge
+
+Glimmora (M)
+IVs: 16 HP / 29 Atk / 28 Def / 3 SpA / 21 SpD / 4 Spe
+Ability: Toxic Debris
+Tera Type: Rock
+Level: 69
+Jolly Nature
+~=Location=196
+~=Version=SL
+.Version=50
+- Rock Slide
+- Power Gem
+- Acid Armor
+- Sludge Wave

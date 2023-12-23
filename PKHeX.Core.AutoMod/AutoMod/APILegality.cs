@@ -211,7 +211,7 @@ namespace PKHeX.Core.AutoMod
                 }
 
                 last = pk;
-                Debug.WriteLine($"{la.Report()}\n");
+                Debug.WriteLine($"{(Species)pk.Species}\n{la.Report()}\n");
             }
             satisfied = LegalizationResult.Failed;
             return last ?? template;
