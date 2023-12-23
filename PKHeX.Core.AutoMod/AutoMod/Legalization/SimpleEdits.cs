@@ -877,6 +877,11 @@ namespace PKHeX.Core.AutoMod
         {
             if (pk is ITechRecord tr and not PA8)
             {
+                if (pk.Species == (ushort)Species.Hydrapple)
+                {
+                    ushort[] DC = [913];
+                    tr.SetRecordFlags(DC);
+                }
                 if (moves.Length != 0)
                 {
                     tr.SetRecordFlags(moves);
