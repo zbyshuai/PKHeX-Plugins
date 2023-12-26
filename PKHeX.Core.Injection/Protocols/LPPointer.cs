@@ -53,16 +53,17 @@ namespace PKHeX.Core.Injection
             },
             new()
             {
-                Name = "KTeraRaidKitakami",
+                Name = "KTeraRaidDLC",
                 Display = "RaidKitakami",
                 SCBKey = 0x100B93DA,
                 Pointer = "[[[main+47350d8]+1C0]+88]+CD8"
             },
             new()
             {
-                Name = "KTeraRaidBlueberry",
+                Name = "KTeraRaidDLC",
                 Display = "RaidBlueberry",
-                Pointer = "[[[main+47350d8]+1C0]+88]+1958"
+                SCBKey = 0x100B93DA,
+                Pointer = "[[[main+47350d8]+1C0]+88]+CD8"
             }
 
         ];
@@ -530,7 +531,7 @@ namespace PKHeX.Core.Injection
                 { "Pokedex", "B_OpenPokedex_Click" },
                 { "Raid", "B_OpenRaids_Click" },
                 { "RaidKitakami", "B_OpenRaids_Click" },
-                {"RaidBlueberry", "B_OpenRaids_Click" }
+                { "RaidBlueberry", "B_OpenRaids_Click" }
                 //{ "Trainer Data", "B_OpenTrainerInfo_Click" },
             };
 
