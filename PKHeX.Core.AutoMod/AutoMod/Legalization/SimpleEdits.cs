@@ -260,7 +260,7 @@ namespace PKHeX.Core.AutoMod
 
             if (pk.Generation > 5 || pk.VC)
             {
-                if (shiny is Shiny.FixedValue or Shiny.Never)
+                if (enc.Shiny is Shiny.FixedValue or Shiny.Never)
                 {
                     return;
                 }
