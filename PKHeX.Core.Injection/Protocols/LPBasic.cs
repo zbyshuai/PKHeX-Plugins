@@ -61,21 +61,21 @@ namespace PKHeX.Core.Injection
             },
             new()
             {
-                Name = "KRaidSpawnList",
+                Name = "Raid",
                 Display = "Raid",
                 SCBKey = 0x9033eb7b,
                 Offset = 0x450C8A70
             },
             new()
             {
-                Name = "KRaidSpawnListR1",
+                Name = "RaidArmor",
                 Display = "RaidArmor",
                 SCBKey = 0x158DA896,
                 Offset = 0x450C94D8
             },
             new()
             {
-                Name = "KRaidSpawnListR2",
+                Name = "RaidCrown",
                 Display = "RaidCrown",
                 SCBKey = 0x148DA703,
                 Offset = 0x450C9F40

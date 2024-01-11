@@ -260,7 +260,7 @@ namespace PKHeX.Core.AutoMod
 
             if (pk.Generation > 5 || pk.VC)
             {
-                if (shiny is Shiny.FixedValue or Shiny.Never)
+                if (enc.Shiny is Shiny.FixedValue or Shiny.Never)
                 {
                     return;
                 }
@@ -879,7 +879,7 @@ namespace PKHeX.Core.AutoMod
             {
                 if (pk.Species == (ushort)Species.Hydrapple)
                 {
-                    ushort[] DC = [913];
+                    ushort[] DC = [(ushort)Move.DragonCheer];
                     tr.SetRecordFlags(DC);
                 }
                 if (moves.Length != 0)

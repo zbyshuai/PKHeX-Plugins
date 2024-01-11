@@ -64,7 +64,6 @@ namespace PKHeX.Core.Enhancements
                         p.SPE_IV.ToString(),
                         p.EXP.ToString(),
                         p.Level.ToString(),
-                        p.Markings.ToString(),
                         p.NotOT,
                         p.MetLevel.ToString(),
                         p.IsShiny.ToString(),

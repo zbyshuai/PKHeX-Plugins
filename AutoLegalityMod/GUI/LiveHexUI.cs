@@ -423,14 +423,8 @@ namespace AutoModPlugins
         {
             bool readPointer = (ModifierKeys & Keys.Control) == Keys.Control;
             var txt = TB_Offset.Text;
-            var offset =
-                readPointer && Remote.Bot.com is ICommunicatorNX nx
-                    ? Remote.Bot.GetCachedPointer(nx, TB_Pointer.Text)
-                    : Util.GetHexValue64(txt);
-            if (
-                (offset.ToString("X16") != txt.ToUpper().PadLeft(16, '0') && !readPointer)
-                || offset == InjectionUtil.INVALID_PTR
-            )
+            var offset = readPointer && Remote.Bot.com is ICommunicatorNX nx ? Remote.Bot.GetCachedPointer(nx, TB_Pointer.Text) : Util.GetHexValue64(txt);
+            if ((offset.ToString("X16") != txt.ToUpper().PadLeft(16, '0') && !readPointer)|| offset == InjectionUtil.INVALID_PTR)
             {
                 WinFormsUtil.Alert("Specified offset is not a valid hex string.");
                 return;
@@ -477,9 +471,7 @@ namespace AutoModPlugins
             var valid = int.TryParse(RamSize.Text, out int size);
             if (offset.ToString("X16") != txt.ToUpper().PadLeft(16, '0') || !valid)
             {
-                WinFormsUtil.Alert(
-                    "Make sure that the RAM offset is a hex string and the size is a valid integer."
-                );
+                WinFormsUtil.Alert("Make sure that the RAM offset is a hex string and the size is a valid integer.");
                 return;
             }
 
@@ -515,9 +507,7 @@ namespace AutoModPlugins
                 }
 
                 using var form = new SimpleHexEditor(result, Remote.Bot, offset, GetRWMethod());
-                var loadgrid =
-                    blockview
-                    && ReflectUtil.GetPropertiesCanWritePublicDeclared(pkm!.GetType()).Count() > 1;
+                var loadgrid = blockview && ReflectUtil.GetPropertiesCanWritePublicDeclared(pkm!.GetType()).Count() > 1;
                 if (loadgrid)
                 {
                     form.PG_BlockView.Visible = true;
@@ -606,8 +596,7 @@ namespace AutoModPlugins
 
         private void SetInjectionTypeView()
         {
-            TB_IP.Visible = L_IP.Visible =
-                CurrentInjectionType == InjectorCommunicationType.SocketNetwork;
+            TB_IP.Visible = L_IP.Visible = CurrentInjectionType == InjectorCommunicationType.SocketNetwork;
             L_USBState.Visible = CurrentInjectionType == InjectorCommunicationType.USB;
         }
 
@@ -641,9 +630,7 @@ namespace AutoModPlugins
             bool getDetails = (ModifierKeys & Keys.Control) == Keys.Control;
             if (getDetails)
             {
-                Clipboard.SetText(
-                    $"Absolute Address: {address + heap:X}\nHeap Address: {address:X}\nHeap Base: {heap:X}"
-                );
+                Clipboard.SetText($"Absolute Address: {address + heap:X}\nHeap Address: {address:X}\nHeap Base: {heap:X}");
             }
         }
 
@@ -678,14 +665,7 @@ namespace AutoModPlugins
             else
             {
                 var key = TB_Pointer.Text.Replace("[key]", "").Trim();
-                if (
-                    !uint.TryParse(
-                        key,
-                        NumberStyles.HexNumber,
-                        CultureInfo.InvariantCulture,
-                        out keyval
-                    )
-                )
+                if (!uint.TryParse(key, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out keyval))
                 {
                     WinFormsUtil.Alert("Key must be in a hexadecimal format.");
                     return;
@@ -744,10 +724,7 @@ namespace AutoModPlugins
 
                 using (var form = new SimpleHexEditor(result, Remote.Bot, address, RWMethod.Absolute, blk_key, keyval, header))
                 {
-                    var loadgrid =
-                        blockview
-                        && ReflectUtil.GetPropertiesCanWritePublicDeclared(pkm!.GetType()).Count()
-                            > 1;
+                    var loadgrid = blockview && ReflectUtil.GetPropertiesCanWritePublicDeclared(pkm!.GetType()).Count() > 1;
                     if (loadgrid)
                     {
                         form.PG_BlockView.Visible = true;
@@ -770,9 +747,7 @@ namespace AutoModPlugins
                             else
                             {
                                 form.Bytes = result;
-                                WinFormsUtil.Error(
-                                    "Size mismatch. Please report this issue on the discord server."
-                                );
+                                WinFormsUtil.Error("Size mismatch. Please report this issue on the discord server.");
                             }
                         }
 
@@ -850,8 +825,10 @@ namespace AutoModPlugins
                 var s = txt switch
                 {
                     "Raid" => cc.Controls.Find("B_Raids", true)[0],
-                    "RaidKitakami" => cc.Controls.Find("B_RaidKitakami", true)[0],
-                    "RaidArmor" => cc.Controls.Find("B_RaidArmor", true)[0],
+                    "RaidKitakami" => cc.Controls.Find("B_RaidsDLC1", true)[0],
+                    "RaidBlueberry" => cc.Controls.Find("B_RaidsDLC2", true)[0],
+                    "RaidArmor" => cc.Controls.Find("B_RaidsDLC1", true)[0],
+                    "RaidCrown" => cc.Controls.Find("B_RaidsDLC2", true)[0],
                     _ => sender,
                 };
 
@@ -936,16 +913,12 @@ namespace AutoModPlugins
 
             if (sbptr.Length == 0)
             {
-                throw new Exception(
-                    $"Pointer is not documented for searching block keys in {version}."
-                );
+                throw new Exception($"Pointer is not documented for searching block keys in {version}.");
             }
 
             if (bot.com is not ICommunicatorNX nx)
             {
-                throw new Exception(
-                    "Remote connection type is unable to read data from absolute offsets."
-                );
+                throw new Exception("Remote connection type is unable to read data from absolute offsets.");
             }
 
             var ofs = bot.SearchSaveKey(sbptr, keyval);
@@ -974,10 +947,7 @@ namespace AutoModPlugins
                 }
                 else
                 {
-                    sb = Activator.CreateInstance(
-                        LPBDSP.types.First(t => t.Name == display),
-                        customdata
-                    );
+                    sb = Activator.CreateInstance(LPBDSP.types.First(t => t.Name == display),customdata);
                 }
             }
             else
@@ -985,8 +955,7 @@ namespace AutoModPlugins
                 var subblocks = Remote.Bot.Injector switch
                 {
                     LPBasic => LPBasic.SCBlocks[version].Where(z => z.Display == display).ToArray(),
-                    LPPointer
-                        => LPPointer.SCBlocks[version].Where(z => z.Display == display).ToArray(),
+                    LPPointer => LPPointer.SCBlocks[version].Where(z => z.Display == display).ToArray(),
                     _ => Array.Empty<BlockData>(),
                 };
 
@@ -1029,14 +998,11 @@ namespace AutoModPlugins
                     var res = error.DialogResult;
                     if (res == DialogResult.Retry)
                     {
-                        Process.Start(
-                            new ProcessStartInfo
+                        Process.Start(new ProcessStartInfo
                             {
-                                FileName =
-                                    "https://github.com/architdate/PKHeX-Plugins/wiki/FAQ-and-Troubleshooting#troubleshooting",
+                                FileName = "https://github.com/architdate/PKHeX-Plugins/wiki/FAQ-and-Troubleshooting#troubleshooting",
                                 UseShellExecute = true
-                            }
-                        );
+                            });
                     }
 
                     return false;

@@ -192,9 +192,7 @@ namespace PKHeX.Core.AutoMod
 
             if (set.Level != 100 && set.Level == enc.LevelMin && pk.Format is 3 or 4)
             {
-                pk.EXP =
-                    Experience.GetEXP(enc.LevelMin + 1, PersonalTable.HGSS[enc.Species].EXPGrowth)
-                    - 1;
+                pk.EXP = Experience.GetEXP(enc.LevelMin + 1, PersonalTable.HGSS[enc.Species].EXPGrowth) - 1;
             }
 
             var currentlang = (LanguageID)pk.Language;
