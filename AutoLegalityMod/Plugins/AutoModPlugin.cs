@@ -85,7 +85,7 @@ namespace AutoModPlugins
             {
                 Process.Start(new ProcessStartInfo
                     {
-                        FileName = "https://github.com/architdate/PKHeX-Plugins/wiki/Installing-PKHeX-Plugins#manual-installation-or-installing-older-releases",
+                        FileName = "https://github.com/architdate/PKHeX-Plugins/wiki/Installing-PKHeX-Plugins",
                         UseShellExecute = true
                     }
                 );
