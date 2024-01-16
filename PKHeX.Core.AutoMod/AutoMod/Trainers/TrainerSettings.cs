@@ -101,6 +101,18 @@ namespace PKHeX.Core.AutoMod
             {
                 trainer = Database.GetTrainerFromGen(generation, lang);
             }
+            else
+            {
+                var super_special_version = ver switch
+                {
+                    GameVersion.BD => GameVersion.SP,
+                    GameVersion.SP => GameVersion.BD,
+                    GameVersion.GE => GameVersion.GP,
+                    GameVersion.GP => GameVersion.GE,
+                    _ => GameVersion.PLA
+                };
+                trainer = Database.GetTrainer(super_special_version, lang);
+            }
 
             if (trainer != null)
             {
@@ -109,9 +121,7 @@ namespace PKHeX.Core.AutoMod
 
             if (fallback == null)
             {
-                return special_version
-                    ? DefaultFallback(ver, lang)
-                    : DefaultFallback(generation, lang);
+                return special_version ? DefaultFallback(ver, lang) : DefaultFallback(generation, lang);
             }
 
             if (lang == null)
