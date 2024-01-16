@@ -106,6 +106,7 @@ IncludeForms_category=Living Dex
 SetShiny_category=Living Dex
 NativeOnly_category=Living Dex
 SetAlpha_category=Living Dex
+TransferVersion_category=Transfer Dex
 GPSSBaseURL_category=Varie
 PromptForSmogonImport_category=Varie
 UseMarkings_category=Varie
