@@ -327,10 +327,6 @@ namespace PKHeX.Core.AutoMod
 
             var sset = new ShowdownSet(setText);
             var set = new RegenTemplate(sset) { Nickname = string.Empty };
-            if (set.Species == 664 || set.Species == 665)
-            {
-                set.Form = 0;
-            }
             template.ApplySetDetails(set);
 
             var t = template.Clone();
@@ -380,6 +376,8 @@ namespace PKHeX.Core.AutoMod
                 or Species.Hoopa when form != 0 && generation <= 6:
                     return true;
                 case Species.Arceus when generation == 4 && form == 9: // ??? form
+                    return true;
+                case Species.Scatterbug or Species.Spewpa when form == 19:
                     return true;
             }
             if (FormInfo.IsBattleOnlyForm(pk.Species, form, generation))

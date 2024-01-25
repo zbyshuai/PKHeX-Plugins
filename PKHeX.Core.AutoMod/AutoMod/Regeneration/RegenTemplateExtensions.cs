@@ -7,15 +7,7 @@ namespace PKHeX.Core.AutoMod
     {
         public static void SanitizeForm(this RegenTemplate set, int gen)
         {
-            if (gen is 9)
-            {
-                // Scatterbug and Spewpa must be Fancy
-                if (set.Species == (ushort)Species.Scatterbug || set.Species == (ushort)Species.Spewpa)
-                {
-                    set.Form = 18;
-                }
-            }
-
+                // Scatterbug and Spewpa must be Fancy - not anymore
             if (!FormInfo.IsBattleOnlyForm(set.Species, set.Form, gen))
             {
                 return;

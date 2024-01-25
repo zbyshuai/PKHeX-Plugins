@@ -15,6 +15,7 @@ namespace AutoModPlugins
         private const string Customization = nameof(Customization);
         private const string Legality = nameof(Legality);
         private const string LivingDex = nameof(LivingDex);
+        private const string TransferDex = nameof(TransferDex);
         private const string Miscellaneous = nameof(Miscellaneous);
         private const string Development = nameof(Development);
 
@@ -130,7 +131,7 @@ namespace AutoModPlugins
         [Category(LivingDex)]
         [Description("Only generate Pokémon natively available in the game version pair.")]
         public bool NativeOnly { get; set; } = true;
-        [Category(LivingDex)]
+        [Category(TransferDex)]
         [Description("Generate Transfer Living Dex destination game")]
         public GameVersion TransferVersion { get; set; } = GameVersion.VL;
         // Miscellaneous
