@@ -11,16 +11,13 @@ namespace AutoModTests
         static FeatureTests() => TestUtil.InitializePKHeXEnvironment();
 
         [Fact]
-        public static void DefaultRegenNoOT() =>
-            RegenSet.Default.HasTrainerSettings.Should().BeFalse();
+        public static void DefaultRegenNoOT() => RegenSet.Default.HasTrainerSettings.Should().BeFalse();
 
         [Fact]
-        public static void DefaultRegenNoExtra() =>
-            RegenSet.Default.HasExtraSettings.Should().BeFalse();
+        public static void DefaultRegenNoExtra() => RegenSet.Default.HasExtraSettings.Should().BeFalse();
 
         [Fact]
-        public static void DefaultRegenNoBatch() =>
-            RegenSet.Default.HasBatchSettings.Should().BeFalse();
+        public static void DefaultRegenNoBatch() => RegenSet.Default.HasBatchSettings.Should().BeFalse();
 
         [Fact]
         public static void FallbackNotPolluted()

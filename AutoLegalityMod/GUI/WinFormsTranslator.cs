@@ -30,9 +30,7 @@ namespace AutoModPlugins
         internal static TranslationContext GetContext(string lang)
         {
             if (Context.TryGetValue(lang, out var context))
-            {
                 return context;
-            }
 
             var lines = GetTranslationFile(lang);
             Context.Add(lang, context = new TranslationContext(lines));

@@ -9,9 +9,7 @@ namespace PKHeX.Core.AutoMod
         {
                 // Scatterbug and Spewpa must be Fancy - not anymore
             if (!FormInfo.IsBattleOnlyForm(set.Species, set.Form, gen))
-            {
                 return;
-            }
 
             set.Form = FormInfo.GetOutOfBattleForm(set.Species, set.Form, gen);
         }
@@ -29,16 +27,12 @@ namespace PKHeX.Core.AutoMod
                     {
                         // Behemoth Blade and Behemoth Bash -> Iron Head
                         if (!set.Moves.Contains((ushort)781) && !set.Moves.Contains((ushort)782))
-                        {
                             return;
-                        }
 
                         for (int i = 0; i < set.Moves.Length; i++)
                         {
                             if (set.Moves[i] is 781 or 782)
-                            {
                                 set.Moves[i] = 442;
-                            }
                         }
                         break;
                     }
@@ -52,9 +46,7 @@ namespace PKHeX.Core.AutoMod
         public static void SanitizeTeraTypes(this RegenTemplate set)
         {
             if (set.Species == (int)Species.Ogerpon && !TeraTypeUtil.IsValidOgerpon((byte)set.TeraType, set.Form))
-            {
                 set.TeraType = ShowdownEdits.GetValidOpergonTeraType(set.Form);
-            }
         }
 
         /// <summary>

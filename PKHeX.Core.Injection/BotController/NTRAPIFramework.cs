@@ -102,9 +102,7 @@ namespace PKHeX.Core.Injection
             {
                 var len = stream.Read(buf, index, length - index);
                 if (len == 0)
-                {
                     return 0;
-                }
 
                 index += len;
             } while (index < length);
@@ -118,9 +116,7 @@ namespace PKHeX.Core.Injection
             {
                 Thread.Sleep(1000);
                 if (!IsConnected)
-                {
                     continue;
-                }
 
                 SendHeartbeatPacket();
                 hbstarted = true;
@@ -139,9 +135,7 @@ namespace PKHeX.Core.Injection
                 {
                     var ret = ReadNetworkStream(stream, buf, buf.Length);
                     if (ret == 0)
-                    {
                         break;
-                    }
 
                     var magic = BitConverter.ToUInt32(buf, 0);
                     var seq = BitConverter.ToUInt32(buf, 4);
@@ -155,9 +149,7 @@ namespace PKHeX.Core.Injection
                     }
                     var dataLen = BitConverter.ToUInt32(buf, t + 4);
                     if (cmd != 0)
-                    {
                         Log($"packet: cmd = {cmd}, dataLen = {dataLen}");
-                    }
 
                     if (magic != 0x12345678)
                     {
@@ -233,9 +225,7 @@ namespace PKHeX.Core.Injection
         private void HandlePacket(uint cmd, uint seq, byte[] dataBuf)
         {
             if (cmd == 9)
-            {
                 HandleReadMem(seq, dataBuf);
-            }
         }
 
         private void SetServer(string serverHost, int serverPort)
@@ -247,9 +237,7 @@ namespace PKHeX.Core.Injection
         private void ConnectToServer()
         {
             if (_tcp != null)
-            {
                 Disconnect();
-            }
 
             try
             {

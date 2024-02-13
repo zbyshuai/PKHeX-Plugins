@@ -59,9 +59,7 @@ namespace AutoModPlugins
             {
                 var txt = Clipboard.GetText();
                 if (ShowdownUtil.IsTextShowdownData(txt))
-                {
                     return txt;
-                }
             }
 
             if (!WinFormsUtil.OpenSAVPKMDialog(new[] { "txt" }, out var path))

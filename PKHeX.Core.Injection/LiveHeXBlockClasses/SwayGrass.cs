@@ -64,9 +64,7 @@ namespace PKHeX.Core.Injection
                     var slice = Data.AsSpan(0x20 + (i * Grass.SIZE), Grass.SIZE).ToArray();
                     var c = slice.ToClass<Grass>();
                     if (c != null)
-                    {
                         result[i] = c;
-                    }
                 }
                 return result;
             }
@@ -115,9 +113,7 @@ namespace PKHeX.Core.Injection
         {
             var ptr = GetSwayGrassPointers(psb.Version);
             if (ptr == null)
-            {
                 return null;
-            }
 
             var nx = (ICommunicatorNX)psb.com;
 
@@ -152,9 +148,7 @@ namespace PKHeX.Core.Injection
         {
             var ptr = GetSwayGrassPointers(psb.Version);
             if (ptr == null)
-            {
                 return;
-            }
 
             var nx = (ICommunicatorNX)psb.com;
             var sway_grass_addr = psb.GetCachedPointer(nx, ptr.ExtendPointer(0x0));

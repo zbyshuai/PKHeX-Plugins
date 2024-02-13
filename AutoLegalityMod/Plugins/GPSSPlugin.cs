@@ -41,18 +41,12 @@ namespace AutoModPlugins
             byte[] rawdata = pk.Data;
             try
             {
-                var response = await PKHeX.Core.Enhancements.NetUtil.GPSSPost(
-                    rawdata,
-                    SaveFileEditor.SAV.Generation,
-                    Url
-                );
+                var response = await PKHeX.Core.Enhancements.NetUtil.GPSSPost(rawdata, SaveFileEditor.SAV.Generation, Url);
 
                 var content = await response.Content.ReadAsStringAsync();
                 var decoded = JsonSerializer.Deserialize<JsonNode>(content);
                 if (decoded == null)
-                {
                     return;
-                }
 #pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
                 var error = decoded["error"] == null ? null : (string)decoded["error"];
 #pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.

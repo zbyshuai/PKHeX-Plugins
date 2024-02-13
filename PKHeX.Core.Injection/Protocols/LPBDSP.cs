@@ -70,9 +70,7 @@ namespace PKHeX.Core.Injection
             var (ptr, count) = RamOffsets.BoxOffsets(psb.Version);
             var addr = psb.GetCachedPointer(sb, ptr);
             if (addr == InjectionUtil.INVALID_PTR)
-            {
                 throw new Exception("Invalid Pointer string.");
-            }
 
             var b = psb.com.ReadBytes(addr, count * 8);
             var boxptr = Core.ArrayUtil.EnumerateSplit(b, 8).Select(z => BitConverter.ToUInt64(z, 0)).ToArray()[box] + 0x20; // add 0x20 to remove vtable bytes
@@ -149,9 +147,7 @@ namespace PKHeX.Core.Injection
         public override byte[] ReadBox(PokeSysBotMini psb, int box, int _, List<byte[]> allpkm)
         {
             if (psb.com is not ICommunicatorNX sb)
-            {
                 return ArrayUtil.ConcatAll(allpkm.ToArray());
-            }
 
             var pkmptrs = GetPokemonPointers(psb, box);
 
@@ -162,9 +158,7 @@ namespace PKHeX.Core.Injection
         public override byte[] ReadSlot(PokeSysBotMini psb, int box, int slot)
         {
             if (psb.com is not ICommunicatorNX sb)
-            {
                 return new byte[psb.SlotSize];
-            }
 
             var pkmptr = GetPokemonPointers(psb, box)[slot];
             return sb.ReadBytesAbsolute(pkmptr + 0x20, psb.SlotSize);
@@ -173,9 +167,7 @@ namespace PKHeX.Core.Injection
         public override void SendSlot(PokeSysBotMini psb, byte[] data, int box, int slot)
         {
             if (psb.com is not ICommunicatorNX sb)
-            {
                 return;
-            }
 
             var pkmptr = GetPokemonPointers(psb, box)[slot];
             sb.WriteBytesAbsolute(data, pkmptr + 0x20);
@@ -184,17 +176,13 @@ namespace PKHeX.Core.Injection
         public override void SendBox(PokeSysBotMini psb, byte[] boxData, int box)
         {
             if (psb.com is not ICommunicatorNX sb)
-            {
                 return;
-            }
 
             ReadOnlySpan<byte> bytes = boxData;
             byte[][] pkmData = bytes.Split(psb.SlotSize);
             var pkmptrs = GetPokemonPointers(psb, box);
             for (int i = 0; i < psb.SlotCount; i++)
-            {
                 sb.WriteBytesAbsolute(pkmData[i], pkmptrs[i] + 0x20);
-            }
         }
 
         public static readonly Func<PokeSysBotMini, byte[]?> GetTrainerData = psb =>
@@ -202,23 +190,17 @@ namespace PKHeX.Core.Injection
             var lv = psb.Version;
             var ptr = GetTrainerPointer(lv);
             if (ptr is null || psb.com is not ICommunicatorNX sb)
-            {
                 return null;
-            }
 
             var retval = new byte[MYSTATUS_BLOCK_SIZE];
             var ram_block = psb.GetCachedPointer(sb, ptr);
             if (ram_block == InjectionUtil.INVALID_PTR)
-            {
                 throw new Exception("Invalid Pointer string.");
-            }
 
             var trainer_name = ptr.ExtendPointer(0x14);
             var trainer_name_addr = psb.GetCachedPointer(sb, trainer_name);
             if (trainer_name_addr == InjectionUtil.INVALID_PTR)
-            {
                 throw new Exception("Invalid Pointer string.");
-            }
 
             psb.com.ReadBytes(trainer_name_addr, 0x1A).CopyTo(retval.AsSpan());
 
@@ -239,16 +221,12 @@ namespace PKHeX.Core.Injection
         {
             var ptr = GetItemPointers(psb.Version);
             if (ptr is null)
-            {
                 return null;
-            }
 
             var nx = (ICommunicatorNX)psb.com;
             var addr = psb.GetCachedPointer(nx, ptr);
             if (addr == InjectionUtil.INVALID_PTR)
-            {
                 throw new Exception("Invalid Pointer string.");
-            }
 
             var item_blk = psb.com.ReadBytes(addr, ITEM_BLOCK_SIZE_RAM);
             var items = Core.ArrayUtil.EnumerateSplit(item_blk, 0xC).Select(z =>
@@ -268,16 +246,12 @@ namespace PKHeX.Core.Injection
         {
             var ptr = GetItemPointers(psb.Version);
             if (ptr is null)
-            {
                 return;
-            }
 
             var nx = (ICommunicatorNX)psb.com;
             var addr = psb.GetCachedPointer(nx, ptr);
             if (addr == InjectionUtil.INVALID_PTR)
-            {
                 throw new Exception("Invalid Pointer string.");
-            }
 
             data = data.AsSpan(0, ITEM_BLOCK_SIZE).ToArray();
             var items = Core.ArrayUtil.EnumerateSplit(data, 0x10).Select(z =>
@@ -298,16 +272,12 @@ namespace PKHeX.Core.Injection
         {
             var ptr = GetUndergroundPointers(psb.Version);
             if (ptr is null)
-            {
                 return null;
-            }
 
             var nx = (ICommunicatorNX)psb.com;
             var addr = psb.GetCachedPointer(nx, ptr);
             if (addr == InjectionUtil.INVALID_PTR)
-            {
                 throw new Exception("Invalid Pointer string.");
-            }
 
             var item_blk = psb.com.ReadBytes(addr, UG_ITEM_BLOCK_SIZE_RAM);
             var extra_data = new byte[] { 0x0, 0x0, 0x0, 0x0 };
@@ -319,16 +289,12 @@ namespace PKHeX.Core.Injection
         {
             var ptr = GetUndergroundPointers(psb.Version);
             if (ptr is null)
-            {
                 return;
-            }
 
             var nx = (ICommunicatorNX)psb.com;
             var addr = psb.GetCachedPointer(nx, ptr);
             if (addr == InjectionUtil.INVALID_PTR)
-            {
                 throw new Exception("Invalid Pointer string.");
-            }
 
             data = data.AsSpan(0, UG_ITEM_BLOCK_SIZE).ToArray();
             var items = Core.ArrayUtil.EnumerateSplit(data, 0xC).Select(z => z.AsSpan(0, 0x8).ToArray()).ToArray();
@@ -343,17 +309,13 @@ namespace PKHeX.Core.Injection
             var lv = psb.Version;
             var ptr = GetTrainerPointer(lv);
             if (ptr is null || psb.com is not ICommunicatorNX sb)
-            {
                 return;
-            }
 
             data = data.AsSpan(0, MYSTATUS_BLOCK_SIZE).ToArray();
             var trainer_name = ptr.ExtendPointer(0x14);
             var trainer_name_addr = psb.GetCachedPointer(sb, trainer_name);
             if (trainer_name_addr == InjectionUtil.INVALID_PTR)
-            {
                 throw new Exception("Invalid Pointer string.");
-            }
 
             var retval = new byte[MYSTATUS_BLOCK_SIZE_RAM];
             // TID, SID, Money, Male
@@ -373,9 +335,7 @@ namespace PKHeX.Core.Injection
         {
             var ptr = GetDaycarePointers(psb.Version);
             if (ptr is null)
-            {
                 return null;
-            }
 
             var nx = (ICommunicatorNX)psb.com;
             var addr = psb.GetCachedPointer(nx, ptr);
@@ -399,9 +359,7 @@ namespace PKHeX.Core.Injection
         {
             var ptr = GetDaycarePointers(psb.Version);
             if (ptr is null)
-            {
                 return;
-            }
 
             var nx = (ICommunicatorNX)psb.com;
             var addr = psb.GetCachedPointer(nx, ptr);
@@ -428,21 +386,15 @@ namespace PKHeX.Core.Injection
                 foreach (Type t in types)
                 {
                     if (t.Name != block)
-                    {
                         continue;
-                    }
 
                     var m = t.GetMethod("Getter", BindingFlags.Public | BindingFlags.Static);
                     if (m is null)
-                    {
                         return false;
-                    }
 
                     var funcout = (byte[]?)m.Invoke(null, new object[] { psb });
                     if (funcout is not null)
-                    {
                         read = [funcout];
-                    }
 
                     return true;
                 }
@@ -457,9 +409,7 @@ namespace PKHeX.Core.Injection
                     var getter = value.Item1;
                     var funcout = getter.Invoke(psb);
                     if (funcout is null)
-                    {
                         return false;
-                    }
 
                     funcout.CopyTo(sb.Data, sb.Offset);
                     read = [funcout];

@@ -44,34 +44,22 @@ namespace AutoModTests
                     var noMoves = lines.Where(z => !z.StartsWith("- "));
 
                     // Giratina Origin from PLA has no item so will fail in BDSP
-                    setsTransfer = ShowdownParsing
-                        .GetShowdownSets(noMoves)
-                        .Where(z => !(z.Species == (ushort)Species.Giratina && z.Form == 1))
-                        .ToList();
+                    setsTransfer = ShowdownParsing.GetShowdownSets(noMoves).Where(z => !(z.Species == (ushort)Species.Giratina && z.Form == 1)).ToList();
                 }
 
                 // Filter sets based on if they are present in destination game
-                var filter = !paTransfer
-                    ? sets.Distinct(new ShowdownSetComparator())
-                        .Where(z => sav.Personal.IsPresentInGame(z.Species, z.Form))
-                    : setsTransfer
-                        .Distinct(new ShowdownSetComparator())
-                        .Where(z => sav.Personal.IsPresentInGame(z.Species, z.Form));
+                var filter = !paTransfer ? sets.Distinct(new ShowdownSetComparator()).Where(z => sav.Personal.IsPresentInGame(z.Species, z.Form)) : setsTransfer.Distinct(new ShowdownSetComparator()).Where(z => sav.Personal.IsPresentInGame(z.Species, z.Form));
 
                 sets = filter.ToList();
                 for (int i = 0; i < sets.Count; i++)
                 {
                     var set = sets[i];
                     if (set.Species <= 0)
-                    {
                         continue;
-                    }
 
                     try
                     {
-                        Debug.Write(
-                            $"Checking Set {i:000} [Species: {(Species)set.Species}] from File {file} using Save {s}: "
-                        );
+                        Debug.Write($"Checking Set {i:000} [Species: {(Species)set.Species}] from File {file} using Save {s}: ");
                         var regen = new RegenTemplate(set, sav.Generation);
                         var almres = sav.GetLegalFromSet(regen);
                         var la = new LegalityAnalysis(almres.Created);
@@ -170,13 +158,11 @@ namespace AutoModTests
                 }
 
                 testfailed = true;
-                msg +=
-                    $"GameVersion {gv} : Illegal: {illegalcount} | Legal: {sets["legal"].Length}\n";
+                msg += $"GameVersion {gv} : Illegal: {illegalcount} | Legal: {sets["legal"].Length}\n";
                 error += $"\n\n=============== GameVersion: {gv} ===============\n\n";
                 error += string.Join("\n\n", sets["illegal"].Select(x => x.Text));
             }
-            var fileName =
-                $"{Path.GetFileName(path).Replace('.', '_')}{DateTime.Now:_yyyy-MM-dd-HH-mm-ss}.log";
+            var fileName = $"{Path.GetFileName(path).Replace('.', '_')}{DateTime.Now:_yyyy-MM-dd-HH-mm-ss}.log";
             if (error.Trim().Length > 0)
             {
                 File.WriteAllText(Path.Combine(LogDirectory, fileName), error);

@@ -48,9 +48,7 @@ namespace PKHeX.Core.Enhancements
         private static string GetStringResponse(Stream? dataStream)
         {
             if (dataStream == null)
-            {
                 return string.Empty;
-            }
 
             using var reader = new StreamReader(dataStream);
             return reader.ReadToEnd();
@@ -90,9 +88,7 @@ namespace PKHeX.Core.Enhancements
             // code is returned as a long
             var json = DownloadString($"https://{Url}/api/v2/gpss/download/pokemon/{code}");
             if (!json.Contains("\"pokemon\":\""))
-            {
                 return null;
-            }
 
             var b64 = json.Split("\"pokemon\":\"")[1].Split("\"")[0];
             return System.Convert.FromBase64String(b64);

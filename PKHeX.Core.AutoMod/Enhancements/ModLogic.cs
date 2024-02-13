@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 namespace PKHeX.Core.AutoMod
@@ -62,7 +61,7 @@ namespace PKHeX.Core.AutoMod
             var resetevent = new ManualResetEvent(false);
             List<PKM> pklist = [];
             List<List<PKM>> Initialpklist = [];
-            var tr = APILegality.UseTrainerData ? TrainerSettings.GetSavedTrainerData(sav.Version, sav.Generation, fallback: sav, lang: (LanguageID)sav.Language) : sav;
+            var tr = APILegality.UseTrainerData ? TrainerSettings.GetSavedTrainerData(sav.Version, sav.Generation) : sav;
             var pt = sav.Personal;
             var species = Enumerable.Range(1, sav.MaxSpeciesID).Select(x => (ushort)x);
             var nthreads = Environment.ProcessorCount;
@@ -71,7 +70,7 @@ namespace PKHeX.Core.AutoMod
             for (int j = 0; j < nthreads; j++)
             {
                 var n = j;
-                new Thread(delegate ()
+                new Thread(() =>
                 {
                     List<PKM> Tpklist = [];
                     List<ushort> subspecies = [];
@@ -88,32 +87,25 @@ namespace PKHeX.Core.AutoMod
                     foreach (var s in subspecies)
                     {
                         if (!pt.IsSpeciesInGame(s))
-                        {
                             continue;
-                        }
 
                         var num_forms = pt[s].FormCount;
                         var str = GameInfo.Strings;
                         if (num_forms == 1 && cfg.IncludeForms) // Validate through form lists
-                        {
                             num_forms = (byte)FormConverter.GetFormList(s, str.types, str.forms, GameInfo.GenderSymbolUnicode, sav.Context).Length;
-                        }
 
                         for (byte f = 0; f < num_forms; f++)
                         {
                             if (!sav.Personal.IsPresentInGame(s, f) || FormInfo.IsLordForm(s, f, sav.Context) || FormInfo.IsBattleOnlyForm(s, f, sav.Generation) || FormInfo.IsFusedForm(s, f, sav.Generation) || (FormInfo.IsTotemForm(s, f) && sav.Context is not EntityContext.Gen7))
-                            {
                                 continue;
-                            }
-                            var form = cfg.IncludeForms ? f : GetBaseForm(s, f, str, sav);
+
+                            var form = cfg.IncludeForms ? f : GetBaseForm(s, f, sav);
                             var pk = AddPKM(sav, tr, s, f, cfg.SetShiny, cfg.SetAlpha, cfg.NativeOnly);
                             if (pk is not null && Tpklist.Find(x => x.Species == pk.Species && x.Form == pk.Form) is null)
                             {
                                 Tpklist.Add(pk);
                                 if (!cfg.IncludeForms)
-                                {
                                     break;
-                                }
                             }
                         }
                     }
@@ -145,7 +137,7 @@ namespace PKHeX.Core.AutoMod
             for (int j = 0; j < nthreads; j++)
             {
                 var n = j;
-                new Thread(delegate ()
+                new Thread(() =>
                 {
                     List<PKM> Tpklist = [];
                     List<ushort> subspecies = [];
@@ -162,32 +154,25 @@ namespace PKHeX.Core.AutoMod
                     foreach (var s in subspecies)
                     {
                         if (!pt.IsSpeciesInGame(s))
-                        {
                             continue;
-                        }
 
                         var num_forms = pt[s].FormCount;
                         var str = GameInfo.Strings;
                         if (num_forms == 1 && cfg.IncludeForms) // Validate through form lists
-                        {
                             num_forms = (byte)FormConverter.GetFormList(s, str.types, str.forms, GameInfo.GenderSymbolUnicode, sav.Context).Length;
-                        }
 
                         for (byte f = 0; f < num_forms; f++)
                         {
                             if (!DestinationSave.Personal.IsPresentInGame(s, f) || FormInfo.IsLordForm(s, f, sav.Context) || FormInfo.IsBattleOnlyForm(s, f, sav.Generation) || FormInfo.IsFusedForm(s, f, sav.Generation) || (FormInfo.IsTotemForm(s, f) && sav.Context is not EntityContext.Gen7))
-                            {
                                 continue;
-                            }
-                            var form = cfg.IncludeForms ? f : GetBaseForm(s, f, str, sav);
+
+                            var form = cfg.IncludeForms ? f : GetBaseForm(s, f, sav);
                             var pk = AddPKM(sav, tr, s, f, cfg.SetShiny, cfg.SetAlpha, cfg.NativeOnly);
                             if (pk is not null && Tpklist.Find(x => x.Species == pk.Species && x.Form == pk.Form) is null)
                             {
                                 Tpklist.Add(pk);
                                 if (!cfg.IncludeForms)
-                                {
                                     break;
-                                }
                             }
                         }
                     }
@@ -198,12 +183,11 @@ namespace PKHeX.Core.AutoMod
             }
             resetevent.WaitOne();
             foreach (var subpklist in Initialpklist)
-            {
                 pklist.AddRange(subpklist);
-            }
+
             return pklist.OrderBy(z => z.Species);
         }
-        public static byte GetBaseForm(ushort s, byte f, GameStrings str, SaveFile sav)
+        public static byte GetBaseForm(ushort s, byte f, SaveFile sav)
         {
             List<Species> SV = [Species.Tauros, Species.Wooper];
             List<Species> LA = [Species.Growlithe, Species.Arcanine, Species.Voltorb, Species.Electrode, Species.Typhlosion, Species.Qwilfish, Species.Sneasel, Species.Samurott, Species.Lilligant, Species.Zorua, Species.Zoroark, Species.Braviary, Species.Sliggoo, Species.Goodra, Species.Avalugg, Species.Decidueye];
@@ -224,9 +208,10 @@ namespace PKHeX.Core.AutoMod
                 return 1;
             }
             else
+            {
                 return f;
-         }
-       
+            }
+        }
         private static PKM? AddPKM(SaveFile sav, ITrainerInfo tr, ushort species, byte form, bool shiny, bool alpha, bool nativeOnly)
         {
             if (tr.GetRandomEncounter(species, form, shiny, alpha, nativeOnly, out var pk) && pk?.Species > 0)
@@ -264,9 +249,7 @@ namespace PKHeX.Core.AutoMod
             var blank = EntityBlank.GetBlank(tr);
             pk = GetRandomEncounter(blank, tr, species, form, shiny, alpha, nativeOnly);
             if (pk is null)
-            {
                 return false;
-            }
 
             pk = EntityConverter.ConvertToType(pk, blank.GetType(), out _);
             return pk is not null;
@@ -298,30 +281,20 @@ namespace PKHeX.Core.AutoMod
             var template = EntityBlank.GetBlank(tr.Generation, (GameVersion)tr.Game);
             var item = GetFormSpecificItem(tr.Game, blank.Species, blank.Form);
             if (item is not null)
-            {
                 blank.HeldItem = (int)item;
-            }
 
             if (blank.Species == (ushort)Species.Keldeo && blank.Form == 1)
-            {
                 blank.Move1 = (ushort)Move.SecretSword;
-            }
 
             if (blank.GetIsFormInvalid(tr, blank.Form))
-            {
                 return null;
-            }
 
             var setText = new ShowdownSet(blank).Text.Split('\r')[0];
-            if (shiny && !SimpleEdits.IsShinyLockedSpeciesForm(blank.Species, blank.Form))
-            {
+            if (shiny && !SimpleEdits.IsShinyLockedSpeciesForm(blank.Species, blank.Form)&&(tr.Generation!=6 && blank.Species != (ushort)Species.Vivillon && blank.Form !=18))
                 setText += Environment.NewLine + "Shiny: Yes";
-            }
 
             if (template is IAlphaReadOnly && alpha && tr.Game == (int)GameVersion.PLA)
-            {
                 setText += Environment.NewLine + "Alpha: Yes";
-            }
 
             var sset = new ShowdownSet(setText);
             var set = new RegenTemplate(sset) { Nickname = string.Empty };
@@ -332,14 +305,10 @@ namespace PKHeX.Core.AutoMod
             var pk = almres.Created;
             var success = almres.Status;
             if (pk.Species == (ushort)Species.Unown && pk.Form != blank.Form)
-            {
                 pk.Form = blank.Form;
-            }
 
             if (success == LegalizationResult.Regenerated)
-            {
                 return pk;
-            }
 
             sset = new ShowdownSet(setText.Split('\r')[0]);
             set = new RegenTemplate(sset) { Nickname = string.Empty };
@@ -379,21 +348,15 @@ namespace PKHeX.Core.AutoMod
                     return true;
             }
             if (FormInfo.IsBattleOnlyForm(pk.Species, form, generation))
-            {
                 return true;
-            }
 
             if (form == 0)
-            {
                 return false;
-            }
 
             if (species == 25 || SimpleEdits.AlolanOriginForms.Contains(species))
             {
                 if (generation >= 7 && pk.Generation is < 7 and not -1)
-                {
                     return true;
-                }
             }
 
             return false;
@@ -402,9 +365,7 @@ namespace PKHeX.Core.AutoMod
         private static int? GetFormSpecificItem(int game, int species, int form)
         {
             if (game == (int)GameVersion.PLA)
-            {
                 return null;
-            }
 
             var generation = ((GameVersion)game).GetGeneration();
             return species switch
@@ -428,16 +389,12 @@ namespace PKHeX.Core.AutoMod
         public static int LegalizeBox(this SaveFile sav, int box)
         {
             if ((uint)box >= sav.BoxCount)
-            {
                 return -1;
-            }
 
             var data = sav.GetBoxData(box);
             var ctr = sav.LegalizeAll(data);
             if (ctr > 0)
-            {
                 sav.SetBoxData(data, box);
-            }
 
             return ctr;
         }
@@ -450,18 +407,14 @@ namespace PKHeX.Core.AutoMod
         public static int LegalizeBoxes(this SaveFile sav)
         {
             if (!sav.HasBox)
-            {
                 return -1;
-            }
 
             var ctr = 0;
             for (int i = 0; i < sav.BoxCount; i++)
             {
                 var result = sav.LegalizeBox(i);
                 if (result < 0)
-                {
                     return result;
-                }
 
                 ctr += result;
             }
@@ -481,16 +434,12 @@ namespace PKHeX.Core.AutoMod
             {
                 var pk = data[i];
                 if (pk.Species <= 0 || new LegalityAnalysis(pk).Valid)
-                {
                     continue;
-                }
 
                 var result = sav.Legalize(pk);
                 result.Heal();
                 if (!new LegalityAnalysis(result).Valid)
-                {
                     continue; // failed to legalize
-                }
 
                 data[i] = result;
                 ctr++;

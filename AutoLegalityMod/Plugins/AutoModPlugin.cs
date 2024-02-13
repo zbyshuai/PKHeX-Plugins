@@ -55,9 +55,7 @@ namespace AutoModPlugins
 
             // Match PKHeX Versioning and ALM Settings only on parent plugin
             if (Priority != 0)
-            {
                 return;
-            }
 
             Task.Run(async () =>
                 {
@@ -104,15 +102,11 @@ namespace AutoModPlugins
             // ReSharper disable once SuspiciousTypeConversion.Global
             var form = ((ContainerControl)SaveFileEditor).ParentForm;
             if (form is null)
-            {
                 return;
-            }
 
             // wait for all plugins to be loaded
             while (!form.IsHandleCreated)
-            {
                 await Task.Delay(0_100, token).ConfigureAwait(false);
-            }
 
             if (form.InvokeRequired)
             {
@@ -131,15 +125,11 @@ namespace AutoModPlugins
             bool mismatch = ALMVersion.GetIsMismatch();
             bool reset =ALMVersion.Versions.CoreVersionCurrent > new Version(_settings.LatestAllowedVersion);
             if (reset)
-            {
                 _settings.LatestAllowedVersion = "0.0.0.0";
-            }
 
             _settings.EnableDevMode = _settings.EnableDevMode && !mismatch;
             if (mismatch || reset)
-            {
                 _settings.Save();
-            }
 
             return (mismatch, mismatch ? WinFormsUtil.ALMErrorMismatch(ALMVersion.Versions) : null);
         }
@@ -148,9 +138,7 @@ namespace AutoModPlugins
         {
             var items = menuStrip.Items;
             if (items.Find(ParentMenuParent, false)[0] is not ToolStripDropDownItem tools)
-            {
                 return;
-            }
 
             var toolsitems = tools.DropDownItems;
             var modmenusearch = toolsitems.Find(ParentMenuName, false);
@@ -161,9 +149,7 @@ namespace AutoModPlugins
         private static ToolStripMenuItem GetModMenu(ToolStripDropDownItem tools, IReadOnlyList<ToolStripItem> search)
         {
             if (search.Count != 0)
-            {
                 return (ToolStripMenuItem)search[0];
-            }
 
             var modmenu = CreateBaseGroupItem();
             tools.DropDownItems.Insert(0, modmenu);

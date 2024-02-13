@@ -43,8 +43,7 @@ namespace AutoModPlugins
             }
             catch (MissingMethodException)
             {
-                var errorstr =
-                    "The PKHeX-Plugins version does not match the PKHeX version.\nRefer to the Wiki for how to fix this error.\n\n"
+                var errorstr = "The PKHeX-Plugins version does not match the PKHeX version.\nRefer to the Wiki for how to fix this error.\n\n"
                     + $"The current ALM Version is {ALMVersion.Versions.AlmVersionCurrent}\n"
                     + $"The current PKHeX Version is {ALMVersion.Versions.CoreVersionCurrent}";
 
@@ -68,9 +67,7 @@ namespace AutoModPlugins
             var sav = SaveFileEditor.SAV;
             var count = sav.LegalizeBox(sav.CurrentBox);
             if (count <= 0) // failed to modify anything
-            {
                 return;
-            }
 
             SaveFileEditor.ReloadSlots();
             WinFormsUtil.Alert($"Legalized {count} Pokémon in Current Box!");
@@ -106,8 +103,7 @@ namespace AutoModPlugins
             la = new LegalityAnalysis(result);
             if (!la.Valid)
             {
-                const string errorstr =
-                    "Unable to make the Active Pokemon legal!\n\n"
+                const string errorstr = "Unable to make the Active Pokemon legal!\n\n"
                     + "No legal Pokémon matches the provided traits.\n\n"
                     + "Visit the Wiki to learn how to import Showdown Sets.";
 

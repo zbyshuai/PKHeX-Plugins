@@ -1,6 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 
 namespace PKHeX.Core.AutoMod
@@ -20,42 +18,30 @@ namespace PKHeX.Core.AutoMod
             pk.ApplySetGender(set);
             var la = new LegalityAnalysis(pk);
             if (la.Valid)
-            {
                 return;
-            }
 
             string Report = la.Report();
 
             if (Report.Contains(LegalityCheckStrings.LPIDGenderMismatch))
-            {
                 pk.Gender = pk.Gender == 0 ? 1 : 0;
-            }
 
             if (pk.Gender is not 0 and not 1)
-            {
                 pk.Gender = pk.GetSaneGender();
-            }
         }
 
         public static void SetNature(PKM pk, IBattleTemplate set, IEncounterable enc)
         {
             if (pk.Nature == set.Nature || set.Nature == -1)
-            {
                 return;
-            }
 
             var val = Math.Min((int)Nature.Quirky, Math.Max((int)Nature.Hardy, set.Nature));
             if (pk.Species == (ushort)Species.Toxtricity)
             {
                 if (pk.Form == ToxtricityUtil.GetAmpLowKeyResult(val))
-                {
                     pk.Nature = val; // StatNature already set
-                }
 
                 if (pk.Format >= 8 && pk.StatNature != pk.Nature && pk.StatNature != 12 && (pk.StatNature > 24 || pk.StatNature % 6 == 0)) // Only Serious Mint for Neutral Natures
-                {
                     pk.StatNature = 12;
-                }
 
                 return;
             }
@@ -65,9 +51,7 @@ namespace PKHeX.Core.AutoMod
             // Try setting the actual nature (in the event the StatNature was set instead)
             var orig = pk.Nature;
             if (orig == val)
-            {
                 return;
-            }
 
             var la = new LegalityAnalysis(pk);
             pk.Nature = val;
@@ -75,32 +59,22 @@ namespace PKHeX.Core.AutoMod
             var enc1 = la.EncounterMatch;
             var enc2 = la2.EncounterMatch;
             if (((!ReferenceEquals(enc1, enc2) && enc1 is not EncounterEgg) || la2.Results.Any(z => (z.Identifier == CheckIdentifier.Nature || z.Identifier == CheckIdentifier.Encounter) && !z.Valid)) && enc is not EncounterEgg)
-            {
                 pk.Nature = orig;
-            }
 
             if (pk.Format >= 8 && pk.StatNature != pk.Nature && pk.StatNature is 0 or 6 or 18 or >= 24) // Only Serious Mint for Neutral Natures
-            {
                 pk.StatNature = (int)Nature.Serious;
-            }
         }
 
         public static void SetAbility(PKM pk, IBattleTemplate set, AbilityPermission preference)
         {
             if (pk.Ability != set.Ability)
-            {
                 pk.RefreshAbility(pk is PK5 { HiddenAbility: true } ? 2 : pk.AbilityNumber >> 1);
-            }
 
             if (pk.Ability != set.Ability && pk.Context >= EntityContext.Gen6 && set.Ability != -1)
-            {
                 pk.RefreshAbility(pk is PK5 { HiddenAbility: true } ? 2 : pk.PersonalInfo.GetIndexOfAbility(set.Ability));
-            }
 
             if (preference <= 0)
-            {
                 return;
-            }
 
             var pi = pk.PersonalInfo;
             var pref = preference.GetSingleValue();
@@ -109,25 +83,17 @@ namespace PKHeX.Core.AutoMod
             {
                 pk.RefreshAbility(pref);
                 if (pk is PK5 pk5 && preference == AbilityPermission.OnlyHidden)
-                {
                     pk5.HiddenAbility = true;
-                }
             }
             // Set preferred ability number if applicable
             if (pref == 2 && pi is IPersonalAbility12H h && h.AbilityH == set.Ability)
-            {
                 pk.AbilityNumber = (int)preference;
-            }
             // 3/4/5 transferred to 6+ will have ability 1 if both abilitynum 1 and 2 are the same. Capsule cant convert 1 -> 2 if the abilities arnt unique
             if (pk.Format >= 6 && pk.Generation is 3 or 4 or 5 && pk.AbilityNumber != 4 && pi is IPersonalAbility12 a && a.Ability1 == a.Ability2)
-            {
                 pk.AbilityNumber = 1;
-            }
 
             if (pk is G3PKM && pi is IPersonalAbility12 b && b.Ability1 == b.Ability2)
-            {
                 pk.AbilityNumber = 1;
-            }
         }
 
         /// <summary>
@@ -146,13 +112,10 @@ namespace PKHeX.Core.AutoMod
             var evolutionRequired = enc.Species != set.Species;
             var formchange = Form != pk.Form;
             if (evolutionRequired)
-            {
                 pk.Species = set.Species;
-            }
+
             if (formchange)
-            {
                 pk.Form = Form;
-            }
 
             if ((evolutionRequired || formchange) && pk is IScaledSizeValue sv)
             {
@@ -167,9 +130,8 @@ namespace PKHeX.Core.AutoMod
                 {
                     var result = ToxtricityUtil.GetAmpLowKeyResult(pk.Nature);
                     if (result == pk.Form)
-                    {
                         break;
-                    }
+
                     pk.Nature = Util.Rand.Next(25);
                 }
             }
@@ -181,34 +143,24 @@ namespace PKHeX.Core.AutoMod
                 SetAbility(pk, set, abilitypref);
             }
             if (pk.CurrentLevel != set.Level)
-            {
                 pk.CurrentLevel = set.Level;
-            }
 
             if (pk.Met_Level > pk.CurrentLevel)
-            {
                 pk.Met_Level = pk.CurrentLevel;
-            }
 
             if (set.Level != 100 && set.Level == enc.LevelMin && pk.Format is 3 or 4)
-            {
                 pk.EXP = Experience.GetEXP(enc.LevelMin + 1, PersonalTable.HGSS[enc.Species].EXPGrowth) - 1;
-            }
 
             var currentlang = (LanguageID)pk.Language;
             var finallang = lang ?? currentlang;
             if (finallang == LanguageID.Hacked)
-            {
                 finallang = LanguageID.English;
-            }
 
             pk.Language = (int)finallang;
 
             // check if nickname even needs to be updated
             if (set.Nickname.Length == 0 && finallang == currentlang && !evolutionRequired)
-            {
                 return;
-            }
 
             if (enc is IFixedTrainer { IsFixedTrainer: true })
             {
@@ -220,9 +172,7 @@ namespace PKHeX.Core.AutoMod
             {
                 // Nickname matches the requested nickname already
                 if (pk.Nickname == set.Nickname)
-                {
                     return;
-                }
                 // This should be illegal except Meister Magikarp in BDSP, however trust the user and set corresponding OT
                 var nick = et.GetNickname(pk.Language);
                 if (nick != null)
@@ -266,9 +216,7 @@ namespace PKHeX.Core.AutoMod
         {
             bool genderValid = pkm.IsGenderValid();
             if (!genderValid)
-            {
                 return IsValidGenderMismatch(pkm);
-            }
 
             // check for mixed->fixed gender incompatibility by checking the gender of the original species
             return !SpeciesCategory.IsFixedGenderFromDual(pkm.Species) || IsValidFixedGenderFromBiGender(pkm, enc.Species);
@@ -284,9 +232,7 @@ namespace PKHeX.Core.AutoMod
         {
             var current = pkm.Gender;
             if (current == 2) // shedinja, genderless
-            {
                 return true;
-            }
 
             var gender = EntityGender.GetFromPID(original, pkm.EncryptionConstant);
             return gender == current;
@@ -317,9 +263,7 @@ namespace PKHeX.Core.AutoMod
         {
             // If no moves are requested, just keep the encounter moves
             if (set.Moves[0] != 0)
-            {
                 pk.SetMoves(set.Moves, pk is not PA8);
-            }
 
             var la = new LegalityAnalysis(pk);
             // Remove invalid encounter moves (eg. Kyurem Encounter -> Requested Kyurem black)
@@ -380,9 +324,7 @@ namespace PKHeX.Core.AutoMod
             pk.ApplyHeldItem(set.HeldItem, set.Context);
             pk.FixInvalidFormItems(); // arceus, silvally, giratina, genesect fix
             if (!ItemRestrictions.IsHeldItemAllowed(pk) || pk is PB7)
-            {
                 pk.HeldItem = 0; // Remove the item if the item is illegal in its generation
-            }
         }
 
         /// <summary>
@@ -393,9 +335,8 @@ namespace PKHeX.Core.AutoMod
         {
             // Ignore games where items don't exist in the first place. They would still allow forms
             if (pk.LA)
-            {
                 return;
-            }
+            
 
             switch ((Species)pk.Species)
             {
@@ -404,9 +345,7 @@ namespace PKHeX.Core.AutoMod
                 case Species.Genesect:
                     bool valid = FormItem.TryGetForm(pk.Species, pk.HeldItem, pk.Format, out byte pkform);
                     if (!valid)
-                    {
                         break;
-                    }
 
                     pk.HeldItem = pk.Form != pkform ? 0 : pk.HeldItem;
                     pk.Form = pk.Form != pkform ? (byte)0 : pkform;
@@ -435,8 +374,7 @@ namespace PKHeX.Core.AutoMod
             }
         }
 
-        public static MoveType GetValidOpergonTeraType(byte form) =>
-            (form & 3) switch
+        public static MoveType GetValidOpergonTeraType(byte form) => (form & 3) switch
             {
                 0 => MoveType.Grass,
                 1 => MoveType.Water,

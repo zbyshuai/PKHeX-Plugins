@@ -10,14 +10,10 @@ namespace AutoModPlugins.GUI
         public ALMError(string error_txt, string[] buttons)
         {
             if (buttons.Length > 4)
-            {
                 throw new Exception($"Expected 4 buttons at maximum but found {buttons.Length}.");
-            }
 
             if (buttons.Length == 0)
-            {
                 throw new Exception("Need at least 1 button.");
-            }
 
             InitializeComponent();
             label1.Text = error_txt;

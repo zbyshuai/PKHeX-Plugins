@@ -10,10 +10,7 @@ namespace PKHeX.Core.AutoMod
     public static class TrainerSettings
     {
         private static readonly TrainerDatabase Database = new();
-        private static readonly string TrainerPath = Path.Combine(
-            Path.GetDirectoryName(Environment.ProcessPath)!,
-            "trainers"
-        );
+        public static readonly string TrainerPath = Path.Combine(Path.GetDirectoryName(Environment.ProcessPath)!, "trainers");
         private static readonly SimpleTrainerInfo DefaultFallback8 = new(GameVersion.SW);
         private static readonly SimpleTrainerInfo DefaultFallback7 = new(GameVersion.UM);
         private static readonly GameVersion[] FringeVersions =
@@ -36,15 +33,10 @@ namespace PKHeX.Core.AutoMod
         public static ITrainerInfo DefaultFallback(GameVersion ver, LanguageID? lang = null)
         {
             if (!ver.IsValidSavedVersion())
-            {
                 ver = GameUtil.GameVersions.First(z => ver.Contains(z));
-            }
 
             var ctx = ver.GetContext();
-            var fallback =
-                lang == null
-                    ? new SimpleTrainerInfo(ver) { Context = ctx }
-                    : new SimpleTrainerInfo(ver) { Language = (int)lang, Context = ctx };
+            var fallback = lang == null ? new SimpleTrainerInfo(ver) { Context = ctx } : new SimpleTrainerInfo(ver) { Language = (int)lang, Context = ctx };
             fallback.OT = DefaultOT;
             fallback.TID16 = DefaultTID16;
             fallback.SID16 = DefaultSID16;
@@ -60,26 +52,20 @@ namespace PKHeX.Core.AutoMod
         public static void LoadTrainerDatabaseFromPath(string path)
         {
             if (!Directory.Exists(path))
-            {
                 return;
-            }
 
             var files = Directory.EnumerateFiles(path, "*", SearchOption.AllDirectories);
             foreach (var f in files)
             {
                 var len = new FileInfo(f).Length;
                 if (!EntityDetection.IsSizePlausible(len))
-                {
                     return;
-                }
 
                 var data = File.ReadAllBytes(f);
                 var prefer = EntityFileExtension.GetContextFromExtension(f, EntityContext.None);
                 var pk = EntityFormat.GetFromBytes(data, prefer);
                 if (pk != null)
-                {
                     Database.Register(new PokeTrainerDetails(pk.Clone()));
-                }
             }
         }
 
@@ -112,19 +98,13 @@ namespace PKHeX.Core.AutoMod
             }
 
             if (trainer != null)
-            {
                 return trainer;
-            }
 
             if (fallback == null)
-            {
                 return special_version ? DefaultFallback(ver, lang) : DefaultFallback(generation, lang);
-            }
 
             if (lang == null)
-            {
                 return fallback;
-            }
 
             return lang == (LanguageID)fallback.Language ? fallback : special_version ? DefaultFallback(ver, lang) : DefaultFallback(generation, lang);
         }
