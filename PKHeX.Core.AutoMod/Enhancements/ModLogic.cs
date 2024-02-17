@@ -61,7 +61,7 @@ namespace PKHeX.Core.AutoMod
             var resetevent = new ManualResetEvent(false);
             List<PKM> pklist = [];
             List<List<PKM>> Initialpklist = [];
-            var tr = APILegality.UseTrainerData ? TrainerSettings.GetSavedTrainerData(sav.Version, sav.Generation) : sav;
+            var tr = APILegality.UseTrainerData ? TrainerSettings.GetSavedTrainerData(sav.Version, sav.Generation, fallback: sav, lang: (LanguageID)sav.Language) : sav;
             var pt = sav.Personal;
             var species = Enumerable.Range(1, sav.MaxSpeciesID).Select(x => (ushort)x);
             var nthreads = Environment.ProcessorCount;
@@ -271,6 +271,7 @@ namespace PKHeX.Core.AutoMod
             blank.Gender = blank.GetSaneGender();
             if (species is ((ushort)Species.Meowstic) or ((ushort)Species.Indeedee))
             {
+                blank.Gender = form;
                 blank.Form = (byte)blank.Gender;
             }
             else
