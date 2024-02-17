@@ -1000,7 +1000,7 @@ namespace PKHeX.Core.AutoMod
                     shiny = set.Shiny ? Shiny.Always : Shiny.Never;
                 }
 
-                FindEggPIDIV8b(pk, shiny, set.Gender);
+                FindEggPIDIV8b(pk, shiny, set.Gender,criteria);
             }
         }
 
@@ -1227,7 +1227,7 @@ namespace PKHeX.Core.AutoMod
         /// <param name="pk">pokemon to edit</param>
         /// <param name="shiny">Shinytype requested</param>
         /// <param name="gender"></param>
-        public static void FindEggPIDIV8b(PKM pk, Shiny shiny, int gender)
+        public static void FindEggPIDIV8b(PKM pk, Shiny shiny, int gender, EncounterCriteria criteria)
         {
             var ivs = new[] { -1, -1, -1, -1, -1, -1 };
             var IVs = pk.IVs;
@@ -1314,8 +1314,8 @@ namespace PKHeX.Core.AutoMod
                     if (ivs[i] == -1)
                         ivs[i] = (int)ivs2[i];
                 }
-                // if (!ivs.SequenceEqual(required_ivs))
-                //    continue;
+                if (!criteria.IsCompatibleIVs(ivs))
+                   continue;
                 pk.IV_HP = ivs[0];
                 pk.IV_ATK = ivs[1];
                 pk.IV_DEF = ivs[2];
