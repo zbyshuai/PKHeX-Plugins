@@ -1645,6 +1645,8 @@ namespace PKHeX.Core.AutoMod
         ///
         public static EncounterCriteria SetSpecialCriteria(EncounterCriteria criteria, IEncounterable enc, IBattleTemplate set)
         {
+            if (enc is EncounterStatic8U)
+                criteria = criteria with { Shiny = Shiny.Never };
             switch (enc.Species)
             {
                 case (int)Species.Kartana when criteria is { Nature: Nature.Timid, IV_ATK: <= 21 }: // Speed boosting Timid Kartana ATK IVs <= 19

@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
+using System.Collections.Concurrent;
 namespace PKHeX.Core.AutoMod
 {
     /// <summary>
@@ -58,67 +60,36 @@ namespace PKHeX.Core.AutoMod
         /// <returns>Consumable list of newly generated <see cref="PKM"/> data.</returns>
         public static IEnumerable<PKM> GenerateLivingDex(this SaveFile sav, LivingDexConfig cfg)
         {
-            var resetevent = new ManualResetEvent(false);
-            List<PKM> pklist = [];
+            var pklist = new ConcurrentBag<PKM>();
             List<List<PKM>> Initialpklist = [];
             var tr = APILegality.UseTrainerData ? TrainerSettings.GetSavedTrainerData(sav.Version, sav.Generation, fallback: sav, lang: (LanguageID)sav.Language) : sav;
             var pt = sav.Personal;
             var species = Enumerable.Range(1, sav.MaxSpeciesID).Select(x => (ushort)x);
-            var nthreads = Environment.ProcessorCount;
-            var toProcess = nthreads;
-            var maxSpeciesperThread = (species.ToArray().Length / nthreads)+1;
-            for (int j = 0; j < nthreads; j++)
+            Parallel.ForEach(species, s =>
             {
-                var n = j;
-                new Thread(() =>
-                {
-                    List<PKM> Tpklist = [];
-                    List<ushort> subspecies = [];
-                    var InitialEnc = maxSpeciesperThread * n;
-                    var FinalEnc = InitialEnc + maxSpeciesperThread;
-                    try
-                    {
-                        subspecies = species.ToList()[InitialEnc..FinalEnc];
-                    }
-                    catch (Exception)
-                    {
-                        subspecies = species.ToList()[InitialEnc..];
-                    }
-                    foreach (var s in subspecies)
-                    {
-                        if (!pt.IsSpeciesInGame(s))
-                            continue;
+                 if (!pt.IsSpeciesInGame(s))
+                      return;
 
-                        var num_forms = pt[s].FormCount;
-                        var str = GameInfo.Strings;
-                        if (num_forms == 1 && cfg.IncludeForms) // Validate through form lists
-                            num_forms = (byte)FormConverter.GetFormList(s, str.types, str.forms, GameInfo.GenderSymbolUnicode, sav.Context).Length;
+                 var num_forms = pt[s].FormCount;
+                 var str = GameInfo.Strings;
+                 if (num_forms == 1 && cfg.IncludeForms) // Validate through form lists
+                      num_forms = (byte)FormConverter.GetFormList(s, str.types, str.forms, GameInfo.GenderSymbolUnicode, sav.Context).Length;
 
-                        for (byte f = 0; f < num_forms; f++)
-                        {
-                            if (!sav.Personal.IsPresentInGame(s, f) || FormInfo.IsLordForm(s, f, sav.Context) || FormInfo.IsBattleOnlyForm(s, f, sav.Generation) || FormInfo.IsFusedForm(s, f, sav.Generation) || (FormInfo.IsTotemForm(s, f) && sav.Context is not EntityContext.Gen7))
-                                continue;
+                 for (byte f = 0; f < num_forms; f++)
+                 {
+                     if (!sav.Personal.IsPresentInGame(s, f) || FormInfo.IsLordForm(s, f, sav.Context) || FormInfo.IsBattleOnlyForm(s, f, sav.Generation) || FormInfo.IsFusedForm(s, f, sav.Generation) || (FormInfo.IsTotemForm(s, f) && sav.Context is not EntityContext.Gen7))
+                         continue;
 
-                            var form = cfg.IncludeForms ? f : GetBaseForm(s, f, sav);
-                            var pk = AddPKM(sav, tr, s, f, cfg.SetShiny, cfg.SetAlpha, cfg.NativeOnly);
-                            if (pk is not null && Tpklist.Find(x => x.Species == pk.Species && x.Form == pk.Form) is null)
-                            {
-                                Tpklist.Add(pk);
-                                if (!cfg.IncludeForms)
-                                    break;
-                            }
-                        }
-                    }
-                    Initialpklist.Add(Tpklist);
-                    if (Interlocked.Decrement(ref toProcess) == 0)
-                        resetevent.Set();
-                }).Start();
-            }
-            resetevent.WaitOne();
-            foreach(var subpklist in Initialpklist)
-            {
-                pklist.AddRange(subpklist);
-            }
+                     var form = cfg.IncludeForms ? f : GetBaseForm(s, f, sav);
+                     var pk = AddPKM(sav, tr, s, f, cfg.SetShiny, cfg.SetAlpha, cfg.NativeOnly);
+                     if (pk is not null && !pklist.Any(x => x.Species == pk.Species && x.Form == pk.Form))
+                     {
+                          pklist.Add(pk);
+                          if (!cfg.IncludeForms)
+                              break;
+                     }
+                 }
+            });
             return pklist.OrderBy(z=>z.Species);
         }
         public static IEnumerable<PKM> GenerateTLivingDex(this SaveFile sav) => sav.GenerateTLivingDex(cfg);
@@ -126,65 +97,37 @@ namespace PKHeX.Core.AutoMod
         {
             var resetevent = new ManualResetEvent(false);
             var DestinationSave = SaveUtil.GetBlankSAV(cfg.TransferVersion, "ALM");
-            List<PKM> pklist = [];
+            ConcurrentBag<PKM> pklist = [];
             List<List<PKM>> Initialpklist = [];
             var tr = APILegality.UseTrainerData ? TrainerSettings.GetSavedTrainerData(sav.Version, sav.Generation, fallback: sav, lang: (LanguageID)sav.Language) : sav;
             var pt = sav.Personal;
             var species = Enumerable.Range(1, sav.MaxSpeciesID).Select(x => (ushort)x);
-            var nthreads = Environment.ProcessorCount;
-            var toProcess = nthreads;
-            var maxSpeciesperThread = (species.ToArray().Length / nthreads) + 1;
-            for (int j = 0; j < nthreads; j++)
+            Parallel.ForEach(species, s =>
             {
-                var n = j;
-                new Thread(() =>
+                if (!pt.IsSpeciesInGame(s))
+                    return;
+                if (!DestinationSave.Personal.IsSpeciesInGame(s))
+                    return;
+                var num_forms = pt[s].FormCount;
+                var str = GameInfo.Strings;
+                if (num_forms == 1 && cfg.IncludeForms) // Validate through form lists
+                    num_forms = (byte)FormConverter.GetFormList(s, str.types, str.forms, GameInfo.GenderSymbolUnicode, sav.Context).Length;
+
+                for (byte f = 0; f < num_forms; f++)
                 {
-                    List<PKM> Tpklist = [];
-                    List<ushort> subspecies = [];
-                    var InitialEnc = maxSpeciesperThread * n;
-                    var FinalEnc = InitialEnc + maxSpeciesperThread;
-                    try
+                    if (!DestinationSave.Personal.IsPresentInGame(s, f) || FormInfo.IsLordForm(s, f, sav.Context) || FormInfo.IsBattleOnlyForm(s, f, sav.Generation) || FormInfo.IsFusedForm(s, f, sav.Generation) || (FormInfo.IsTotemForm(s, f) && sav.Context is not EntityContext.Gen7))
+                        continue;
+
+                    var form = cfg.IncludeForms ? f : GetBaseForm(s, f, sav);
+                    var pk = AddPKM(sav, tr, s, f, cfg.SetShiny, cfg.SetAlpha, cfg.NativeOnly);
+                    if (pk is not null && !pklist.Any(x => x.Species == pk.Species && x.Form == pk.Form))
                     {
-                        subspecies = species.ToList()[InitialEnc..FinalEnc];
+                        pklist.Add(pk);
+                        if (!cfg.IncludeForms)
+                            break;
                     }
-                    catch (Exception)
-                    {
-                        subspecies = species.ToList()[InitialEnc..];
-                    }
-                    foreach (var s in subspecies)
-                    {
-                        if (!pt.IsSpeciesInGame(s))
-                            continue;
-
-                        var num_forms = pt[s].FormCount;
-                        var str = GameInfo.Strings;
-                        if (num_forms == 1 && cfg.IncludeForms) // Validate through form lists
-                            num_forms = (byte)FormConverter.GetFormList(s, str.types, str.forms, GameInfo.GenderSymbolUnicode, sav.Context).Length;
-
-                        for (byte f = 0; f < num_forms; f++)
-                        {
-                            if (!DestinationSave.Personal.IsPresentInGame(s, f) || FormInfo.IsLordForm(s, f, sav.Context) || FormInfo.IsBattleOnlyForm(s, f, sav.Generation) || FormInfo.IsFusedForm(s, f, sav.Generation) || (FormInfo.IsTotemForm(s, f) && sav.Context is not EntityContext.Gen7))
-                                continue;
-
-                            var form = cfg.IncludeForms ? f : GetBaseForm(s, f, sav);
-                            var pk = AddPKM(sav, tr, s, f, cfg.SetShiny, cfg.SetAlpha, cfg.NativeOnly);
-                            if (pk is not null && Tpklist.Find(x => x.Species == pk.Species && x.Form == pk.Form) is null)
-                            {
-                                Tpklist.Add(pk);
-                                if (!cfg.IncludeForms)
-                                    break;
-                            }
-                        }
-                    }
-                    Initialpklist.Add(Tpklist);
-                    if (Interlocked.Decrement(ref toProcess) == 0)
-                        resetevent.Set();
-                }).Start();
-            }
-            resetevent.WaitOne();
-            foreach (var subpklist in Initialpklist)
-                pklist.AddRange(subpklist);
-
+                }
+            });
             return pklist.OrderBy(z => z.Species);
         }
         public static byte GetBaseForm(ushort s, byte f, SaveFile sav)
