@@ -52,6 +52,10 @@ namespace PKHeX.Core.Injection
             lock (_sync)
             {
                 Connection = new Socket(SocketType.Stream, ProtocolType.Tcp);
+                var testconnect = new UdpClient(19999);
+                var msg = testconnect.ReceiveAsync().Result;
+                if(msg.Buffer != null)
+                    IP = msg.RemoteEndPoint.Address.ToString();
                 Connection.Connect(IP, Port);
                 Connected = true;
             }
