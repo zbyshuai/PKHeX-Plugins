@@ -251,7 +251,7 @@ namespace AutoModPlugins
                     return (LiveHeXValidation.None, "", version);
             }
 
-            var saveName = GameInfo.GetVersionName((GameVersion)SAV.SAV.Game);
+            var saveName = GameInfo.GetVersionName(SAV.SAV.Version);
             var msg = "Could not find a compatible game version while establishing an NTR connection.\n" + $"Save file loaded: Pokémon {saveName}";
             return (LiveHeXValidation.GameVersion, msg, LiveHeXVersion.Unknown);
         }

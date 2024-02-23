@@ -27,7 +27,7 @@ namespace PKHeX.Core.AutoMod
                 Extra.Alpha = true;
         }
 
-        public RegenSet(ICollection<string> lines, int format, Shiny shiny = Shiny.Never)
+        public RegenSet(ICollection<string> lines, byte format, Shiny shiny = Shiny.Never)
         {
             var modified = lines.Select(z => z.Replace(">=", "≥").Replace("<=", "≤"));
             Extra = new RegenSetting { ShinyType = shiny };

@@ -1140,12 +1140,12 @@ namespace PKHeX.Core.AutoMod
                 [Pink] = [Love, Dream, Heal],
             };
 
-        public static int ApplyFirstLegalBall(PKM pkm, IEnumerable<Ball> balls)
+        public static byte ApplyFirstLegalBall(PKM pkm, IEnumerable<Ball> balls)
         {
             var orig_ball = pkm.Ball;
             foreach (var b in balls)
             {
-                pkm.Ball = (int)b;
+                pkm.Ball = (byte)b;
                 if (new LegalityAnalysis(pkm).Valid)
                     return pkm.Ball;
             }

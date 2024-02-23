@@ -105,7 +105,7 @@ namespace AutoModTests
                 var almres = tr.GetLegalFromSet(showdown);
                 var pk = almres.Created;
                 pk.Language.Should().Be((int)LanguageID.English);
-                pk.OT_Name.Should().Be(sti.OT);
+                pk.OriginalTrainerName.Should().Be(sti.OT);
 
                 TrainerSettings.Clear();
             }
@@ -151,7 +151,7 @@ namespace AutoModTests
                 var almres = tr.GetLegalFromSet(showdown);
                 var pk = almres.Created;
                 pk.Language.Should().Be((int)LanguageID.Japanese);
-                pk.OT_Name.Should().Be(sti.OT);
+                pk.OriginalTrainerName.Should().Be(sti.OT);
 
                 TrainerSettings.Clear();
             }
