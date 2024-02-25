@@ -94,7 +94,7 @@ namespace PKHeX.Core.AutoMod
                 }
 
                 // Look before we leap -- don't waste time generating invalid / incompatible junk.
-                if (!IsEncounterValid(set, enc, abilityreq, destVer))
+               if (!IsEncounterValid(set, enc, abilityreq, destVer))
                     continue;
 
                 if (enc is IFixedNature { IsFixedNature: true } fixedNature)
@@ -1001,7 +1001,7 @@ namespace PKHeX.Core.AutoMod
                     shiny = set.Shiny ? Shiny.Always : Shiny.Never;
                 }
 
-                FindEggPIDIV8b(pk, shiny, set.Gender is null ? (byte)25 : (byte)set.Gender,criteria);
+                FindEggPIDIV8b(pk, shiny, set.Gender is null ? (byte)Gender.Random : (byte)set.Gender,criteria);
             }
         }
 
