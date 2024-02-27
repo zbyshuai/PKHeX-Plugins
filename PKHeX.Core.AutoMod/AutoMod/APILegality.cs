@@ -414,7 +414,7 @@ namespace PKHeX.Core.AutoMod
                 return false;
 
             // Don't process if the gender does not match the set
-            if (set.Gender != -1 && enc is IFixedGender { IsFixedGender: true } fg && fg.Gender != set.Gender)
+            if (set.Gender is not null && enc is IFixedGender { IsFixedGender: true } fg && fg.Gender != set.Gender)
                 return false;
 
             // Don't process if PKM is definitely Hidden Ability and the PKM is from Gen 3 or Gen 4 and Hidden Capsule doesn't exist
@@ -1032,14 +1032,14 @@ namespace PKHeX.Core.AutoMod
                     bool isShiny;
                     uint xor;
                     while (true)
-                    {
+                {
                         xor = ShinyUtil.GetShinyXor(pid, fakeTID);
                         isShiny = xor < 16;
                         if (isShiny)
                         {
                             if (xor != 0)
                                 xor = 1;
-                            break;
+                    break;
                         }
                         if (i >= 1)
                             break;
@@ -1108,7 +1108,7 @@ namespace PKHeX.Core.AutoMod
                     PersonalInfo.RatioMagicMale => 0,
                     _ => Encounter9RNG.GetGender(gender_ratio, rand.NextInt(100)),
                 };
-                if (criteria.Gender != FixedGenderUtil.GenderRandom && gender != criteria.Gender)
+                if (criteria.Gender is not null && gender != criteria.Gender)
                     continue;
                 pk.Gender = (byte)gender;
 
@@ -1427,6 +1427,12 @@ namespace PKHeX.Core.AutoMod
 
                 if (pk.Gender != EntityGender.GetFromPIDAndRatio(pk.PID, gr))
                     continue;
+                if(enc is EncounterSlot4 s4)
+                {
+                    var lvl = new SingleLevelRange(enc.LevelMin);
+                    if (!LeadFinder.TryGetLeadInfo4(s4, lvl, pk.HGSS, seed, 4, out _))
+                        continue;
+                }
 
                 if (pk.Version == GameVersion.CXD && Method == PIDType.CXD) // verify locks
                 {
