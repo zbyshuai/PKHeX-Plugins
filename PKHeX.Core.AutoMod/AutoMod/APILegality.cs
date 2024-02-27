@@ -1387,7 +1387,6 @@ namespace PKHeX.Core.AutoMod
                 case PIDType.Pokewalker when (pk.Nature >= Nature.Quirky || pk.AbilityNumber == 4): // No possible pokewalker matches
                     return;
             }
-
             var iterPKM = pk.Clone();
             // Requested pokemon may be an evolution, guess index based on requested species ability
             var ability_idx = GetRequiredAbilityIdx(iterPKM, set);
@@ -1445,7 +1444,8 @@ namespace PKHeX.Core.AutoMod
                 {
                     if (pk.Form != iterPKM.Form)
                         continue;
-
+                    if (enc.Generation == 4)
+                        pk.Form = GetUnownForm(seed,pk.HGSS);
                     if (enc.Generation == 3 && pk.Form != EntityPID.GetUnownForm3(pk.PID))
                         continue;
                 }
@@ -1456,7 +1456,15 @@ namespace PKHeX.Core.AutoMod
                 break;
             } while (++count < 5_000_000);
         }
+        private static byte GetUnownForm(uint seed, bool hgss)
+        {
+            // ABCD|E(Item)|F(Form) determination
+            if (!hgss)
+                return 8; // Always 100% form as 'I' in one of the rooms. Don't need to check rand(1) choice.
 
+            var formSeed = LCRNG.Next6(seed);
+            return RuinsOfAlph4.GetEntranceForm(formSeed); // !?
+        }
         private static int GetRequiredAbilityIdx(PKM pkm, IBattleTemplate set)
         {
             if (set.Ability == -1)
