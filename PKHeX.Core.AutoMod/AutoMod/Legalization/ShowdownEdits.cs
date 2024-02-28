@@ -110,7 +110,7 @@ namespace PKHeX.Core.AutoMod
             pk.SetRecordFlags(set.Moves); // Set record flags before evolution (TODO: what if middle evolution has exclusive record moves??)
 
             var evolutionRequired = enc.Species != set.Species;
-            var formchange = Form != pk.Form;
+            var formchange = Form != pk.Form && pk.Species != (ushort)Species.Unown;
             if (evolutionRequired)
                 pk.Species = set.Species;
 

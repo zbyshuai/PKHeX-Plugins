@@ -95,7 +95,7 @@ namespace PKHeX.Core.AutoMod
 
                 // Look before we leap -- don't waste time generating invalid / incompatible junk.
                if (!IsEncounterValid(set, enc, abilityreq, destVer))
-                    continue;
+                   continue;
 
                 if (enc is IFixedNature { IsFixedNature: true } fixedNature)
                     criteria = criteria with { Nature = Nature.Random };
@@ -414,8 +414,8 @@ namespace PKHeX.Core.AutoMod
                 return false;
 
             // Don't process if the gender does not match the set
-            if (set.Gender is not null && enc is IFixedGender { IsFixedGender: true } fg && fg.Gender != set.Gender)
-                return false;
+            //if (enc is IFixedGender { IsFixedGender: true } fg && fg.Gender != set.Gender)
+                //return false;
 
             // Don't process if PKM is definitely Hidden Ability and the PKM is from Gen 3 or Gen 4 and Hidden Capsule doesn't exist
             var gen = enc.Generation;
@@ -437,7 +437,7 @@ namespace PKHeX.Core.AutoMod
 
         public static bool IsRequestedLevelValid(IBattleTemplate set, IEncounterable enc)
         {
-            if (enc.Generation <= 2)
+            if (enc.Generation <= 4)
                 return true;
 
             if (enc.LevelMin > enc.LevelMax)
@@ -498,7 +498,7 @@ namespace PKHeX.Core.AutoMod
                 return false;
 
             // Further shiny filtering if set is regentemplate
-            if (set is RegenTemplate regent && regent.Regen.HasExtraSettings)
+            /*if (set is RegenTemplate regent && regent.Regen.HasExtraSettings)
             {
                 var shinytype = regent.Regen.Extra.ShinyType;
                 if (shinytype == Shiny.AlwaysStar && enc.Shiny == Shiny.AlwaysSquare)
@@ -506,7 +506,7 @@ namespace PKHeX.Core.AutoMod
 
                 if (shinytype == Shiny.AlwaysSquare && enc.Shiny == Shiny.AlwaysStar)
                     return false;
-            }
+            }*/
             return true;
         }
 
@@ -1448,10 +1448,10 @@ namespace PKHeX.Core.AutoMod
                 }
                 if (pk.Species == (int)Species.Unown)
                 {
+                    if (enc.Generation == 4 && pk.Form != GetUnownForm(seed, pk.HGSS))
+                        continue;
                     if (pk.Form != iterPKM.Form)
                         continue;
-                    if (enc.Generation == 4)
-                        pk.Form = GetUnownForm(seed,pk.HGSS);
                     if (enc.Generation == 3 && pk.Form != EntityPID.GetUnownForm3(pk.PID))
                         continue;
                 }

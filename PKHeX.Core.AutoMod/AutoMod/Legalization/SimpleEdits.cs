@@ -225,7 +225,6 @@ namespace PKHeX.Core.AutoMod
         {
             if (pk.IsShiny == isShiny)
                 return; // don't mess with stuff if pk is already shiny. Also do not modify for specific shinies (Most likely event shinies)
-            
 
             if (!isShiny)
             {
