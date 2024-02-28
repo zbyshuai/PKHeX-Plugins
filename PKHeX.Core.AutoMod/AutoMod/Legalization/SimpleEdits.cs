@@ -223,6 +223,9 @@ namespace PKHeX.Core.AutoMod
         /// <param name="shiny">Set is shiny</param>
         public static void SetShinyBoolean(this PKM pk, bool isShiny, IEncounterable enc, Shiny shiny)
         {
+            if (SimpleEdits.IsShinyLockedSpeciesForm(pk.Species, pk.Form))
+                return;
+
             if (pk.IsShiny == isShiny)
                 return; // don't mess with stuff if pk is already shiny. Also do not modify for specific shinies (Most likely event shinies)
 
