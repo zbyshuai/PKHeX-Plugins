@@ -411,7 +411,7 @@ namespace PKHeX.Core.Injection
                     if (funcout is null)
                         return false;
 
-                    funcout.CopyTo(sb.Data, sb.Offset);
+                    funcout.CopyTo(sb.Data);
                     read = [funcout];
                 }
                 else
@@ -436,8 +436,7 @@ namespace PKHeX.Core.Injection
                 return;
             }
             var setter = value.Item2;
-            var offset = ((IDataIndirect)sb).Offset;
-            setter.Invoke(psb, data.AsSpan(offset).ToArray());
+            setter.Invoke(psb, data.AsSpan().ToArray());
         }
     }
 }
