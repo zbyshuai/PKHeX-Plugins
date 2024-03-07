@@ -11,16 +11,13 @@ namespace AutoModTests
         static FeatureTests() => TestUtil.InitializePKHeXEnvironment();
 
         [Fact]
-        public static void DefaultRegenNoOT() =>
-            RegenSet.Default.HasTrainerSettings.Should().BeFalse();
+        public static void DefaultRegenNoOT() => RegenSet.Default.HasTrainerSettings.Should().BeFalse();
 
         [Fact]
-        public static void DefaultRegenNoExtra() =>
-            RegenSet.Default.HasExtraSettings.Should().BeFalse();
+        public static void DefaultRegenNoExtra() => RegenSet.Default.HasExtraSettings.Should().BeFalse();
 
         [Fact]
-        public static void DefaultRegenNoBatch() =>
-            RegenSet.Default.HasBatchSettings.Should().BeFalse();
+        public static void DefaultRegenNoBatch() => RegenSet.Default.HasBatchSettings.Should().BeFalse();
 
         [Fact]
         public static void FallbackNotPolluted()
@@ -108,7 +105,7 @@ namespace AutoModTests
                 var almres = tr.GetLegalFromSet(showdown);
                 var pk = almres.Created;
                 pk.Language.Should().Be((int)LanguageID.English);
-                pk.OT_Name.Should().Be(sti.OT);
+                pk.OriginalTrainerName.Should().Be(sti.OT);
 
                 TrainerSettings.Clear();
             }
@@ -154,7 +151,7 @@ namespace AutoModTests
                 var almres = tr.GetLegalFromSet(showdown);
                 var pk = almres.Created;
                 pk.Language.Should().Be((int)LanguageID.Japanese);
-                pk.OT_Name.Should().Be(sti.OT);
+                pk.OriginalTrainerName.Should().Be(sti.OT);
 
                 TrainerSettings.Clear();
             }

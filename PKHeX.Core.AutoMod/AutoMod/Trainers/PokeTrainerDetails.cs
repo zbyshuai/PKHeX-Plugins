@@ -28,11 +28,11 @@ namespace PKHeX.Core.AutoMod
 
         public string OT
         {
-            get => pkm.OT_Name;
-            set => pkm.OT_Name = value;
+            get => pkm.OriginalTrainerName;
+            set => pkm.OriginalTrainerName = value;
         }
-        public int Gender => pkm.OT_Gender;
-        public int Game => pkm.Version;
+        public byte Gender => pkm.OriginalTrainerGender;
+        public GameVersion Version => pkm.Version;
         public int Language
         {
             get => pkm.Language;
@@ -45,9 +45,7 @@ namespace PKHeX.Core.AutoMod
             set
             {
                 if (pkm is IGeoTrack gt)
-                {
                     gt.Country = value;
-                }
             }
         }
         public byte Region
@@ -56,9 +54,7 @@ namespace PKHeX.Core.AutoMod
             set
             {
                 if (pkm is IGeoTrack gt)
-                {
                     gt.Region = value;
-                }
             }
         }
         public byte ConsoleRegion
@@ -67,12 +63,10 @@ namespace PKHeX.Core.AutoMod
             set
             {
                 if (pkm is IGeoTrack gt)
-                {
                     gt.ConsoleRegion = value;
-                }
             }
         }
-        public int Generation => pkm.Generation;
+        public byte Generation => pkm.Generation;
         public EntityContext Context => pkm.Context;
 
         public static PokeTrainerDetails Clone(PokeTrainerDetails p) => new(p.pkm.Clone());

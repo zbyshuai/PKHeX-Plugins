@@ -11,13 +11,13 @@ namespace PKHeX.Core.AutoMod
         public ushort Species { get; set; }
         public EntityContext Context { get; set; }
         public string Nickname { get; set; }
-        public int Gender { get; set; }
+        public byte? Gender { get; set; }
         public int HeldItem { get; set; }
         public int Ability { get; set; }
-        public int Level { get; set; }
+        public byte Level { get; set; }
         public bool Shiny { get; set; }
-        public int Friendship { get; set; }
-        public int Nature { get; set; }
+        public byte Friendship { get; set; }
+        public Nature Nature { get; set; }
         public string FormName { get; set; }
         public byte Form { get; set; }
         public int HiddenPowerType { get; set; }
@@ -42,7 +42,7 @@ namespace PKHeX.Core.AutoMod
             Gender = set.Gender;
             HeldItem = set.HeldItem;
             Ability = set.Ability;
-            Level = (set.Level == 50 && APILegality.ForceLevel100for50) ? 100 : set.Level;
+            Level = (set.Level == 50 && APILegality.ForceLevel100for50) ? (byte)100 : set.Level;
             Shiny = set.Shiny;
             Friendship = set.Friendship;
             Nature = set.Nature;
@@ -60,7 +60,7 @@ namespace PKHeX.Core.AutoMod
             SanitizeMoves(set, Moves);
         }
 
-        public RegenTemplate(ShowdownSet set, int gen = PKX.Generation) : this(set, gen, set.Text)
+        public RegenTemplate(ShowdownSet set, byte gen = PKX.Generation) : this(set, gen, set.Text)
         {
             this.SanitizeForm(gen);
             this.SanitizeBattleMoves();
@@ -76,9 +76,7 @@ namespace PKHeX.Core.AutoMod
             Regen = new RegenSet(set.InvalidLines, gen, shiny);
             Shiny = Regen.Extra.IsShiny;
             if (Ability == -1)
-            {
                 Ability = RegenUtil.GetRegenAbility(set.Species, gen, Regen.Extra.Ability);
-            }
 
             set.InvalidLines.Clear();
         }
@@ -87,9 +85,7 @@ namespace PKHeX.Core.AutoMod
         {
             pk.FixGender(this);
             if (!pk.IsNicknamed)
-            {
                 Nickname = string.Empty;
-            }
 
             Regen = new RegenSet(pk);
             Shiny = Regen.Extra.IsShiny;
@@ -102,9 +98,7 @@ namespace PKHeX.Core.AutoMod
             for (int i = 0; i < evs.Length; i++)
             {
                 if (copy[i] > maxEV)
-                {
                     copy[i] = maxEV;
-                }
             }
             return copy;
         }
@@ -113,15 +107,11 @@ namespace PKHeX.Core.AutoMod
         {
             // Specified moveset, no need to sanitize
             if (moves[0] != 0)
-            {
                 return;
-            }
 
             // Sanitize keldeo moves to avoid form mismatches
             if (set.Species == (ushort)Core.Species.Keldeo)
-            {
                 moves[0] = set.Form == 0 ? (ushort)Move.AquaJet : (ushort)Move.SecretSword;
-            }
         }
 
         private string GetSummary()
@@ -135,23 +125,17 @@ namespace PKHeX.Core.AutoMod
             var split = text.Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
             var group = split.Where(z => !IsIgnored(z, Regen)).GroupBy(z => z.StartsWith("- ")).ToArray();
             if (group.Length == 0)
-            {
                 return sb.ToString();
-            }
 
             sb.AppendJoin(Environment.NewLine, group[0]).AppendLine(); // Not Moves
 
             // Add non-Showdown content
             if (hasRegen)
-            {
                 sb.AppendLine(regen.Trim());
-            }
 
             // Add Moves
             if (group.Length > 1)
-            {
                 sb.AppendJoin(Environment.NewLine, group[1]).AppendLine(); // Moves
-            }
 
             return sb.ToString();
         }

@@ -24,12 +24,10 @@ namespace PKHeX.Core.AutoMod
             Extra.Ball = (Ball)pk.Ball;
             Extra.ShinyType = pk.ShinyXor == 0 ? Shiny.AlwaysSquare : pk.IsShiny ? Shiny.AlwaysStar : Shiny.Never;
             if (pk is IAlphaReadOnly { IsAlpha: true })
-            {
                 Extra.Alpha = true;
-            }
         }
 
-        public RegenSet(ICollection<string> lines, int format, Shiny shiny = Shiny.Never)
+        public RegenSet(ICollection<string> lines, byte format, Shiny shiny = Shiny.Never)
         {
             var modified = lines.Select(z => z.Replace(">=", "≥").Replace("<=", "≤"));
             Extra = new RegenSetting { ShinyType = shiny };
@@ -45,29 +43,19 @@ namespace PKHeX.Core.AutoMod
         {
             var sb = new StringBuilder();
             if (HasExtraSettings)
-            {
                 sb.AppendLine(RegenUtil.GetSummary(Extra));
-            }
 
             if (HasTrainerSettings && Trainer != null)
-            {
                 sb.AppendLine(RegenUtil.GetSummary(Trainer));
-            }
 
             if (HasBatchSettings)
-            {
                 sb.AppendLine(RegenUtil.GetSummary(Batch));
-            }
 
             if (EncounterFilters.Any())
-            {
                 sb.AppendLine(RegenUtil.GetSummary(EncounterFilters));
-            }
 
             if (VersionFilters.Count > 0)
-            {
                 sb.AppendLine(RegenUtil.GetSummary(VersionFilters));
-            }
 
             return sb.ToString();
         }

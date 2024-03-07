@@ -10,14 +10,10 @@ namespace PKHeX.Core.Injection
         public static ulong GetPointerAddress(this ICommunicatorNX sb, string ptr, bool heapRelative = true)
         {
             if (string.IsNullOrWhiteSpace(ptr) || ptr.IndexOfAny(['-', '/', '*']) != -1)
-            {
                 return INVALID_PTR;
-            }
 
             while (ptr.Contains("]]"))
-            {
                 ptr = ptr.Replace("]]", "]+0]");
-            }
 
             uint finadd = 0;
             if (!ptr.EndsWith(']'))
@@ -27,9 +23,7 @@ namespace PKHeX.Core.Injection
             }
             var jumps = ptr.Replace("main", "").Replace("[", "").Replace("]", "").Split(new[] { "+" }, StringSplitOptions.RemoveEmptyEntries);
             if (jumps.Length == 0)
-            {
                 return INVALID_PTR;
-            }
 
             var initaddress = Util.GetHexValue(jumps[0].Trim());
             ulong address = BitConverter.ToUInt64(sb.ReadBytesMain(initaddress, 0x8), 0);
@@ -37,9 +31,7 @@ namespace PKHeX.Core.Injection
             {
                 var val = Util.GetHexValue(j.Trim());
                 if (val == initaddress)
-                {
                     continue;
-                }
 
                 address = BitConverter.ToUInt64(sb.ReadBytesAbsolute(address + val, 0x8), 0);
             }
@@ -55,9 +47,7 @@ namespace PKHeX.Core.Injection
         public static string ExtendPointer(this string pointer, params uint[] jumps)
         {
             foreach (var jump in jumps)
-            {
                 pointer = $"[{pointer}]+{jump:X}";
-            }
 
             return pointer;
         }
@@ -65,9 +55,7 @@ namespace PKHeX.Core.Injection
         public static ulong SearchSaveKey(this PokeSysBotMini psb, string saveblocks, uint key)
         {
             if (psb.com is not ICommunicatorNX nx)
-            {
                 return 0;
-            }
 
             var ptr = psb.GetCachedPointer(nx, saveblocks, false);
             var dt = nx.ReadBytesAbsolute(ptr + 8, 16);
@@ -81,9 +69,7 @@ namespace PKHeX.Core.Injection
                 var mid = start + ((block_ct >> 1) * size);
                 var found = BitConverter.ToUInt32(nx.ReadBytesAbsolute(mid, 4));
                 if (found == key)
-                {
                     return mid;
-                }
 
                 if (found >= key)
                 {

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using FluentAssertions;
 using PKHeX.Core;
@@ -72,9 +71,7 @@ namespace AutoModTests
                 for (int i = Array.IndexOf(GetGameVersionsToTest, ver)+1; i < GetGameVersionsToTest.Length; i++)
                 {
                     foreach (var cf in cfgs)
-                    {
                         yield return new object[] { ver, cf, GetGameVersionsToTest[i] };
-                    }
                 }
             }
         }
@@ -104,40 +101,30 @@ namespace AutoModTests
             foreach (ushort s in species)
             {
                 if (!personal.IsSpeciesInGame(s))
-                {
                     continue;
-                }
 
                 List<byte> forms = [];
                 var formCount = personal[s].FormCount;
                 var str = GameInfo.Strings;
                 if (formCount == 1 && cfg.IncludeForms) // Validate through form lists
-                {
                     formCount = (byte)FormConverter.GetFormList(s, str.types, str.forms, GameInfo.GenderSymbolUnicode, sav.Context).Length;
-                }
 
                 for (byte f = 0; f < formCount; f++)
                 {
                     if (!destpersonal.Personal.IsPresentInGame(s, f) || FormInfo.IsFusedForm(s, f, sav.Generation) || FormInfo.IsBattleOnlyForm(s, f, sav.Generation) || (FormInfo.IsTotemForm(s, f) && sav.Context is not EntityContext.Gen7) || FormInfo.IsLordForm(s, f, sav.Context))
-                    {
                         continue;
-                    }
 
                     var valid = sav.GetRandomEncounter(s, f, cfg.SetShiny, cfg.SetAlpha, cfg.NativeOnly, out PKM? pk);
                     if (pk is not null && valid && pk.Form == f && !forms.Contains(f))
                     {
                         forms.Add(f);
                         if (!cfg.IncludeForms)
-                        {
                             break;
-                        }
                     }
                 }
 
                 if (forms.Count > 0)
-                {
                     speciesDict.TryAdd(s, forms);
-                }
             }
 
             return cfg.IncludeForms ? speciesDict.Values.Sum(x => x.Count) : speciesDict.Count;

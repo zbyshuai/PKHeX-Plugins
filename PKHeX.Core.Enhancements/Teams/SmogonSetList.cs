@@ -84,25 +84,17 @@ namespace PKHeX.Core.Enhancements
                 }
 
                 if (IllegalFormats.Any(s => s.Equals(format, StringComparison.OrdinalIgnoreCase)))
-                {
                     continue;
-                }
 
                 if (LetsGo != format.StartsWith("LGPE", StringComparison.OrdinalIgnoreCase))
-                {
                     continue;
-                }
 
                 if (BDSP != format.StartsWith("BDSP", StringComparison.OrdinalIgnoreCase))
-                {
                     continue;
-                }
 
                 var level = format.StartsWith("LC") ? 5 : 100;
                 if (!split1[i - 1].Contains("\"name\":"))
-                {
                     continue;
-                }
 
                 var name = split1[i - 1][
                     (
@@ -161,12 +153,7 @@ namespace PKHeX.Core.Enhancements
             };
         }
 
-        private static string ConvertSetToShowdown(
-            string set,
-            string species,
-            bool shiny,
-            int level
-        )
+        private static string ConvertSetToShowdown(string set, string species, bool shiny, int level)
         {
             var result = GetSetLines(set, species, shiny, level);
             return string.Join(Environment.NewLine, result);
@@ -174,12 +161,7 @@ namespace PKHeX.Core.Enhancements
 
         private static readonly string[] statNames = ["HP", "Atk", "Def", "SpA", "SpD", "Spe"];
 
-        private static List<string> GetSetLines(
-            string set,
-            string species,
-            bool shiny,
-            int level
-        )
+        private static List<string> GetSetLines(string set, string species, bool shiny, int level)
         {
             TryGetToken(set, "\"items\":[\"", "\"", out var item);
             TryGetToken(set, "\"moveslots\":", ",\"evconfigs\":", out var movesets);
@@ -189,61 +171,39 @@ namespace PKHeX.Core.Enhancements
             TryGetToken(set, "\"teratypes\":[\"", "\"", out var teratype);
 
             if (teratype?.StartsWith(']') == true)
-            {
                 teratype = null;
-            }
 
             var evs = ParseEVIVs(evstr, false);
             var ivs = ParseEVIVs(ivstr, true);
             var ability = set[1] == ']' ? string.Empty : set.Split('\"')[1];
 
             if (item == "No Item") // LGPE actually lists an item, RBY sets have an empty [].
-            {
                 item = string.Empty;
-            }
 
             var result = new List<string>(9)
             {
                 item.Length == 0 ? species : $"{species} @ {item}",
             };
             if (level != 100)
-            {
                 result.Add($"Level: {level}");
-            }
 
             if (shiny)
-            {
                 result.Add("Shiny: Yes");
-            }
 
             if (!string.IsNullOrWhiteSpace(ability))
-            {
                 result.Add($"Ability: {ability}");
-            }
 
             if (!string.IsNullOrWhiteSpace(teratype))
-            {
                 result.Add($"Tera Type: {teratype}");
-            }
 
             if (evstr.Length >= 3)
-            {
-                result.Add(
-                    $"EVs: {string.Join(" / ", statNames.Select((z, i) => $"{evs[i]} {z}"))}"
-                );
-            }
+                result.Add($"EVs: {string.Join(" / ", statNames.Select((z, i) => $"{evs[i]} {z}"))}");
 
             if (ivstr.Length >= 3)
-            {
-                result.Add(
-                    $"IVs: {string.Join(" / ", statNames.Select((z, i) => $"{ivs[i]} {z}"))}"
-                );
-            }
+                result.Add($"IVs: {string.Join(" / ", statNames.Select((z, i) => $"{ivs[i]} {z}"))}");
 
             if (!string.IsNullOrWhiteSpace(nature))
-            {
                 result.Add($"{nature} Nature");
-            }
 
             result.AddRange(GetMoves(movesets).Select(move => $"- {move}"));
             return result;
@@ -257,12 +217,7 @@ namespace PKHeX.Core.Enhancements
         /// <param name="suffix">Suffix</param>
         /// <param name="result">Substring within prefix-suffix.</param>
         /// <returns>True if found a substring, false if no prefix found.</returns>
-        private static bool TryGetToken(
-            string line,
-            string prefix,
-            string suffix,
-            out string result
-        )
+        private static bool TryGetToken(string line, string prefix, string suffix, out string result)
         {
             var prefixStart = line.IndexOf(prefix, StringComparison.Ordinal);
             if (prefixStart < 0)
@@ -274,9 +229,7 @@ namespace PKHeX.Core.Enhancements
 
             var suffixStart = line.IndexOf(suffix, prefixStart, StringComparison.Ordinal);
             if (suffixStart < 0)
-            {
                 suffixStart = line.Length;
-            }
 
             result = line[prefixStart..suffixStart];
             return true;
@@ -288,31 +241,22 @@ namespace PKHeX.Core.Enhancements
             var slots = movesets.Split(new[] { "],[" }, StringSplitOptions.None);
             foreach (var slot in slots)
             {
-                var choices = slot.Split(new[] { "\"move\":\"" }, StringSplitOptions.None)
-                    .Skip(1)
-                    .ToArray();
+                var choices = slot.Split(new[] { "\"move\":\"" }, StringSplitOptions.None).Skip(1).ToArray();
                 foreach (var choice in choices)
                 {
                     var move = GetMove(choice);
                     if (moves.Contains(move))
-                    {
                         continue;
-                    }
 
                     if (move.Equals("Hidden Power", StringComparison.OrdinalIgnoreCase))
-                    {
-                        move =
-                            $"{move} [{choice.Split(new[] { "\"type\":\"" }, StringSplitOptions.None)[1].Split('\"')[0]}]";
-                    }
+                        move = $"{move} [{choice.Split(new[] { "\"type\":\"" }, StringSplitOptions.None)[1].Split('\"')[0]}]";
 
                     moves.Add(move);
                     break;
                 }
 
                 if (moves.Count == 4)
-                {
                     break;
-                }
             }
 
             static string GetMove(string s) => s.Split('"')[0];
@@ -325,12 +269,9 @@ namespace PKHeX.Core.Enhancements
             string[] evdefault = ["0", "0", "0", "0", "0", "0"];
             var val = iv ? ivdefault : evdefault;
             if (string.IsNullOrWhiteSpace(liststring))
-            {
                 return val;
-            }
 
-            string getStat(string v) =>
-                liststring.Split(new[] { v }, StringSplitOptions.None)[1].Split(',')[0];
+            string getStat(string v) => liststring.Split(new[] { v }, StringSplitOptions.None)[1].Split(',')[0];
             val[0] = getStat("\"hp\":");
             val[1] = getStat("\"atk\":");
             val[2] = getStat("\"def\":");

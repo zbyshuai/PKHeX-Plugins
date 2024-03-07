@@ -12,9 +12,7 @@ namespace PKHeX.Core.Injection
         {
             int len = 0;
             foreach (var a in arr)
-            {
                 len += a.Length;
-            }
 
             var result = new T[len];
 
@@ -32,9 +30,7 @@ namespace PKHeX.Core.Injection
         {
             var result = new T[data.Length / size][];
             for (int i = 0; i < data.Length; i += size)
-            {
                 result[i / size] = data.Slice(i, size).ToArray();
-            }
 
             return result;
         }

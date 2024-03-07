@@ -45,9 +45,7 @@ namespace PKHeX.Core.Enhancements
         {
             paste = paste.Trim(); // Remove White Spaces
             if (IsTeamBackup(paste))
-            {
                 return ShowdownTeamSet.GetTeams(paste).SelectMany(z => z.Team).ToList();
-            }
 
             var lines = paste.Split(separator, StringSplitOptions.None);
             return ShowdownParsing.GetShowdownSets(lines).ToList();
@@ -62,9 +60,7 @@ namespace PKHeX.Core.Enhancements
         {
             source = source.Trim();
             if (IsTeamBackup(source))
-            {
                 return true;
-            }
 
             string[] stringSeparators = ["\n\r"];
 

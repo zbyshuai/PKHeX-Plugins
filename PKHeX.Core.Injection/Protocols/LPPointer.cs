@@ -18,6 +18,7 @@ namespace PKHeX.Core.Injection
             LiveHeXVersion.SV_v201,
             LiveHeXVersion.SV_v202,
             LiveHeXVersion.SV_v300,
+            LiveHeXVersion.SV_v301,
             LiveHeXVersion.LA_v100,
             LiveHeXVersion.LA_v101,
             LiveHeXVersion.LA_v102,
@@ -509,6 +510,7 @@ namespace PKHeX.Core.Injection
         public static readonly Dictionary<LiveHeXVersion, BlockData[]> SCBlocks =
             new()
             {
+                { LiveHeXVersion.SV_v301, Blocks_SV_v300 },
                 { LiveHeXVersion.SV_v300, Blocks_SV_v300 },
                 { LiveHeXVersion.SV_v202, Blocks_SV_v202 },
                 { LiveHeXVersion.SV_v201, Blocks_SV_v201 },
@@ -539,7 +541,7 @@ namespace PKHeX.Core.Injection
         {
             return lv switch
             { 
-                LiveHeXVersion.SV_v300 => "[[[[main+47350d8]+1C0]+30]+9D0]",
+                LiveHeXVersion.SV_v300 or LiveHeXVersion.SV_v301 => "[[[[main+47350d8]+1C0]+30]+9D0]",
                 LiveHeXVersion.SV_v202 => "[[[[main+4623A30]+198]+30]+9D0]",
                 LiveHeXVersion.SV_v201 => "[[[[main+4622A30]+198]+30]+9D0]",
                 LiveHeXVersion.SV_v132 => "[[[main+44C1C18]+130]+9B0]",
@@ -559,7 +561,7 @@ namespace PKHeX.Core.Injection
         {
             return lv switch
             {
-                LiveHeXVersion.SV_v300 => "[[[[[main+47350d8]+D8]]]+30]",
+                LiveHeXVersion.SV_v300 or LiveHeXVersion.SV_v301 => "[[[[[main+47350d8]+D8]]]+30]",
                 LiveHeXVersion.SV_v202 => "[[[[[main+4617648]+D8]]]+30]",
                 LiveHeXVersion.SV_v201 => "[[[[[main+4616648]+D8]]]+30]",
                 LiveHeXVersion.SV_v132 => "[[[[[main+44B71A8]+D8]]]+30]",
@@ -572,9 +574,7 @@ namespace PKHeX.Core.Injection
         public override byte[] ReadBox(PokeSysBotMini psb, int box, int _, List<byte[]> allpkm)
         {
             if (psb.com is not ICommunicatorNX sb)
-            {
                 return ArrayUtil.ConcatAll(allpkm.ToArray());
-            }
 
             var lv = psb.Version;
             var b1s1 = psb.GetCachedPointer(sb, GetB1S1Pointer(lv));
@@ -586,9 +586,7 @@ namespace PKHeX.Core.Injection
         public override byte[] ReadSlot(PokeSysBotMini psb, int box, int slot)
         {
             if (psb.com is not ICommunicatorNX sb)
-            {
                 return new byte[psb.SlotSize];
-            }
 
             var lv = psb.Version;
             var slotsize = RamOffsets.GetSlotSize(lv);
@@ -602,9 +600,7 @@ namespace PKHeX.Core.Injection
         public override void SendSlot(PokeSysBotMini psb, byte[] data, int box, int slot)
         {
             if (psb.com is not ICommunicatorNX sb)
-            {
                 return;
-            }
 
             var lv = psb.Version;
             var slotsize = RamOffsets.GetSlotSize(lv);
@@ -618,9 +614,7 @@ namespace PKHeX.Core.Injection
         public override void SendBox(PokeSysBotMini psb, byte[] boxData, int box)
         {
             if (psb.com is not ICommunicatorNX sb)
-            {
                 return;
-            }
 
             var lv = psb.Version;
             var b1s1 = psb.GetCachedPointer(sb, GetB1S1Pointer(lv));
@@ -633,9 +627,7 @@ namespace PKHeX.Core.Injection
         {
             read = null;
             if (psb.com is not ICommunicatorNX sb)
-            {
                 return false;
-            }
 
             try
             {
@@ -643,9 +635,7 @@ namespace PKHeX.Core.Injection
                 var blocks = sav.GetType().GetProperty("Blocks");
                 var allblocks = blocks?.GetValue(sav);
                 if (allblocks is not SCBlockAccessor scba)
-                {
                     return false;
-                }
 
                 foreach (var sub in offsets)
                 {
@@ -653,9 +643,7 @@ namespace PKHeX.Core.Injection
                     var offset = sub.Pointer;
                     var scb = scba.GetBlock(scbkey);
                     if (scb.Type == SCTypeCode.None && sub.Type != SCTypeCode.None)
-                    {
                         ReflectUtil.SetValue(scb, "Type", sub.Type);
-                    }
 
                     var ram = psb.com.ReadBytes(psb.GetCachedPointer(sb, offset), scb.Data.Length);
                     ram.CopyTo(scb.Data, 0);
@@ -679,16 +667,12 @@ namespace PKHeX.Core.Injection
         public override void WriteBlocksFromSAV(PokeSysBotMini psb, string block, SaveFile sav)
         {
             if (psb.com is not ICommunicatorNX sb)
-            {
                 return;
-            }
 
             var blocks = sav.GetType().GetProperty("Blocks");
             var allblocks = blocks?.GetValue(sav);
             if (allblocks is not SCBlockAccessor scba)
-            {
                 return;
-            }
 
             var offsets = SCBlocks[psb.Version].Where(z => z.Display == block);
             foreach (var sub in offsets)
@@ -703,9 +687,7 @@ namespace PKHeX.Core.Injection
         public static readonly Func<PokeSysBotMini, byte[]?> GetTrainerDataLA = psb =>
         {
             if (psb.com is not ICommunicatorNX sb)
-            {
                 return null;
-            }
 
             var lv = psb.Version;
             var ptr = SCBlocks[lv].First(z => z.Name == "MyStatus").Pointer;
@@ -716,9 +698,7 @@ namespace PKHeX.Core.Injection
         public static readonly Func<PokeSysBotMini, byte[]?> GetTrainerDataSV = psb =>
         {
             if (psb.com is not ICommunicatorNX sb)
-            {
                 return null;
-            }
 
             var lv = psb.Version;
             var ptr = SCBlocks[lv].First(z => z.Name == "MyStatus").Pointer;

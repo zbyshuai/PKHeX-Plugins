@@ -13,9 +13,7 @@ namespace PKHeX.Core.Injection
         {
             var bytes = psb.com.ReadBytes(psb.GetBoxOffset(box), len);
             if (psb.GapSize == 0)
-            {
                 return bytes;
-            }
 
             var currofs = 0;
             for (int i = 0; i < psb.SlotCount; i++)
@@ -51,9 +49,7 @@ namespace PKHeX.Core.Injection
             ReadOnlySpan<byte> bytes = boxData;
             byte[][] pkmData = bytes.Split(psb.SlotSize);
             for (int i = 0; i < psb.SlotCount; i++)
-            {
                 SendSlot(psb, pkmData[i], box, i);
-            }
         }
 
         public static readonly Func<PokeSysBotMini, byte[]?> GetTrainerData = psb =>
@@ -62,9 +58,7 @@ namespace PKHeX.Core.Injection
             var ofs = RamOffsets.GetTrainerBlockOffset(lv);
             var size = RamOffsets.GetTrainerBlockSize(lv);
             if (size <= 0 || ofs == 0)
-            {
                 return null;
-            }
 
             var data = psb.com.ReadBytes(ofs, size);
             return data;

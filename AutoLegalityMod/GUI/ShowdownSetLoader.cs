@@ -76,9 +76,7 @@ namespace AutoModPlugins
 
             var message = result.GetMessage();
             if (!string.IsNullOrEmpty(message))
-            {
                 WinFormsUtil.Alert(message);
-            }
         }
 
         private static AutoModErrorCode ImportSetToTabs(ShowdownSet set, bool skipDialog = false)
@@ -105,8 +103,7 @@ namespace AutoModPlugins
 
             if (msg is LegalizationResult.VersionMismatch)
             {
-                var errorstr =
-                    "The PKHeX-Plugins version does not match the PKHeX version.\n\n"
+                var errorstr = "The PKHeX-Plugins version does not match the PKHeX version.\n\n"
                     + "Refer to the Wiki to fix this error.\n\n"
                     + $"The current ALM Version is {ALMVersion.Versions.AlmVersionCurrent}\n"
                     + $"The current PKHeX Version is {ALMVersion.Versions.CoreVersionCurrent}";
@@ -137,10 +134,8 @@ namespace AutoModPlugins
                     analysis = regen.SetAnalysis(sav, legal);
                 }
 
-                var errorstr =
-                    msg == LegalizationResult.Failed ? "failed to generate" : "timed out";
-                var invalid_set_error =
-                    (analysis == null ? $"Set {errorstr}." : $"Set Invalid: {analysis}")
+                var errorstr = msg == LegalizationResult.Failed ? "failed to generate" : "timed out";
+                var invalid_set_error = (analysis == null ? $"Set {errorstr}." : $"Set Invalid: {analysis}")
                     + "\n\nRefer to the wiki for more help on generating sets correctly."
                     + "\n\nIf you are sure this set is valid, please create an issue on GitHub and upload the error_log.txt file in the issue.";
                 var error = WinFormsUtil.ALMErrorBasic(invalid_set_error);
@@ -181,8 +176,7 @@ namespace AutoModPlugins
             var result = sav.ImportToExisting(sets, BoxData, out var invalid, out var timeout, start, replace);
             if (timeout.Count > 0 || invalid.Count > 0)
             {
-                var errorstr =
-                    $"{timeout.Count} set(s) timed out and {invalid.Count} set(s) are invalid."
+                var errorstr = $"{timeout.Count} set(s) timed out and {invalid.Count} set(s) are invalid."
                     + "\n\nRefer to the wiki for more help on generating sets correctly."
                     + "\n\nIf you are sure this set is valid, please create an issue on GitHub and upload the error_log.txt file in the issue.";
 
@@ -202,8 +196,7 @@ namespace AutoModPlugins
 
             if (result is AutoModErrorCode.VersionMismatch)
             {
-                var errorstr =
-                    "The PKHeX-Plugins version does not match the PKHeX version.\nRefer to the Wiki for how to fix this error.\n\n"
+                var errorstr = "The PKHeX-Plugins version does not match the PKHeX version.\nRefer to the Wiki for how to fix this error.\n\n"
                     + $"The current ALM Version is {ALMVersion.Versions.AlmVersionCurrent}\n"
                     + $"The current PKHeX Version is {ALMVersion.Versions.CoreVersionCurrent}";
 
@@ -224,9 +217,7 @@ namespace AutoModPlugins
             }
 
             if (result != AutoModErrorCode.None)
-            {
                 return result;
-            }
 
             Debug.WriteLine("Multi Set Genning Complete. Setting data to the save file and reloading view.");
             SaveFileEditor.ReloadSlots();
@@ -269,9 +260,7 @@ namespace AutoModPlugins
             };
 
             if (APILegality.UseCompetitiveMarkings)
-            {
                 MarkingApplicator.MarkingMethod = APILegality.CompetitiveMarking;
-            }
 
             if (APILegality.EnableDevMode && settings.LatestAllowedVersion == "0.0.0.0")
             {

@@ -95,6 +95,7 @@ namespace PKHeX.Core.Injection
                         LiveHeXVersion.SV_v201,
                         LiveHeXVersion.SV_v202,
                         LiveHeXVersion.SV_v300,
+                        LiveHeXVersion.SV_v301,
                     }
                 },
                 {
@@ -109,7 +110,8 @@ namespace PKHeX.Core.Injection
                         LiveHeXVersion.SV_v132,
                         LiveHeXVersion.SV_v201,
                         LiveHeXVersion.SV_v202,
-                        LiveHeXVersion.SV_v300
+                        LiveHeXVersion.SV_v300,
+                        LiveHeXVersion.SV_v301,
                     }
                 },
             };
@@ -119,19 +121,13 @@ namespace PKHeX.Core.Injection
         protected static InjectionBase GetInjector(LiveHeXVersion version, bool useCache)
         {
             if (LPLGPE.GetVersions().Contains(version))
-            {
                 return new LPLGPE(version, useCache);
-            }
 
             if (LPBDSP.GetVersions().Contains(version))
-            {
                 return new LPBDSP(version, useCache);
-            }
 
             if (LPPointer.GetVersions().Contains(version))
-            {
                 return new LPPointer(version, useCache);
-            }
 
             return LPBasic.GetVersions().Contains(version) ? (InjectionBase)new LPBasic(version, useCache) : throw new NotImplementedException("Unknown LiveHeXVersion.");
         }
@@ -175,9 +171,7 @@ namespace PKHeX.Core.Injection
         public static LiveHeXVersion GetVersionFromTitle(string titleID, string gameVersion)
         {
             if (!SupportedTitleVersions.TryGetValue(titleID, out var versions))
-            {
                 return LiveHeXVersion.Unknown;
-            }
 
             versions = versions.Reverse().ToArray();
             var sanitized = gameVersion.Replace(".", "");
@@ -185,15 +179,11 @@ namespace PKHeX.Core.Injection
             {
                 var name = Enum.GetName(typeof(LiveHeXVersion), version);
                 if (name is null)
-                {
                     continue;
-                }
 
                 name = name.Split('v')[1];
                 if (name == sanitized)
-                {
                     return version;
-                }
             }
             return LiveHeXVersion.Unknown;
         }
@@ -202,19 +192,13 @@ namespace PKHeX.Core.Injection
         {
             msg = "";
             if (psb.com is not ICommunicatorNX nx)
-            {
                 return false;
-            }
 
             if (nx.IsProgramRunning(Ovlloader_ID))
-            {
                 msg += "Tesla overlay";
-            }
 
             if (nx.IsProgramRunning(Dmnt_ID))
-            {
                 msg += msg != "" ? " and dmnt (cheats?)" : "Dmnt (cheats?)";
-            }
 
             bool detected = msg != "";
             msg += detected ? " detected.\n\nPlease remove or close the interfering applications and reboot your Switch." : "";

@@ -1140,16 +1140,14 @@ namespace PKHeX.Core.AutoMod
                 [Pink] = [Love, Dream, Heal],
             };
 
-        public static int ApplyFirstLegalBall(PKM pkm, IEnumerable<Ball> balls)
+        public static byte ApplyFirstLegalBall(PKM pkm, IEnumerable<Ball> balls)
         {
             var orig_ball = pkm.Ball;
             foreach (var b in balls)
             {
-                pkm.Ball = (int)b;
+                pkm.Ball = (byte)b;
                 if (new LegalityAnalysis(pkm).Valid)
-                {
                     return pkm.Ball;
-                }
             }
             return orig_ball;
         }
@@ -1159,9 +1157,7 @@ namespace PKHeX.Core.AutoMod
             mark = 0; // throwaway value
             var markinstruction = set is RegenTemplate rt && rt.Regen.HasBatchSettings && rt.Regen.Batch.Instructions.Any(z => z.PropertyName.StartsWith("RibbonMark"));
             if (markinstruction)
-            {
                 return false;
-            }
 
             var invalid = new[]
             {
@@ -1177,9 +1173,7 @@ namespace PKHeX.Core.AutoMod
 
             var count = valid.Length;
             if (count == 0)
-            {
                 return false;
-            }
 
             var randomindex = Util.Rand.Next(valid.Length);
             mark = (RibbonIndex)valid[randomindex];

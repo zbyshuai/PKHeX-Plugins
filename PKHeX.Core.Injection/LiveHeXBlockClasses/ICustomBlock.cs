@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace PKHeX.Core.Injection
+﻿namespace PKHeX.Core.Injection
 {
     public interface ICustomBlock
     {

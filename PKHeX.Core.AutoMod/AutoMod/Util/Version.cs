@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Diagnostics;
-using System.Linq;
 using System.Reflection;
 
 namespace PKHeX.Core.AutoMod
@@ -27,9 +26,7 @@ namespace PKHeX.Core.AutoMod
         public static bool GetIsMismatch(Version? currentCore, Version? currentALM, Version? latestCore)
         {
             if (currentCore is null || currentALM is null || latestCore is null)
-            {
                 return false;
-            }
 
             var latestAllowed = new Version(APILegality.LatestAllowedVersion);
             return (APILegality.EnableDevMode && (latestCore > latestAllowed) && (latestCore > currentCore)) || (!APILegality.EnableDevMode && (currentCore > currentALM));

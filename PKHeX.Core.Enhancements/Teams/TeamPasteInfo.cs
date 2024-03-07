@@ -32,21 +32,15 @@ namespace PKHeX.Core.Enhancements
 
             var title = pastedata.Split(new[] { "<h1>" }, StringSplitOptions.None);
             if (title.Length > 1)
-            {
                 Title = GetVal(title[1]);
-            }
 
             var auth = pastedata.Split(new[] { "<h2>&nbsp;by" }, StringSplitOptions.None);
             if (auth.Length > 1)
-            {
                 Author = GetVal(auth[1]);
-            }
 
             var desc = pastedata.Split(new[] { "<p>" }, StringSplitOptions.None);
             if (desc.Length > 1)
-            {
                 Description = GetVal(desc[1]);
-            }
         }
 
         private void GetFromPasteBin(string url)
@@ -67,9 +61,7 @@ namespace PKHeX.Core.Enhancements
         private static PasteSource GetSource(string url)
         {
             if (url.Contains("pokepast.es/"))
-            {
                 return PasteSource.PokePaste;
-            }
 
             return url.Contains("pastebin.com/") ? PasteSource.Pastebin : PasteSource.None;
         }
@@ -113,15 +105,11 @@ namespace PKHeX.Core.Enhancements
             URL = url;
             var isUri = Uri.IsWellFormedUriString(url, UriKind.RelativeOrAbsolute);
             if (!isUri)
-            {
                 return;
-            }
 
             Source = GetSource(url);
             if (Source == PasteSource.None)
-            {
                 return;
-            }
 
             url = GetRawURL(url);
             Sets = NetUtil.GetPageText(url).Trim();

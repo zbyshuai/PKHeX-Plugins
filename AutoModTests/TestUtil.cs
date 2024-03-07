@@ -17,9 +17,8 @@ namespace AutoModTests
             lock (_lock)
             {
                 if (Initialized)
-                {
                     return;
-                }
+                
 
                 EncounterEvent.RefreshMGDB();
                 RibbonStrings.ResetDictionary(GameInfo.Strings.ribbons);
@@ -35,11 +34,7 @@ namespace AutoModTests
             var folder = Directory.GetCurrentDirectory();
             while (!folder.EndsWith(nameof(AutoModTests)))
             {
-                var dir =
-                    Directory.GetParent(folder)
-                    ?? throw new DirectoryNotFoundException(
-                        $"Unable to find a directory named {nameof(AutoModTests)}."
-                    );
+                var dir = Directory.GetParent(folder) ?? throw new DirectoryNotFoundException( $"Unable to find a directory named {nameof(AutoModTests)}.");
                 folder = dir.FullName;
             }
             return Path.Combine(folder, name);
