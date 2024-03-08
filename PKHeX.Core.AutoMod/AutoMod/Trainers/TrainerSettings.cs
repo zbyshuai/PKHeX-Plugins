@@ -33,7 +33,7 @@ namespace PKHeX.Core.AutoMod
             };
             if (lang == null)
                 return fallback;
-            return new SimpleTrainerInfo((GameVersion)fallback.Game) { Language = (int)lang };
+            return new SimpleTrainerInfo((GameVersion)fallback.Version) { Language = (int)lang };
         }
 
         public static ITrainerInfo DefaultFallback(GameVersion ver, LanguageID? lang = null)
@@ -141,8 +141,8 @@ namespace PKHeX.Core.AutoMod
             int origin = pk.Generation;
             int format = pk.Format;
             if (format != origin)
-                return GetSavedTrainerData(format, (GameVersion)template_save.Game, fallback: template_save, lang: lang);
-            return GetSavedTrainerData((GameVersion)pk.Version, origin, template_save, lang);
+                return GetSavedTrainerData((byte)format, (GameVersion)template_save.Version, fallback: template_save, lang: lang);
+            return GetSavedTrainerData((byte)pk.Version, (GameVersion)origin, template_save, lang);
         }
 
         /// <summary>
