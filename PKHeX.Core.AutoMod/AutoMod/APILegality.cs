@@ -31,6 +31,7 @@ namespace PKHeX.Core.AutoMod
         public static bool AllowBatchCommands { get; set; } = true;
         public static bool ForceLevel100for50 { get; set; } = true;
         public static bool AllowHOMETransferGeneration { get; set; } = true;
+        public static MoveType[] RandTypes { get; set; } = [];
         public static int Timeout { get; set; } = 15;
 
         /// <summary>

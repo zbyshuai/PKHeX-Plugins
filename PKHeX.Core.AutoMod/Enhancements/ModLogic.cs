@@ -4,6 +4,8 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Collections.Concurrent;
+using System.Runtime;
+using PKHeX.Core.Enhancements;
 namespace PKHeX.Core.AutoMod
 {
     /// <summary>
@@ -390,6 +392,78 @@ namespace PKHeX.Core.AutoMod
             }
 
             return ctr;
+        }
+        public static PKM[] GetSixRandomMons(this SaveFile sav)
+        {
+            Span<PKM> RandomTeam = [];
+            int i = 0;
+            Span<int> ivs = stackalloc int[6];
+            do
+            {
+                var rng = new Random();
+                var spec = rng.Next(sav.MaxSpeciesID);
+                var rough = EntityBlank.GetBlank(sav);
+                rough.Species = (ushort)spec;
+                rough.Gender = rough.GetSaneGender();
+                if (!sav.Personal.IsSpeciesInGame(rough.Species))
+                    continue;
+                if (APILegality.RandTypes.Length > 0 && (!APILegality.RandTypes.Contains((MoveType)rough.PersonalInfo.Type1) || !APILegality.RandTypes.Contains((MoveType)rough.PersonalInfo.Type2)))
+                    continue;
+                var formnumb = sav.Personal[rough.Species].FormCount;
+                if (formnumb == 1)
+                    formnumb = (byte)FormConverter.GetFormList(rough.Species, GameInfo.Strings.types, GameInfo.Strings.forms, GameInfo.GenderSymbolUnicode, sav.Context).Length;
+                do
+                {
+                    if (formnumb == 0) break;
+                    rough.Form = (byte)rng.Next(formnumb);
+                }
+                while (!sav.Personal.IsPresentInGame(rough.Species, rough.Form) || FormInfo.IsLordForm(rough.Species, rough.Form, sav.Context) || FormInfo.IsBattleOnlyForm(rough.Species, rough.Form, sav.Generation) || FormInfo.IsFusedForm(rough.Species, rough.Form, sav.Generation) || (FormInfo.IsTotemForm(rough.Species, rough.Form) && sav.Context is not EntityContext.Gen7));
+                if (rough.Species is ((ushort)Species.Meowstic) or ((ushort)Species.Indeedee))
+                {
+                    rough.Gender = rough.Form;
+                    rough.Form = (byte)rough.Gender;
+                }
+                var item = GetFormSpecificItem((int)sav.Version, rough.Species, rough.Form);
+                if (item is not null)
+                    rough.HeldItem = (int)item;
+
+                if (rough.Species == (ushort)Species.Keldeo && rough.Form == 1)
+                    rough.Move1 = (ushort)Move.SecretSword;
+
+                if (GetIsFormInvalid(rough, sav, rough.Form))
+                    continue;
+                try
+                {
+                    var goodset = new SmogonSetList(rough);
+                    if (goodset.Valid && goodset.Sets.Count != 0)
+                    {
+                        var checknull = sav.GetLegalFromSet(goodset.Sets[0]);
+                        if (checknull.Status != LegalizationResult.Regenerated)
+                            continue;
+                        RandomTeam = RandomTeam.ToArray().Append(checknull.Created).ToArray();
+                        i++;
+                        continue;
+                    }
+                }
+                catch (Exception) { }
+
+                var showstring = new ShowdownSet(rough).Text.Split('\r')[0];
+                showstring += "\nLevel: 100\n";
+                ivs.Clear();
+                EffortValues.SetMax(ivs, rough);
+                showstring += $"EVs: {ivs[0]} HP / {ivs[1]} Atk / {ivs[2]} Def / {ivs[3]} SpA / {ivs[4]} SpD / {ivs[5]} Spe\n";
+                var m = new ushort[4];
+                rough.GetMoveSet(m, true);
+                showstring += $"- {GameInfo.MoveDataSource.First(z => z.Value == m[0]).Text}\n- {GameInfo.MoveDataSource.First(z => z.Value == m[1]).Text}\n- {GameInfo.MoveDataSource.First(z => z.Value == m[2]).Text}\n- {GameInfo.MoveDataSource.First(z => z.Value == m[3]).Text}";
+                showstring += "\n\n";
+                var nullcheck = sav.GetLegalFromSet(new ShowdownSet(showstring));
+                if (nullcheck.Status != LegalizationResult.Regenerated)
+                    continue;
+                RandomTeam = RandomTeam.ToArray().Append(nullcheck.Created).ToArray();
+                i++;
+
+            } while (i < 6);
+            return RandomTeam.ToArray();
         }
     }
 }
