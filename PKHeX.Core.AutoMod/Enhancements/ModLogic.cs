@@ -440,6 +440,7 @@ namespace PKHeX.Core.AutoMod
                         var checknull = sav.GetLegalFromSet(goodset.Sets[0]);
                         if (checknull.Status != LegalizationResult.Regenerated)
                             continue;
+                        checknull.Created.ResetPartyStats();
                         RandomTeam = RandomTeam.ToArray().Append(checknull.Created).ToArray();
                         i++;
                         continue;
@@ -459,6 +460,7 @@ namespace PKHeX.Core.AutoMod
                 var nullcheck = sav.GetLegalFromSet(new ShowdownSet(showstring));
                 if (nullcheck.Status != LegalizationResult.Regenerated)
                     continue;
+                nullcheck.Created.ResetPartyStats();
                 RandomTeam = RandomTeam.ToArray().Append(nullcheck.Created).ToArray();
                 i++;
 
