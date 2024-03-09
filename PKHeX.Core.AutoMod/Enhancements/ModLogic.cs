@@ -437,7 +437,7 @@ namespace PKHeX.Core.AutoMod
                     var goodset = new SmogonSetList(rough);
                     if (goodset.Valid && goodset.Sets.Count != 0)
                     {
-                        var checknull = sav.GetLegalFromSet(goodset.Sets[0]);
+                        var checknull = sav.GetLegalFromSet(goodset.Sets[rng.Next(goodset.Sets.Count)]);
                         if (checknull.Status != LegalizationResult.Regenerated)
                             continue;
                         checknull.Created.ResetPartyStats();
