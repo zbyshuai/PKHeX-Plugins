@@ -14,7 +14,7 @@ namespace AutoModPlugins
     public partial class LiveHeXUI : Form, ISlotViewer<PictureBox>
     {
         private ISaveFileProvider SAV { get; }
-        private static GameVersion SAV_Version = GameVersion.Unknown;
+        private static GameVersion SAV_Version = GameVersion.Any;
 
         public int ViewIndex => BoxSelect?.SelectedIndex ?? 0;
         public IList<PictureBox> SlotPictureBoxes => throw new InvalidOperationException();
@@ -87,51 +87,43 @@ namespace AutoModPlugins
         private void SetTrainerData(SaveFile sav)
         {
             // Check and set trainerdata based on ISaveBlock interfaces
-            byte[] dest;
-            int startofs = 0;
+            Span<byte> dest;
 
             Func<PokeSysBotMini, byte[]?> tdata;
             switch (sav)
             {
                 case ISaveBlock8SWSH s8:
                     dest = s8.MyStatus.Data;
-                    startofs = s8.MyStatus.Offset;
                     tdata = LPBasic.GetTrainerData;
                     break;
 
                 case ISaveBlock7Main s7:
                     dest = s7.MyStatus.Data;
-                    startofs = s7.MyStatus.Offset;
                     tdata = LPBasic.GetTrainerData;
                     break;
 
                 case ISaveBlock6Main s6:
                     dest = s6.Status.Data;
-                    startofs = s6.Status.Offset;
                     tdata = LPBasic.GetTrainerData;
                     break;
 
                 case SAV7b slgpe:
                     dest = slgpe.Blocks.Status.Data;
-                    startofs = slgpe.Blocks.Status.Offset;
                     tdata = LPLGPE.GetTrainerData;
                     break;
 
                 case SAV8BS sbdsp:
                     dest = sbdsp.MyStatus.Data;
-                    startofs = sbdsp.MyStatus.Offset;
                     tdata = LPBDSP.GetTrainerData;
                     break;
 
                 case SAV8LA sbla:
                     dest = sbla.MyStatus.Data;
-                    startofs = sbla.MyStatus.Offset;
                     tdata = LPPointer.GetTrainerDataLA;
                     break;
 
                 case SAV9SV s9sv:
                     dest = s9sv.MyStatus.Data;
-                    startofs = s9sv.MyStatus.Offset;
                     tdata = LPPointer.GetTrainerDataSV;
                     break;
 
@@ -148,7 +140,7 @@ namespace AutoModPlugins
             if (data is null)
                 return;
 
-            data.CopyTo(dest, startofs);
+            data.CopyTo(dest);
         }
 
         private void ChangeBox(object? sender, EventArgs e)
@@ -251,7 +243,7 @@ namespace AutoModPlugins
                     return (LiveHeXValidation.None, "", version);
             }
 
-            var saveName = GameInfo.GetVersionName((GameVersion)SAV.SAV.Game);
+            var saveName = GameInfo.GetVersionName(SAV.SAV.Version);
             var msg = "Could not find a compatible game version while establishing an NTR connection.\n" + $"Save file loaded: Pokémon {saveName}";
             return (LiveHeXValidation.GameVersion, msg, LiveHeXVersion.Unknown);
         }
@@ -816,7 +808,7 @@ namespace AutoModPlugins
             sb switch
             {
                 SCBlock sc => sc.Data,
-                IDataIndirect sv => sv.Data,
+                IDataIndirect sv => sv.Data.ToArray(),
                 _ => data,
             };
 

@@ -25,13 +25,13 @@ namespace PKHeX.Core.AutoMod
         public static string SetAnalysis(this IBattleTemplate set, ITrainerInfo sav, PKM failed)
         {
             if (failed.Version == 0)
-                failed.Version = sav.Game;
+                failed.Version = sav.Version;
 
             var species_name = SpeciesName.GetSpeciesNameGeneration(set.Species, (int)LanguageID.English, sav.Generation);
             var analysis = set.Form == 0 ? string.Format(SPECIES_UNAVAILABLE, species_name) : string.Format(SPECIES_UNAVAILABLE_FORM, species_name, set.FormName);
 
             // Species checks
-            var gv = (GameVersion)sav.Game;
+            var gv = sav.Version;
             if (!gv.ExistsInGame(set.Species, set.Form))
                 return analysis; // Species does not exist in the game
 
@@ -48,7 +48,7 @@ namespace PKHeX.Core.AutoMod
                 filters = r.Regen.Batch.Filters;
                 batchedit = APILegality.AllowBatchCommands && r.Regen.HasBatchSettings;
             }
-            var destVer = (GameVersion)sav.Game;
+            var destVer = sav.Version;
             if (destVer <= 0 && sav is SaveFile s)
                 destVer = s.Version;
 

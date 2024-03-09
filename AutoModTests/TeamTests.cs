@@ -71,16 +71,12 @@ namespace AutoModTests
                         else
                         {
                             illegalsets.Add(regen);
-                            Debug.WriteLine(
-                                $"Invalid Set for {(Species)set.Species} in file {file} with set: {regen.Text}"
-                            );
+                            Debug.WriteLine($"Invalid Set for {(Species)set.Species} in file {file} with set: {regen.Text}");
                         }
                     }
                     catch
                     {
-                        Debug.WriteLine(
-                            $"Exception for {(Species)set.Species} in file {file} with set: {set.Text}"
-                        );
+                        Debug.WriteLine($"Exception for {(Species)set.Species} in file {file} with set: {set.Text}");
                     }
                 }
                 results[s] = new Dictionary<string, RegenTemplate[]>

@@ -23,7 +23,7 @@ namespace PKHeX.Core.AutoMod
             string Report = la.Report();
 
             if (Report.Contains(LegalityCheckStrings.LPIDGenderMismatch))
-                pk.Gender = pk.Gender == 0 ? 1 : 0;
+                pk.Gender = pk.Gender == 0 ? (byte)1 : (byte)0;
 
             if (pk.Gender is not 0 and not 1)
                 pk.Gender = pk.GetSaneGender();
@@ -31,17 +31,17 @@ namespace PKHeX.Core.AutoMod
 
         public static void SetNature(PKM pk, IBattleTemplate set, IEncounterable enc)
         {
-            if (pk.Nature == set.Nature || set.Nature == -1)
+            if (pk.Nature == set.Nature || set.Nature == Nature.Random)
                 return;
 
-            var val = Math.Min((int)Nature.Quirky, Math.Max((int)Nature.Hardy, set.Nature));
+            var val = (Nature)Math.Min((int)Nature.Quirky, Math.Max((int)Nature.Hardy, (int)set.Nature));
             if (pk.Species == (ushort)Species.Toxtricity)
             {
                 if (pk.Form == ToxtricityUtil.GetAmpLowKeyResult(val))
                     pk.Nature = val; // StatNature already set
 
-                if (pk.Format >= 8 && pk.StatNature != pk.Nature && pk.StatNature != 12 && (pk.StatNature > 24 || pk.StatNature % 6 == 0)) // Only Serious Mint for Neutral Natures
-                    pk.StatNature = 12;
+                if (pk.Format >= 8 && pk.StatNature != pk.Nature && pk.StatNature != Nature.Serious && (pk.StatNature > Nature.Quirky || (int)pk.StatNature % 6 == 0)) // Only Serious Mint for Neutral Natures
+                    pk.StatNature = Nature.Serious;
 
                 return;
             }
@@ -61,8 +61,8 @@ namespace PKHeX.Core.AutoMod
             if (((!ReferenceEquals(enc1, enc2) && enc1 is not EncounterEgg) || la2.Results.Any(z => (z.Identifier == CheckIdentifier.Nature || z.Identifier == CheckIdentifier.Encounter) && !z.Valid)) && enc is not EncounterEgg)
                 pk.Nature = orig;
 
-            if (pk.Format >= 8 && pk.StatNature != pk.Nature && pk.StatNature is 0 or 6 or 18 or >= 24) // Only Serious Mint for Neutral Natures
-                pk.StatNature = (int)Nature.Serious;
+            if (pk.Format >= 8 && pk.StatNature != pk.Nature && pk.StatNature is 0 or Nature.Docile or Nature.Bashful or >= Nature.Quirky) // Only Serious Mint for Neutral Natures
+                pk.StatNature = Nature.Serious;
         }
 
         public static void SetAbility(PKM pk, IBattleTemplate set, AbilityPermission preference)
@@ -111,10 +111,11 @@ namespace PKHeX.Core.AutoMod
 
             var evolutionRequired = enc.Species != set.Species;
             var formchange = Form != pk.Form;
+            var UnownFormSet = pk.Species == (ushort)Species.Unown && (enc.Generation == 3 || enc.Generation == 4);
             if (evolutionRequired)
                 pk.Species = set.Species;
 
-            if (formchange)
+            if (formchange && !UnownFormSet)
                 pk.Form = Form;
 
             if ((evolutionRequired || formchange) && pk is IScaledSizeValue sv)
@@ -132,7 +133,7 @@ namespace PKHeX.Core.AutoMod
                     if (result == pk.Form)
                         break;
 
-                    pk.Nature = Util.Rand.Next(25);
+                    pk.Nature = (Nature)Util.Rand.Next(25);
                 }
             }
 
@@ -145,11 +146,11 @@ namespace PKHeX.Core.AutoMod
             if (pk.CurrentLevel != set.Level)
                 pk.CurrentLevel = set.Level;
 
-            if (pk.Met_Level > pk.CurrentLevel)
-                pk.Met_Level = pk.CurrentLevel;
+            if (pk.MetLevel > pk.CurrentLevel)
+                pk.MetLevel = pk.CurrentLevel;
 
             if (set.Level != 100 && set.Level == enc.LevelMin && pk.Format is 3 or 4)
-                pk.EXP = Experience.GetEXP(enc.LevelMin + 1, PersonalTable.HGSS[enc.Species].EXPGrowth) - 1;
+                pk.EXP = Experience.GetEXP((byte)(enc.LevelMin + 1), PersonalTable.HGSS[enc.Species].EXPGrowth) - 1;
 
             var currentlang = (LanguageID)pk.Language;
             var finallang = lang ?? currentlang;
@@ -203,7 +204,7 @@ namespace PKHeX.Core.AutoMod
         /// <param name="set">IBattleset template to grab the set gender</param>
         private static void ApplySetGender(this PKM pk, IBattleTemplate set)
         {
-            pk.Gender = set.Gender != -1 ? set.Gender : pk.GetSaneGender();
+            pk.Gender = set.Gender != null ? (byte)set.Gender : pk.GetSaneGender();
         }
 
         /// <summary>
@@ -336,7 +337,6 @@ namespace PKHeX.Core.AutoMod
             // Ignore games where items don't exist in the first place. They would still allow forms
             if (pk.LA)
                 return;
-            
 
             switch ((Species)pk.Species)
             {

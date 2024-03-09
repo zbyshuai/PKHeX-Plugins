@@ -6,7 +6,7 @@ namespace PKHeX.Core.AutoMod
 {
     public static class RegenUtil
     {
-        public static bool GetTrainerInfo(IEnumerable<string> lines, int format, out ITrainerInfo tr)
+        public static bool GetTrainerInfo(IEnumerable<string> lines, byte format, out ITrainerInfo tr)
         {
             var sti = new SimpleTrainerInfo { Generation = format };
 
@@ -30,7 +30,7 @@ namespace PKHeX.Core.AutoMod
                         SID7 = sid;
                         break;
                     case "OTGender":
-                        sti.Gender = value is "Female" or "F" ? 1 : 0;
+                        sti.Gender = value is "Female" or "F" ? (byte)1 : (byte)0;
                         break;
                     default:
                         continue;

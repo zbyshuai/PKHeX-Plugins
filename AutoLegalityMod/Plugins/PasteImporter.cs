@@ -1,8 +1,14 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Windows.Forms;
 using AutoModPlugins.Properties;
+using PKHeX.Core;
+using PKHeX.Core.AutoMod;
 using PKHeX.Core.Enhancements;
+using PKHeX.Core.Injection;
+using Microsoft.VisualBasic.Devices;
+using System.Windows.Input;
 
 namespace AutoModPlugins
 {
@@ -31,12 +37,19 @@ namespace AutoModPlugins
             {
                 form.Icon = Resources.icon;
             }
-
+            form.KeyDown += downkey;
             ShowdownSetLoader.PKMEditor = PKMEditor;
             ShowdownSetLoader.SaveFileEditor = SaveFileEditor;
+            
         }
 
-        private static void ImportPaste(object? sender, EventArgs e)
+        private void downkey(object? sender, KeyEventArgs e)
+        {
+            if ((e.KeyCode == Keys.NumPad6 || e.KeyCode == Keys.D6) && e.Control)
+                GetSixRandomMons();
+        }
+
+        private void ImportPaste(object? sender, EventArgs e)
         {
             // Check for showdown data in clipboard
             var text = GetTextShowdownData();
@@ -52,7 +65,7 @@ namespace AutoModPlugins
         /// Check whether the showdown text is supposed to be loaded via a text file. If so, set the clipboard to its contents.
         /// </summary>
         /// <returns>output boolean that tells if the data provided is valid or not</returns>
-        private static string? GetTextShowdownData()
+        private string? GetTextShowdownData()
         {
             bool skipClipboardCheck = (Control.ModifierKeys & Keys.Shift) == Keys.Shift;
             if (!skipClipboardCheck && Clipboard.ContainsText())
@@ -61,7 +74,7 @@ namespace AutoModPlugins
                 if (ShowdownUtil.IsTextShowdownData(txt))
                     return txt;
             }
-
+            
             if (!WinFormsUtil.OpenSAVPKMDialog(new[] { "txt" }, out var path))
             {
                 WinFormsUtil.Alert("No data provided.");
@@ -82,6 +95,131 @@ namespace AutoModPlugins
 
             WinFormsUtil.Alert("Text file with invalid data provided. Please provide a text file with proper Showdown data");
             return null;
+        }
+        public void GetSixRandomMons()
+        {
+            if(WinFormsUtil.Prompt(MessageBoxButtons.OKCancel,"Generate 6 Random Pokemon?") != DialogResult.OK) 
+                return;
+            Span<PKM> RandomTeam = [];
+            int i = 0;
+            Span<int> ivs = stackalloc int[6];
+            do
+            {
+                var rng = new Random();
+                var spec = rng.Next(SaveFileEditor.SAV.MaxSpeciesID);
+                var rough = EntityBlank.GetBlank(SaveFileEditor.SAV);
+                rough.Species = (ushort)spec;
+                rough.Gender = rough.GetSaneGender();
+                if (!SaveFileEditor.SAV.Personal.IsSpeciesInGame(rough.Species))
+                    continue;
+                if (_settings.RandomTypes.Length > 0 && (!_settings.RandomTypes.Contains((MoveType)rough.PersonalInfo.Type1) || !_settings.RandomTypes.Contains((MoveType)rough.PersonalInfo.Type2)))
+                    continue;
+                var formnumb = SaveFileEditor.SAV.Personal[rough.Species].FormCount;
+                if(formnumb == 1)
+                    formnumb = (byte)FormConverter.GetFormList(rough.Species, GameInfo.Strings.types, GameInfo.Strings.forms, GameInfo.GenderSymbolUnicode, SaveFileEditor.SAV.Context).Length;
+                do
+                {
+                    if (formnumb == 0) break;
+                    rough.Form = (byte)rng.Next(formnumb);
+                }
+                while (!SaveFileEditor.SAV.Personal.IsPresentInGame(rough.Species, rough.Form) || FormInfo.IsLordForm(rough.Species, rough.Form, SaveFileEditor.SAV.Context) || FormInfo.IsBattleOnlyForm(rough.Species, rough.Form, SaveFileEditor.SAV.Generation) || FormInfo.IsFusedForm(rough.Species, rough.Form, SaveFileEditor.SAV.Generation) || (FormInfo.IsTotemForm(rough.Species, rough.Form) && SaveFileEditor.SAV.Context is not EntityContext.Gen7));
+                if (rough.Species is ((ushort)Species.Meowstic) or ((ushort)Species.Indeedee))
+                {
+                    rough.Gender = rough.Form;
+                    rough.Form = (byte)rough.Gender;
+                }
+                var item = GetFormSpecificItem((int)SaveFileEditor.SAV.Version, rough.Species, rough.Form);
+                if (item is not null)
+                    rough.HeldItem = (int)item;
+
+                if (rough.Species == (ushort)Species.Keldeo && rough.Form == 1)
+                    rough.Move1 = (ushort)Move.SecretSword;
+
+                if (GetIsFormInvalid(rough, SaveFileEditor.SAV, rough.Form))
+                    continue;
+                try
+                {
+                    var goodset = new SmogonSetList(rough);
+                    if (goodset.Valid && goodset.Sets.Count != 0)
+                    {
+                        var checknull = SaveFileEditor.SAV.GetLegalFromSet(goodset.Sets[0]);
+                        if(checknull.Status != LegalizationResult.Regenerated)
+                            continue;
+                        RandomTeam = RandomTeam.ToArray().Append(checknull.Created).ToArray();
+                        i++;
+                        continue;
+                    }
+                }
+                catch (Exception) { }
+
+                var showstring = new ShowdownSet(rough).Text.Split('\r')[0];
+                showstring += "\nLevel: 100\n";
+                ivs.Clear();
+                EffortValues.SetMax(ivs, rough);
+                showstring += $"EVs: {ivs[0]} HP / {ivs[1]} Atk / {ivs[2]} Def / {ivs[3]} SpA / {ivs[4]} SpD / {ivs[5]} Spe\n";
+                var m = new ushort[4];
+                rough.GetMoveSet(m, true);
+                showstring += $"- {GameInfo.MoveDataSource.First(z => z.Value == m[0]).Text}\n- {GameInfo.MoveDataSource.First(z => z.Value == m[1]).Text}\n- {GameInfo.MoveDataSource.First(z => z.Value == m[2]).Text}\n- {GameInfo.MoveDataSource.First(z => z.Value == m[3]).Text}";
+                showstring += "\n\n";
+                var nullcheck = SaveFileEditor.SAV.GetLegalFromSet(new ShowdownSet(showstring));
+                if (nullcheck.Status != LegalizationResult.Regenerated)
+                    continue;
+                RandomTeam = RandomTeam.ToArray().Append(nullcheck.Created).ToArray();
+                i++;
+
+            } while (i < 6);
+            var empties = Legalizer.FindAllEmptySlots(SaveFileEditor.SAV.BoxData, 0);
+            for(int k =0; k<6; k++)
+            {
+                SaveFileEditor.SAV.SetBoxSlotAtIndex(RandomTeam[k], empties[k]);
+            }
+            SaveFileEditor.ReloadSlots();
+        }
+        public static int? GetFormSpecificItem(int game, int species, int form)
+        {
+            if (game == (int)GameVersion.PLA)
+                return null;
+
+            var generation = ((GameVersion)game).GetGeneration();
+            return species switch
+            {
+                (ushort)Species.Arceus => generation != 4 || form < 9 ? SimpleEdits.GetArceusHeldItemFromForm(form) : SimpleEdits.GetArceusHeldItemFromForm(form - 1),
+                (ushort)Species.Silvally => SimpleEdits.GetSilvallyHeldItemFromForm(form),
+                (ushort)Species.Genesect => SimpleEdits.GetGenesectHeldItemFromForm(form),
+                (ushort)Species.Giratina => form == 1 && generation < 9 ? 112 : form == 1 ? 1779 : null, // Griseous Orb
+                (ushort)Species.Zacian => form == 1 ? 1103 : null, // Rusted Sword
+                (ushort)Species.Zamazenta => form == 1 ? 1104 : null, // Rusted Shield
+                _ => null
+            };
+        }
+        public static bool GetIsFormInvalid(PKM pk, ITrainerInfo tr, byte form)
+        {
+            var generation = tr.Generation;
+            var species = pk.Species;
+            switch ((Species)species)
+            {
+                case Species.Unown when generation == 2 && form >= 26:
+                    return true;
+                case Species.Floette when form == 5:
+                    return true;
+                case Species.Shaymin
+                or Species.Furfrou
+                or Species.Hoopa when form != 0 && generation <= 6:
+                    return true;
+                case Species.Arceus when generation == 4 && form == 9: // ??? form
+                    return true;
+                case Species.Scatterbug or Species.Spewpa when form == 19:
+                    return true;
+            }
+            if (FormInfo.IsBattleOnlyForm(pk.Species, form, generation))
+                return true;
+
+            if (form == 0)
+                return false;
+
+     
+
+            return false;
         }
     }
 }

@@ -223,9 +223,11 @@ namespace PKHeX.Core.AutoMod
         /// <param name="shiny">Set is shiny</param>
         public static void SetShinyBoolean(this PKM pk, bool isShiny, IEncounterable enc, Shiny shiny)
         {
+            if (SimpleEdits.IsShinyLockedSpeciesForm(pk.Species, pk.Form))
+                return;
+
             if (pk.IsShiny == isShiny)
                 return; // don't mess with stuff if pk is already shiny. Also do not modify for specific shinies (Most likely event shinies)
-            
 
             if (!isShiny)
             {
@@ -456,15 +458,15 @@ namespace PKHeX.Core.AutoMod
             bool neverOT = !HistoryVerifier.GetCanOTHandle(enc, pk, enc.Generation);
             if (enc.Generation <= 2)
             {
-                pk.OT_Friendship = GetBaseFriendship(EntityContext.Gen7, pk.Species, pk.Form); // VC transfers use SM personal info
+                pk.OriginalTrainerFriendship = (byte)GetBaseFriendship(EntityContext.Gen7, pk.Species, pk.Form); // VC transfers use SM personal info
             }
             else if (neverOT)
             {
-                pk.OT_Friendship = GetBaseFriendship(enc);
+                pk.OriginalTrainerFriendship = (byte)GetBaseFriendship(enc);
             }
             else
             {
-                pk.CurrentFriendship = pk.HasMove(218) ? 0 : 255;
+                pk.CurrentFriendship = pk.HasMove(218) ? (byte)0 : (byte)255;
             }
         }
 
@@ -497,7 +499,7 @@ namespace PKHeX.Core.AutoMod
                 prefer = 2; // prefer english
 
             if (pk is IHandlerLanguage pkm)
-                pkm.HT_Language = prefer;
+                pkm.HandlingTrainerLanguage = prefer;
         }
 
         public static void SetGigantamaxFactor(this PKM pk, IBattleTemplate set, IEncounterable enc)
@@ -568,7 +570,7 @@ namespace PKHeX.Core.AutoMod
 
         private static int GetBaseFriendship(IEncounterTemplate enc) => enc switch
             {
-                IFixedOTFriendship f => f.OT_Friendship,
+                IFixedOTFriendship f => f.OriginalTrainerFriendship,
                 { Version: GameVersion.BD or GameVersion.SP } => PersonalTable.SWSH.GetFormEntry(enc.Species, enc.Form).BaseFriendship,
                 _ => GetBaseFriendship(enc.Context, enc.Species, enc.Form),
             };
@@ -599,7 +601,7 @@ namespace PKHeX.Core.AutoMod
         {
             pk.TID16 = trainer.TID16;
             pk.SID16 = pk.Generation >= 3 ? trainer.SID16 : (ushort)0;
-            pk.OT_Name = trainer.OT;
+            pk.OriginalTrainerName = trainer.OT;
         }
 
         /// <summary>
@@ -617,8 +619,8 @@ namespace PKHeX.Core.AutoMod
                 return;
 
             pk.CurrentHandler = 1;
-            pk.HT_Name = trainer.OT;
-            pk.HT_Gender = trainer.Gender;
+            pk.HandlingTrainerName = trainer.OT;
+            pk.HandlingTrainerGender = trainer.Gender;
             pk.SetHTLanguage((byte)trainer.Language);
             pk.SetSuggestedMemories();
         }
