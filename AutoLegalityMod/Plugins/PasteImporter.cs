@@ -45,8 +45,11 @@ namespace AutoModPlugins
 
         private void downkey(object? sender, KeyEventArgs e)
         {
+           
             if ((e.KeyCode == Keys.NumPad6 || e.KeyCode == Keys.D6) && e.Control)
             {
+                if (WinFormsUtil.Prompt(MessageBoxButtons.OKCancel, "Generate 6 Random Pokemon?") != DialogResult.OK)
+                    return;
                 APILegality.RandTypes = _settings.RandomTypes;
                 var RandomTeam = SaveFileEditor.SAV.GetSixRandomMons();
                 var empties = Legalizer.FindAllEmptySlots(SaveFileEditor.SAV.BoxData, 0);
@@ -54,6 +57,7 @@ namespace AutoModPlugins
                 {
                     SaveFileEditor.SAV.SetBoxSlotAtIndex(RandomTeam[k], empties[k]);
                 }
+                SaveFileEditor.ReloadSlots();
             }
                 
         }
