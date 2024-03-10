@@ -452,6 +452,7 @@ namespace PKHeX.Core.AutoMod
                         var checknull = sav.GetLegalFromSet(goodset.Sets[rng.Next(goodset.Sets.Count)]);
                         if (checknull.Status != LegalizationResult.Regenerated)
                             continue;
+                        checknull.Created.ResetPartyStats();
                         RandomTeam.Add(checknull.Created);
                         selectedSpecies.Add(rough.Species);
                         continue;
@@ -471,6 +472,7 @@ namespace PKHeX.Core.AutoMod
                 var nullcheck = sav.GetLegalFromSet(new ShowdownSet(showstring));
                 if (nullcheck.Status != LegalizationResult.Regenerated)
                     continue;
+                nullcheck.Created.ResetPartyStats();
                 RandomTeam.Add(nullcheck.Created);
                 selectedSpecies.Add(rough.Species);
             }
