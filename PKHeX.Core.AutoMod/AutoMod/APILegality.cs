@@ -108,7 +108,6 @@ namespace PKHeX.Core.AutoMod
                 var raw = enc.GetPokemonFromEncounter(tr, criteria, set);
                 if (raw.OriginalTrainerName.Length == 0)
                 {
-                    
                     raw.Language = tr.Language;
                     tr.ApplyTo(raw);
                 }
@@ -416,8 +415,8 @@ namespace PKHeX.Core.AutoMod
                 return false;
 
             // Don't process if the gender does not match the set
-            //if (enc is IFixedGender { IsFixedGender: true } fg && fg.Gender != set.Gender)
-                //return false;
+            if (set.Gender is not null && enc is IFixedGender { IsFixedGender: true } fg && fg.Gender != set.Gender)
+                return false;
 
             // Don't process if PKM is definitely Hidden Ability and the PKM is from Gen 3 or Gen 4 and Hidden Capsule doesn't exist
             var gen = enc.Generation;
@@ -1450,9 +1449,9 @@ namespace PKHeX.Core.AutoMod
                 }
                 if (pk.Species == (int)Species.Unown)
                 {
-                    if (enc.Generation == 4 && pk.Form != GetUnownForm(seed, pk.HGSS))
-                        continue;
                     if (pk.Form != iterPKM.Form)
+                        continue;
+                    if (enc.Generation == 4 && pk.Form != GetUnownForm(seed, pk.HGSS))
                         continue;
                     if (enc.Generation == 3 && pk.Form != EntityPID.GetUnownForm3(pk.PID))
                         continue;

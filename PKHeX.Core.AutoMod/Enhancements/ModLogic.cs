@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Collections.Concurrent;
 using System.Runtime;
+using System.Diagnostics;
 namespace PKHeX.Core.AutoMod
 {
     /// <summary>
@@ -62,7 +63,6 @@ namespace PKHeX.Core.AutoMod
         public static IEnumerable<PKM> GenerateLivingDex(this SaveFile sav, LivingDexConfig cfg)
         {
             var pklist = new ConcurrentBag<PKM>();
-            List<List<PKM>> Initialpklist = [];
             var tr = APILegality.UseTrainerData ? TrainerSettings.GetSavedTrainerData(sav.Version, sav.Generation, fallback: sav, lang: (LanguageID)sav.Language) : sav;
             var pt = sav.Personal;
             var species = Enumerable.Range(1, sav.MaxSpeciesID).Select(x => (ushort)x);
@@ -99,7 +99,6 @@ namespace PKHeX.Core.AutoMod
             var resetevent = new ManualResetEvent(false);
             var DestinationSave = SaveUtil.GetBlankSAV(cfg.TransferVersion, "ALM");
             ConcurrentBag<PKM> pklist = [];
-            List<List<PKM>> Initialpklist = [];
             var tr = APILegality.UseTrainerData ? TrainerSettings.GetSavedTrainerData(sav.Version, sav.Generation, fallback: sav, lang: (LanguageID)sav.Language) : sav;
             var pt = sav.Personal;
             var species = Enumerable.Range(1, sav.MaxSpeciesID).Select(x => (ushort)x);
@@ -457,7 +456,7 @@ namespace PKHeX.Core.AutoMod
                         continue;
                     }
                 }
-                catch (Exception) { }
+                catch (Exception) { Debug.Write("Smogon Issues"); }
 
                 var showstring = new ShowdownSet(rough).Text.Split('\r')[0];
                 showstring += "\nLevel: 100\n";
@@ -476,7 +475,7 @@ namespace PKHeX.Core.AutoMod
                 selectedSpecies.Add(rough.Species);
             }
 
-            return RandomTeam.ToArray();
+            return [.. RandomTeam];
         }
     }
 }
