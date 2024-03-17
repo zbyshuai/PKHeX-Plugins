@@ -1453,8 +1453,6 @@ namespace PKHeX.Core.AutoMod
                 {
                     if (pk.Form != set.Form)
                         continue;
-                    if (enc.Generation == 4 && pk.Form != GetUnownForm(seed, pk.HGSS))
-                        return;
                     if (enc.Generation == 3 && pk.Form != EntityPID.GetUnownForm3(pk.PID))
                         continue;
                 }
