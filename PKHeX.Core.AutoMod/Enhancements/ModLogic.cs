@@ -22,11 +22,6 @@ namespace PKHeX.Core.AutoMod
             NativeOnly = false,
             TransferVersion = GameVersion.SL
         };
-        public static bool IncludeForms { get; set; }
-        public static bool SetShiny { get; set; }
-        public static bool SetAlpha { get; set; }
-        public static bool NativeOnly { get; set; }
-        public static GameVersion TransferVersion { get; set; }
 
         /// <summary>
         /// Exports the <see cref="SaveFile.CurrentBox"/> to <see cref="ShowdownSet"/> as a single string.
@@ -82,7 +77,7 @@ namespace PKHeX.Core.AutoMod
                          continue;
 
                      var form = cfg.IncludeForms ? f : GetBaseForm(s, f, sav);
-                     var pk = AddPKM(sav, tr, s, f, cfg.SetShiny, cfg.SetAlpha, cfg.NativeOnly);
+                     var pk = AddPKM(sav, tr, s, form, cfg.SetShiny, cfg.SetAlpha, cfg.NativeOnly);
                      if (pk is not null && !pklist.Any(x => x.Species == pk.Species && x.Form == pk.Form))
                      {
                           pklist.Add(pk);
@@ -119,7 +114,7 @@ namespace PKHeX.Core.AutoMod
                         continue;
 
                     var form = cfg.IncludeForms ? f : GetBaseForm(s, f, sav);
-                    var pk = AddPKM(sav, tr, s, f, cfg.SetShiny, cfg.SetAlpha, cfg.NativeOnly);
+                    var pk = AddPKM(sav, tr, s, form, cfg.SetShiny, cfg.SetAlpha, cfg.NativeOnly);
                     if (pk is not null && !pklist.Any(x => x.Species == pk.Species && x.Form == pk.Form))
                     {
                         pklist.Add(pk);
