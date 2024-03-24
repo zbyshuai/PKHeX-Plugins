@@ -531,7 +531,10 @@ namespace PKHeX.Core.AutoMod
 
             if (enc is IStaticCorrelation8b s && s.GetRequirement(pk) == StaticCorrelation8bRequirement.MustHave)
                 return true;
-
+            if (enc is EncounterSlot4 && pk.Species == (ushort)Species.Unown)
+                return true;
+            if (enc is EncounterSlot3 && pk.Species == (ushort)Species.Unown)
+                return true;
             return enc is EncounterEgg && GameVersion.BDSP.Contains(enc.Version);
         }
 
@@ -1002,7 +1005,19 @@ namespace PKHeX.Core.AutoMod
                     shiny = set.Shiny ? Shiny.Always : Shiny.Never;
                 }
 
-                FindEggPIDIV8b(pk, shiny, set.Gender is null ? (byte)Gender.Random : (byte)set.Gender,criteria);
+                FindEggPIDIV8b(pk, shiny, set.Gender, criteria);
+            }
+            else if (enc is EncounterSlot4 enc4 && pk.Species == (ushort)Species.Unown)
+            {
+                var pi = PersonalTable.HGSS[pk.Species];
+                if (pk.HGSS)
+                    enc4.SetFromIVsK((PK4)pk, pi, criteria, out var _);
+                else
+                    enc4.SetFromIVsJ((PK4)pk, pi, criteria, out var _);
+            }
+            else if (enc is EncounterSlot3 enc3 && pk.Species == (ushort)Species.Unown)
+            {
+                enc3.SetFromIVsUnown((PK3)pk, criteria);
             }
         }
 
@@ -1228,7 +1243,7 @@ namespace PKHeX.Core.AutoMod
         /// <param name="pk">pokemon to edit</param>
         /// <param name="shiny">Shinytype requested</param>
         /// <param name="gender"></param>
-        public static void FindEggPIDIV8b(PKM pk, Shiny shiny, byte gender, EncounterCriteria criteria)
+        public static void FindEggPIDIV8b(PKM pk, Shiny shiny, byte? gender, EncounterCriteria criteria)
         {
             var ivs = new[] { -1, -1, -1, -1, -1, -1 };
             var IVs = pk.IVs;
@@ -1279,7 +1294,7 @@ namespace PKHeX.Core.AutoMod
                 {
                     var gender_roll = rng.NextUInt(252) + 1;
                     var fin_gender = gender_roll < ratio ? 1 : 0;
-                    if (gender != (byte)Gender.Genderless && gender != fin_gender)
+                    if (gender is not null && gender!=(byte)Gender.Genderless&& gender != fin_gender)
                         continue;
                 }
 
@@ -1315,7 +1330,7 @@ namespace PKHeX.Core.AutoMod
                     if (ivs[i] == -1)
                         ivs[i] = (int)ivs2[i];
                 }
-                if (!criteria.IsCompatibleIVs(ivs))
+               if (!criteria.IsIVsCompatibleSpeedLast(ivs,8))
                    continue;
                 pk.IV_HP = ivs[0];
                 pk.IV_ATK = ivs[1];
@@ -1412,14 +1427,14 @@ namespace PKHeX.Core.AutoMod
                 }
                 if (PokeWalkerSeedFail(seed, Method, pk, iterPKM))
                     continue;
-                if (IsMatchFromPKHeX(pk, iterPKM, compromise, HPType, shiny, gr, set, enc, seed, Method))
+                if (IsMatchFromPKHeX(pk, iterPKM, HPType, shiny, gr, set, enc, seed, Method))
                     return;
-
                 PIDGenerator.SetValuesFromSeed(pk, Method, seed);
-                if (pk.AbilityNumber != iterPKM.AbilityNumber && !compromise && pk.Nature != iterPKM.Nature)
+                if (pk.AbilityNumber != iterPKM.AbilityNumber )
                     continue;
-
-                if (pk.PIDAbility != iterPKM.PIDAbility && !compromise)
+                if (!compromise && pk.Nature != iterPKM.Nature)
+                    continue;
+                if (pk.PIDAbility != iterPKM.PIDAbility)
                     continue;
 
                 if (HPType >= 0 && pk.HPType != HPType)
@@ -1451,7 +1466,7 @@ namespace PKHeX.Core.AutoMod
                 }
                 if (pk.Species == (ushort)Species.Unown)
                 {
-                    if (pk.Form != set.Form)
+                    if (pk.Form != iterPKM.Form)
                         continue;
                     if (enc.Generation == 3 && pk.Form != EntityPID.GetUnownForm3(pk.PID))
                         continue;
@@ -1463,12 +1478,13 @@ namespace PKHeX.Core.AutoMod
                 break;
             } while (++count < 5_000_000);
         }
-        private static bool IsMatchFromPKHeX(PKM pk,PKM iterPKM,bool compromise,int HPType, bool shiny,byte gr,IBattleTemplate set, IEncounterable enc, uint seed, PIDType Method)
+        private static bool IsMatchFromPKHeX(PKM pk, PKM iterPKM, int HPType, bool shiny, byte gr, IBattleTemplate set, IEncounterable enc, uint seed, PIDType Method)
         {
-            if (pk.AbilityNumber != iterPKM.AbilityNumber && !compromise && pk.Nature != iterPKM.Nature)
+            
+            if (pk.AbilityNumber != iterPKM.AbilityNumber && pk.Nature != iterPKM.Nature)
                 return false;
 
-            if (pk.PIDAbility != iterPKM.PIDAbility && !compromise)
+            if (pk.PIDAbility != iterPKM.PIDAbility)
                 return false;
 
             if (HPType >= 0 && pk.HPType != HPType)
@@ -1498,17 +1514,20 @@ namespace PKHeX.Core.AutoMod
                 if ((la.Info.PIDIV.Type != PIDType.CXD && la.Info.PIDIV.Type != PIDType.CXD_ColoStarter) || !la.Info.PIDIVMatches || !pk.IsValidGenderPID(enc))
                     return false;
             }
-            if (pk.Species == (int)Species.Unown)
+            if (pk.Species == (ushort)Species.Unown)
             {
-                if (pk.Form != set.Form)
-                    return false;
-                if (enc.Generation == 4 && pk.Form != GetUnownForm(seed, pk.HGSS))
+                if (pk.Form != iterPKM.Form)
                     return false;
                 if (enc.Generation == 3 && pk.Form != EntityPID.GetUnownForm3(pk.PID))
                     return false;
             }
             var pidxor = ((pk.TID16 ^ pk.SID16 ^ (int)(pk.PID & 0xFFFF) ^ (int)(pk.PID >> 16)) & ~0x7) == 8;
             if (Method == PIDType.Channel && (shiny != pk.IsShiny || pidxor))
+                return false;
+
+            if (enc.Version == GameVersion.HGSS || enc.Version == GameVersion.Pt || enc.Version == GameVersion.DP)
+                return false;
+            if (!new LegalityAnalysis(pk).Valid)
                 return false;
             return true;
         }

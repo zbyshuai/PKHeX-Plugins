@@ -22,7 +22,11 @@ namespace PKHeX.Core.AutoMod
             NativeOnly = false,
             TransferVersion = GameVersion.SL
         };
-
+        public static bool IncludeForms { get; set; }
+        public static bool SetShiny { get; set; }
+        public static bool SetAlpha { get; set; }
+        public static bool NativeOnly { get; set; }
+        public static GameVersion TransferVersion { get; set; }
         /// <summary>
         /// Exports the <see cref="SaveFile.CurrentBox"/> to <see cref="ShowdownSet"/> as a single string.
         /// </summary>
