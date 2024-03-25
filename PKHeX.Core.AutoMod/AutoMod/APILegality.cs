@@ -1429,6 +1429,7 @@ namespace PKHeX.Core.AutoMod
                     continue;
                 if (IsMatchFromPKHeX(pk, iterPKM, HPType, shiny, gr, set, enc, seed, Method))
                     return;
+               
                 PIDGenerator.SetValuesFromSeed(pk, Method, seed);
                 if (pk.AbilityNumber != iterPKM.AbilityNumber )
                     continue;
@@ -1474,8 +1475,12 @@ namespace PKHeX.Core.AutoMod
                 var pidxor = ((pk.TID16 ^ pk.SID16 ^ (int)(pk.PID & 0xFFFF) ^ (int)(pk.PID >> 16)) & ~0x7) == 8;
                 if (Method == PIDType.Channel && (shiny != pk.IsShiny || pidxor))
                     continue;
+                if (Method == PIDType.Channel && !ChannelJirachi.IsPossible(seed))
+                    continue;
+                if (pk.TID16 == 06930 && !MystryMew.IsValidSeed(seed))
+                    continue;
 
-                break;
+                    break;
             } while (++count < 5_000_000);
         }
         private static bool IsMatchFromPKHeX(PKM pk, PKM iterPKM, int HPType, bool shiny, byte gr, IBattleTemplate set, IEncounterable enc, uint seed, PIDType Method)
