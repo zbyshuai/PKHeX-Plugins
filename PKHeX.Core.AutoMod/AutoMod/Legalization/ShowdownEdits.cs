@@ -113,7 +113,8 @@ namespace PKHeX.Core.AutoMod
 
             if (formchange && !UnownFormSet)
                 pk.Form = Form;
-
+            if ((enc.Version == GameVersion.BD || enc.Version == GameVersion.SP) && pk.Species == (ushort)Species.Unown)
+                pk.MetLocation = GetBDSPUnownMetLocation(Form);
             if ((evolutionRequired || formchange) && pk is IScaledSizeValue sv)
             {
                 sv.HeightAbsolute = sv.CalcHeightAbsolute;
@@ -378,5 +379,22 @@ namespace PKHeX.Core.AutoMod
                 3 => MoveType.Rock,
                 _ => (MoveType)TeraTypeUtil.OverrideNone,
             };
+        public static ushort GetBDSPUnownMetLocation(byte form)
+        {
+            return (form) switch
+            {
+                < 3 or > 5 and < 8 or > 8 and < 13 or > 13 and < 17 or > 17 and < 26 => 227,
+                3 => 240,
+                4 => 239,
+                5 => 229,
+                8 => 237,
+                13 => 238,
+                17 => 231,
+                > 25 => 225
+
+
+
+            };
+        }
     }
 }

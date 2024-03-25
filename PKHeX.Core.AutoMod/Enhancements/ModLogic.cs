@@ -247,8 +247,6 @@ namespace PKHeX.Core.AutoMod
             var almres = tr.TryAPIConvert(set, t, nativeOnly);
             var pk = almres.Created;
             var success = almres.Status;
-            if (pk.Species == (ushort)Species.Unown && pk.Form != blank.Form)
-                pk.Form = blank.Form;
 
             if (success == LegalizationResult.Regenerated)
                 return pk;
@@ -277,8 +275,7 @@ namespace PKHeX.Core.AutoMod
             var species = pk.Species;
             switch ((Species)species)
             {
-                case Species.Unown when generation == 2 && form >= 26:
-                    return true;
+                
                 case Species.Floette when form == 5:
                     return true;
                 case Species.Shaymin
