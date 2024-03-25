@@ -11,7 +11,7 @@
   <ItemGroup>
     <PackageReference Include="Costura.Fody" Version="5.8.0-alpha0098" PrivateAssets="all" />
     <PackageReference Include="Fody" Version="6.8.0" PrivateAssets="all" />
-    <PackageReference Include="PKHeX.Core" Version="24.3.10" ExcludeAssets="runtime" />
+    <PackageReference Include="PKHeX.Core" Version="24.3.26" ExcludeAssets="runtime" />
     <ProjectReference Include="..\PKHeX.Core.AutoMod\PKHeX.Core.AutoMod.csproj" />
     <ProjectReference Include="..\PKHeX.Core.Enhancements\PKHeX.Core.Enhancements.csproj" />
     <ProjectReference Include="..\PKHeX.Core.Injection\PKHeX.Core.Injection.csproj" />
