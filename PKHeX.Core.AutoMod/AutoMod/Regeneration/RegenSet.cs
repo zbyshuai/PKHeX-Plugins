@@ -35,6 +35,10 @@ namespace PKHeX.Core.AutoMod
             foreach (var rib in BatchRibbons)
                 if (rib.HasRibbon)
                     modified.Add($".{rib.Name}=true");
+            modified.Add($".MetLocation={pk.MetLocation}");
+            modified.Add($".MetDay={pk.MetDay}");
+            modified.Add($".MetMonth={pk.MetMonth}");
+            modified.Add($".MetYear={pk.MetYear}");
             if(modified.Count > 0)
                 Batch = new StringInstructionSet(modified.ToArray().AsSpan());
         }
