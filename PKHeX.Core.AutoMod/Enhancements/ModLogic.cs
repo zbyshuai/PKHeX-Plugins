@@ -42,9 +42,10 @@ namespace PKHeX.Core.AutoMod
         /// <returns>Concatenated string of all sets in the specified box.</returns>
         public static string GetRegenSetsFromBox(this SaveFile sav, int box)
         {
-            var data = sav.GetBoxData(box);
+            Span<PKM> data = sav.GetBoxData(box);
             var sep = Environment.NewLine + Environment.NewLine;
-            return data.GetRegenSets(sep);
+            var returnstring = data.GetRegenSets(sep);
+            return returnstring;
         }
 
         /// <summary>
