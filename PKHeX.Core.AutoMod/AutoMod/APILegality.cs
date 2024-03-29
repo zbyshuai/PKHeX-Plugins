@@ -104,7 +104,7 @@ namespace PKHeX.Core.AutoMod
                 criteria = SetSpecialCriteria(criteria, enc, set);
 
                 // Create the PKM from the template.
-                var tr = SimpleEdits.IsUntradeableEncounter(enc) ? dest : GetTrainer(regen, enc, set);
+                var tr = SimpleEdits.IsUntradeableEncounter(enc) ? dest : GetTrainer(regen, enc, set, dest);
                 var raw = enc.GetPokemonFromEncounter(tr, criteria, set);
                 if (raw.OriginalTrainerName.Length == 0)
                 {
@@ -332,7 +332,7 @@ namespace PKHeX.Core.AutoMod
         /// </summary>
         /// <param name="regen">Regenset</param>
         /// <returns>ITrainerInfo of the trainerdetails</returns>
-        private static ITrainerInfo GetTrainer(RegenSet regen, IEncounterable enc, IBattleTemplate set)
+        private static ITrainerInfo GetTrainer(RegenSet regen, IEncounterable enc, IBattleTemplate set, ITrainerInfo dest)
         {
             var ver = enc.Version;
             var gen = enc.Generation;
@@ -360,7 +360,7 @@ namespace PKHeX.Core.AutoMod
             if (AllowTrainerOverride && regen.HasTrainerSettings && regen.Trainer != null)
                 return regen.Trainer.MutateLanguage(mutate, ver);
 
-            return UseTrainerData ? TrainerSettings.GetSavedTrainerData(ver, gen).MutateLanguage(mutate, ver) : TrainerSettings.DefaultFallback(ver, regen.Extra.Language);
+            return UseTrainerData ? TrainerSettings.GetSavedTrainerData(ver, gen).MutateLanguage(mutate, ver) : TrainerSettings.DefaultFallback(ver, regen.Extra.Language??(LanguageID)dest.Language);
         }
 
         /// <summary>
