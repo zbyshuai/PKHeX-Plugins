@@ -1311,7 +1311,10 @@ namespace PKHeX.Core.AutoMod
                 {
                     var stat = rng.NextUInt(6);
                     if (ivs[stat] != -1)
+                    {
+                        inherited++;
                         continue;
+                    }
 
                     rng.NextUInt(2); // decides which parents iv to inherit, assume that parent has the required IV
                     ivs[stat] = required_ivs[stat];
@@ -1529,10 +1532,7 @@ namespace PKHeX.Core.AutoMod
             var pidxor = ((pk.TID16 ^ pk.SID16 ^ (int)(pk.PID & 0xFFFF) ^ (int)(pk.PID >> 16)) & ~0x7) == 8;
             if (Method == PIDType.Channel && (shiny != pk.IsShiny || pidxor))
                 return false;
-
-            if (enc.Version == GameVersion.HGSS || enc.Version == GameVersion.Pt || enc.Version == GameVersion.DP)
-                return false;
-            if (!new LegalityAnalysis(pk).Valid)
+            if (pk.Species == (ushort)Species.Jirachi)
                 return false;
             return true;
         }
