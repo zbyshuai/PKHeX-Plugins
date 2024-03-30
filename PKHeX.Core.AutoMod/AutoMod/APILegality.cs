@@ -76,7 +76,8 @@ namespace PKHeX.Core.AutoMod
             var gamelist = FilteredGameList(template, destVer, AllowBatchCommands, set, native);
             if (dest.Generation <= 2)
                 template.EXP = 0; // no relearn moves in gen 1/2 so pass level 1 to generator
-
+            if (gamelist.Length == 1 && gamelist[0] == GameVersion.DP)
+                gamelist = [GameVersion.D, GameVersion.P];
             var encounters = GetAllEncounters(pk: template, moves: new ReadOnlyMemory<ushort>(set.Moves), gamelist);
             var criteria = EncounterCriteria.GetCriteria(set, template.PersonalInfo);
             criteria.ForceMinLevelRange = true;
@@ -1425,7 +1426,7 @@ namespace PKHeX.Core.AutoMod
                 uint seed = Util.Rand32();
                 if (isWishmaker)
                 {
-                    seed = WC3Seeds.GetShinyWishmakerSeed((Nature)iterPKM.Nature);
+                    seed = WC3Seeds.GetShinyWishmakerSeed(iterPKM.Nature);
                     isWishmaker = false;
                 }
                 if (PokeWalkerSeedFail(seed, Method, pk, iterPKM))
@@ -1533,6 +1534,10 @@ namespace PKHeX.Core.AutoMod
             if (Method == PIDType.Channel && (shiny != pk.IsShiny || pidxor))
                 return false;
             if (pk.Species == (ushort)Species.Jirachi)
+                return false;
+            if (Method == PIDType.Pokewalker)
+                return false;
+            if (!new LegalityAnalysis(pk).Valid)
                 return false;
             return true;
         }
