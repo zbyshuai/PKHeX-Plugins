@@ -540,7 +540,7 @@ namespace PKHeX.Core.Injection
         private static string GetB1S1Pointer(LiveHeXVersion lv)
         {
             return lv switch
-            { 
+            {
                 LiveHeXVersion.SV_v300 or LiveHeXVersion.SV_v301 => "[[[[main+47350d8]+1C0]+30]+9D0]",
                 LiveHeXVersion.SV_v202 => "[[[[main+4623A30]+198]+30]+9D0]",
                 LiveHeXVersion.SV_v201 => "[[[[main+4622A30]+198]+30]+9D0]",

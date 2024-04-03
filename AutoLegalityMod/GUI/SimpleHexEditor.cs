@@ -1,6 +1,7 @@
 ﻿using PKHeX.Core;
 using PKHeX.Core.Injection;
 using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Timers;
 using System.Windows.Forms;
@@ -129,7 +130,8 @@ namespace AutoModPlugins.GUI
 
         private void ChangeCopyMethod(object sender, EventArgs e)
         {
-            RTB_RAM.method = (CopyMethod)CB_CopyMethod.SelectedItem;
+            if(CB_CopyMethod.SelectedItem is not null)
+                RTB_RAM.method = (CopyMethod)CB_CopyMethod.SelectedItem;
         }
 
         private void CB_AutoRefresh_CheckedChanged(object sender, EventArgs e)
@@ -163,7 +165,7 @@ namespace AutoModPlugins.GUI
                 {
                     refresh.Stop();
                 }
-                catch (Exception) { }
+                catch (Exception) { Debug.Write("form closing error"); }
             }
         }
     }
