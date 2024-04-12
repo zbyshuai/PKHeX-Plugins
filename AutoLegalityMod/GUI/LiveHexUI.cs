@@ -746,7 +746,7 @@ namespace AutoModPlugins
                 };
 
                 // Invoke function
-                cc.GetType().GetMethod(v, BindingFlags.NonPublic | BindingFlags.Instance)?.Invoke(cc, new[] { s, e });
+                cc.GetType().GetMethod(v, BindingFlags.NonPublic | BindingFlags.Instance)?.Invoke(cc, [s, e]);
 
                 for (var i = 0; i < objects.Count; i++)
                 {
