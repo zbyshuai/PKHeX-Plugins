@@ -466,7 +466,7 @@ namespace PKHeX.Core.Injection
                 Name = "KSatchelUpgrades",
                 Display = "Items",
                 SCBKey = 0x75CE2CF6,
-                Pointer = "[[[[[main+42BA6B0]+1D8]+1B8]+70]+270]+38",
+                Pointer = "[[[[[main+42BA6B0]+1D8]+1D8]]+428]+18",
                 Type = SCTypeCode.UInt32
             },
             new()
@@ -646,8 +646,6 @@ namespace PKHeX.Core.Injection
                         ReflectUtil.SetValue(scb, "Type", sub.Type);
 
                     var ram = psb.com.ReadBytes(psb.GetCachedPointer(sb, offset), scb.Data.Length);
-                    if (sub.Name == "KSatchelUpgrades")
-                        ram[0] = 0x28;
                     scb.ChangeData(ram);
                     if (read is null)
                     {
