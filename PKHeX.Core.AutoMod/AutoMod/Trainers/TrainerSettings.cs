@@ -9,13 +9,19 @@ namespace PKHeX.Core.AutoMod
     /// </summary>
     public static class TrainerSettings
     {
+        private static readonly string ProcessPath = Environment.ProcessPath ?? string.Empty;
         private static readonly TrainerDatabase Database = new();
         private static readonly string TrainerPath = Path.Combine(Path.GetDirectoryName(Environment.ProcessPath)!, "trainers");
         private static readonly SimpleTrainerInfo DefaultFallBack6 = new(GameVersion.AS);
         private static readonly SimpleTrainerInfo DefaultFallback8 = new(GameVersion.SW);
         private static readonly SimpleTrainerInfo DefaultFallback7 = new(GameVersion.UM);
         private static readonly SimpleTrainerInfo DefaultFallback9 = new(GameVersion.SL);
-        private static readonly GameVersion[] FringeVersions = { GameVersion.GG, GameVersion.BDSP, GameVersion.PLA};
+        private static readonly GameVersion[] FringeVersions =
+        [
+            GameVersion.GG,
+            GameVersion.BDSP,
+            GameVersion.PLA
+        ];
 
         public static string DefaultOT { get; set; } = "ALM";
         public static ushort DefaultTID16 { get; set; } = 54321; // reverse of PKHeX defaults
